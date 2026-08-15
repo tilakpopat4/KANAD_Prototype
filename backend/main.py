@@ -15,6 +15,10 @@ import database
 import auth
 import parser
 
+if os.environ.get("VERCEL"):
+    import seed
+    seed.seed_data()
+
 app = FastAPI(title="ForenSync API", version="1.0.0")
 
 app.add_middleware(
@@ -25,7 +29,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+if os.environ.get("VERCEL"):
+    UPLOAD_DIR = "/tmp/uploads"
+else:
+    UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # Helper: Auto-routing and Priority Engine

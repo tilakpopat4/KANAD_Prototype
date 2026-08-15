@@ -101,9 +101,9 @@ def seed_data():
     db.refresh(c3)
     print("Seed complaints created.")
 
-    # 3. Associate evidence files
-    mock_sqlite = "sample_data/mock_browser.sqlite"
-    mock_evtx = "sample_data/security_sample.evtx"
+    sample_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "sample_data"))
+    mock_sqlite = os.path.join(sample_dir, "mock_browser.sqlite")
+    mock_evtx = os.path.join(sample_dir, "security_sample.evtx")
 
     import hashlib
     def get_sha256(filepath):

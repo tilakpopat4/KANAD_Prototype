@@ -2,7 +2,7 @@ import os
 import datetime
 import database
 import auth
-from parser import parse_file
+from evidence_parser import parse_file
 
 def seed_data():
     database.init_db()

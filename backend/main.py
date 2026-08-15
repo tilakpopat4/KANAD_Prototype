@@ -11,9 +11,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
+import sys
+sys.path.insert(0, os.path.dirname(__file__))
+
 import database
 import auth
-import parser
+import evidence_parser as parser
 
 if os.environ.get("VERCEL"):
     import seed

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahmedabad Cyber Crime Portal — KANAD</title>
+    <meta name="description" content="File cyber complaints, track case status, and upload digital evidence with the Ahmedabad Cyber Crime Branch portal.">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="/frontend/style.css">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="notranslate">
+            <div class="logo-area" onclick="window.location.href='/'" style="cursor: pointer;">
+                <img src="/frontend/assets/logo.png" alt="CCI Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="logo-icon" style="display:none; align-items:center; justify-content:center; width:40px; height:40px; background: linear-gradient(135deg, #18548e, #289ee7); border-radius:8px; font-size:20px;">🛡️</div>
+                <div>
+                    <div class="logo-text">ForenSync</div>
+                    <div class="logo-sub">Cyber Shield Ahmedabad</div>
+                </div>
+            </div>
+            
+            <!-- User Status & Logout -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div id="user-profile-display" style="display: flex; align-items: center; gap: 10px;">
+                    <button id="logout-btn" class="btn-secondary" style="padding: 6px 12px; font-size: 13px; display: none;">
+                        Logout <i data-lucide="log-out" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
+                    </button>
+                </div>
+                
+                <!-- Dynamic Translation Switcher -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="languages" style="width: 16px; height: 16px; color: var(--neon-cyan);"></i>
+                    <div id="google_translate_element"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- FEEDBACK ALERT -->
+        <div id="alert-banner" class="alert-feedback"></div>
+
+        <!-- NAVIGATION TABS -->
+        <div class="tab-container" id="tab-container" style="display: none;">
+            <button class="tab-btn active" id="tab-auth" onclick="switchTab('auth')">
+                <i data-lucide="lock"></i> <span data-i18n="tab_auth">Authentication</span>
+            </button>
+            <button class="tab-btn" id="tab-citizen-file" onclick="switchTab('citizen-file')" style="display: none;">
+                <i data-lucide="file-text"></i> <span data-i18n="tab_citizen">Citizen Portal</span>
+            </button>
+            <button class="tab-btn" id="tab-citizen-track" onclick="switchTab('citizen-track')" style="display: none;">
+                <i data-lucide="search"></i> Track Status
+            </button>
+            <button class="tab-btn" id="tab-landing" onclick="switchTab('landing')" style="display: none;">
+                <i data-lucide="home"></i> Landing
+            </button>
+        </div>
+
+        <!-- LANDING VIEW -->
+        <div id="view-landing" class="app-view active">
+            <h1 style="text-align: center; margin-top: 40px; margin-bottom: 10px; color: var(--neon-cyan); font-size: 32px; font-weight: 700;">
+                Ahmedabad Cyber Crime Portal
+            </h1>
+            <p style="text-align: center; color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px auto; font-size: 15px;">
+                Welcome to Ahmedabad Cyber Shield. Select an option below to report an incident or track status.
+            </p>
+            
+            <!-- Announcements Slideshow (Full Screen) -->
+            <div id="slideshow-container" class="slideshow-container">
+                <!-- Slides will be injected here dynamically -->
+
+                <!-- Prev / Next Arrow Buttons -->
+                <button class="slide-arrow slide-prev" onclick="changeSlide(-1)" aria-label="Previous slide">&#10094;</button>
+                <button class="slide-arrow slide-next" onclick="changeSlide(1)" aria-label="Next slide">&#10095;</button>
+
+                <!-- Dots/bullets -->
+                <div id="slideshow-dots" style="text-align: center; position: absolute; bottom: 20px; width: 100%; z-index: 5;">
+                </div>
+            </div>
+
+            
+            <!-- Grid of 4 cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; max-width: 100%; margin: 0 auto;">
+                <div class="glass-panel hover-card" onclick="selectLandingOption('financial_fraud')">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
+                        <i data-lucide="banknote" style="width: 48px; height: 48px; color: var(--neon-cyan);"></i>
+                        <h3 style="color: var(--neon-cyan); margin-top: 10px;">Financial Frauds</h3>
+                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Report UPI, SMS, Bank, or Credit Card frauds</p>
+                    </div>
+                </div>
+                
+                <div class="glass-panel hover-card" onclick="selectLandingOption('women_child')">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
+                        <i data-lucide="heart" style="width: 48px; height: 48px; color: #ff6b6b;"></i>
+                        <h3 style="color: #ff6b6b; margin-top: 10px;">Women/Child Cyber Cases</h3>
+                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Report cyber harassment, abuse, or stalking against women/children</p>
+                    </div>
+                </div>
+                
+                <div class="glass-panel hover-card" onclick="selectLandingOption('other')">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
+                        <i data-lucide="shield-alert" style="width: 48px; height: 48px; color: var(--neon-purple);"></i>
+                        <h3 style="color: var(--neon-purple); margin-top: 10px;">Other Cyber Crime</h3>
+                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Report hacking, ransomware, or other digital crimes</p>
+                    </div>
+                </div>
+                
+                <div class="glass-panel hover-card" onclick="selectLandingOption('track')">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
+                        <i data-lucide="search" style="width: 48px; height: 48px; color: var(--success);"></i>
+                        <h3 style="color: var(--success); margin-top: 10px;">Track Your Complaint</h3>
+                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Check case status, details, or upload evidence</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. AUTHENTICATION VIEW -->
+        <div id="view-auth" class="app-view" style="max-width: 480px; margin: 40px auto 0 auto;">
+            <div class="glass-panel">
+                <h2 style="margin-bottom: 15px; color: var(--neon-cyan); display: flex; align-items: center; gap: 10px; justify-content: center;">
+                    <i data-lucide="shield-check"></i> Citizen Verification
+                </h2>
+                <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 25px;">
+                    Secure verification required to report cyber complaints.
+                </p>
+                
+                <form id="auth-otp-form" onsubmit="handleOtpSubmit(event)">
+                    <!-- Step 1: Email & Captcha -->
+                    <div id="auth-step-1">
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="auth-email" class="form-control" placeholder="Enter Email Address" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Security Captcha</label>
+                            <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 8px;">
+                                <canvas id="captcha-canvas" width="150" height="45" style="border-radius: 6px; background: #121c26; border: 1px solid var(--border-color);"></canvas>
+                                <button type="button" class="btn-secondary" onclick="generateCaptcha()" style="padding: 10px;"><i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i></button>
+                            </div>
+                            <input type="text" id="auth-captcha-input" class="form-control" placeholder="Enter Captcha Code" required>
+                        </div>
+                        
+                        <button type="button" onclick="sendEmailOtp()" class="btn-primary" style="width: 100%; margin-top: 15px;">
+                            Send Email OTP <i data-lucide="mail"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Step 2: OTP Entry -->
+                    <div id="auth-step-2" style="display: none;">
+                        <div class="form-group">
+                            <label>Enter 6-Digit Email OTP</label>
+                            <input type="text" id="auth-otp-input" class="form-control" placeholder="••••••" maxlength="6" pattern="[0-9]{6}">
+                            <div id="otp-timer" style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; text-align: right;"></div>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 15px;">
+                            Verify &amp; Proceed <i data-lucide="arrow-right"></i>
+                        </button>
+                        
+                        <button type="button" onclick="backToStep1()" class="btn-secondary" style="width: 100%; margin-top: 10px;">
+                            Back / Edit Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. CITIZEN COMPLAINT REGISTRATION VIEW -->
+        <div id="view-citizen-file" class="app-view">
+            <div style="max-width: 800px; margin: 20px auto 0 auto;" class="glass-panel">
+                <h2 style="margin-bottom: 20px; color: var(--neon-cyan); display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="edit-3"></i> <span data-i18n="citizen_file_title">File Cyber Complaint</span>
+                </h2>
+                <form id="complaint-form">
+                    <div class="form-group">
+                        <label data-i18n="citizen_description_label">Detailed Description</label>
+                        <textarea id="complaint-desc" class="form-control" rows="6" placeholder="Describe the incident..." required></textarea>
+                        
+                        <!-- Auto-routing Feedback Banner -->
+                        <div id="suggest-banner" class="suggest-banner" style="display: none;">
+                            <span>
+                                <i data-lucide="cpu" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 5px;"></i>
+                                AI Routing Desk: <strong id="suggest-cat">financial_fraud</strong> | Priority: <strong id="suggest-priority">3</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Category Follow-Up Questions (Conditional details) -->
+                    <div id="conditional-questions" class="form-group" style="display: none; padding: 15px; border-radius: 8px; background: rgba(120, 196, 224, 0.05); border: 1px solid var(--border-color); margin-bottom: 20px;">
+                        <h4 id="conditional-title" style="margin-bottom: 10px; font-size: 14px; color: var(--neon-cyan);">Specific Investigation Queries</h4>
+                        <div id="conditional-fields"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label data-i18n="citizen_category_label">Category (Optional Override)</label>
+                        <select id="complaint-cat" class="form-control" onchange="handleCategoryQuestions()">
+                            <option value="" data-i18n="citizen_cat_auto">Auto-Route (Recommended)</option>
+                            <option value="financial_fraud" data-i18n="citizen_cat_financial">Financial Fraud</option>
+                            <option value="women_child" data-i18n="citizen_cat_women_child">Women/Child Cyber Cases</option>
+                            <option value="impersonation" data-i18n="citizen_cat_impersonation">Social Media Impersonation</option>
+                            <option value="hacking" data-i18n="citizen_cat_hacking">Hacking / Ransomware</option>
+                            <option value="other" data-i18n="citizen_cat_other">Other Crimes</option>
+                        </select>
+                    </div>
+
+                    <!-- Stepwise Severity Guide -->
+                    <div id="severity-guide" class="glass-panel" style="display: none; background: rgba(157, 112, 90, 0.1); border: 1px solid var(--warning); padding: 15px; margin-bottom: 20px;">
+                        <h4 style="color: var(--warning); display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <i data-lucide="alert-triangle"></i> SEVERE SECURITY EVENT DETECTED
+                        </h4>
+                        <ul style="font-size: 13px; list-style-position: inside; color: var(--text-primary);">
+                            <li>Isolate this compromised device from network/Wi-Fi immediately.</li>
+                            <li>Do not reboot or shut down the machine to preserve volatile RAM.</li>
+                            <li>Take pictures of the screen/ransom note using an external phone.</li>
+                        </ul>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%;">
+                        <span data-i18n="citizen_submit_btn">Submit Cyber Complaint</span> <i data-lucide="send"></i>
+                    </button>
+                </form>
+                
+                <!-- Public Advisory Block -->
+                <div class="glass-panel" style="margin-top: 30px; background: rgba(120, 196, 224, 0.05);">
+                    <h4 style="color: var(--neon-purple); display: flex; align-items: center; gap: 6px; font-size: 15px; margin-bottom: 8px;">
+                        <i data-lucide="info"></i> Public Awareness Advisory
+                    </h4>
+                    <p style="font-size: 12px; color: var(--text-secondary);">
+                        The Ahmedabad Cyber Crime Branch will never call asking for money, passwords, or OTPs. File reports safely here. Maintain evidence integrity for legal compliance.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. CITIZEN TRACK COMPLAINT VIEW -->
+        <div id="view-citizen-track" class="app-view">
+            <div style="max-width: 800px; margin: 20px auto 0 auto;" class="glass-panel">
+                <h2 style="margin-bottom: 20px; color: var(--neon-purple); display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="search"></i> <span data-i18n="citizen_track_title">Track Complaint Status</span>
+                </h2>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="track-ticket-id" class="form-control" placeholder="Enter Ticket ID (e.g. TXN-12345)">
+                    <button onclick="trackComplaint()" class="btn-primary" style="padding: 12px 20px;">Track</button>
+                </div>
+
+                <!-- Track Details Display -->
+                <div id="track-result" style="display: none; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span id="track-badge-status" class="badge"></span>
+                        <span id="track-ticket-num" style="font-family: var(--font-heading); font-weight: 700; color: var(--neon-cyan);"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <div id="track-cat" style="font-weight: 500;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Assigned Desk</label>
+                        <div id="track-desk" style="font-weight: 500;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority Score</label>
+                        <div id="track-priority" style="font-weight: 500;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Submitted Description</label>
+                        <div id="track-desc-body" style="font-size: 14px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; color: var(--text-secondary); max-height: 150px; overflow-y: auto;"></div>
+                    </div>
+
+                    <!-- Track Evidence Upload -->
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <h3 style="font-size: 16px; margin-bottom: 10px; color: var(--neon-cyan);">
+                            <i data-lucide="paperclip"></i> Upload Digital Evidence
+                        </h3>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+                            Supported formats: <strong>.evtx</strong> (Windows log) or <strong>.sqlite</strong> (App/Browser logs)
+                        </p>
+
+                        <div class="upload-dropzone" onclick="document.getElementById('evidence-file-input').click()">
+                            <i data-lucide="upload-cloud" style="width: 32px; height: 32px; color: var(--neon-cyan); margin-bottom: 8px;"></i>
+                            <p>Click to browse and upload file</p>
+                            <input type="file" id="evidence-file-input" onchange="uploadEvidenceFile()">
+                        </div>
+                        
+                        <!-- Queue/Offline state notifier -->
+                        <div id="offline-queue-notifier" style="display: none; padding: 10px; background: rgba(157, 112, 90, 0.1); border: 1px solid var(--warning); border-radius: 6px; font-size: 12px; margin-bottom: 10px; color: var(--text-primary);">
+                            <i data-lucide="wifi-off" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 5px;"></i>
+                            Queued — will sync when online.
+                        </div>
+                        
+                        <div id="evidence-upload-status" style="font-size: 13px; color: var(--neon-purple);"></div>
+
+                        <!-- List of Evidence for this complaint -->
+                        <div style="margin-top: 15px;">
+                            <label style="font-size: 12px; color: var(--text-secondary);">Uploaded Files</label>
+                            <ul id="track-evidence-list" style="list-style: none; margin-top: 5px;"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Citizen Portal JavaScript -->
+    <script src="/frontend/citizen/citizen.js"></script>
+</body>
+</html>

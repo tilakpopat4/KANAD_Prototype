@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForenSync - Admin Control Portal</title>
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="/frontend/style.css">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="notranslate">
+            <div class="logo-area" onclick="window.location.href='/'" style="cursor: pointer;">
+                <img src="/frontend/assets/logo.png" alt="CCI Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="logo-icon" style="display:none; align-items:center; justify-content:center; width:40px; height:40px; background: linear-gradient(135deg, #18548e, #289ee7); border-radius:8px; font-size:20px;">ðŸ›¡ï¸</div>
+                <div>
+                    <div class="logo-text">ForenSync</div>
+                    <div class="logo-sub">Cyber Shield Ahmedabad</div>
+                </div>
+            </div>
+            
+            <!-- User Status & Logout -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div id="user-profile-display" style="display: flex; align-items: center; gap: 10px;">
+                    <button id="logout-btn" class="btn-secondary" style="padding: 6px 12px; font-size: 13px; display: none;">
+                        Logout <i data-lucide="log-out" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
+                    </button>
+                </div>
+                
+                <!-- Dynamic Translation Switcher -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="languages" style="width: 16px; height: 16px; color: var(--neon-cyan);"></i>
+                    <div id="google_translate_element"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- FEEDBACK ALERT -->
+        <div id="alert-banner" class="alert-feedback"></div>
+
+        <!-- NAVIGATION TABS -->
+        <div class="tab-container" id="tab-container" style="display: none;">
+            <button class="tab-btn active" id="tab-auth" onclick="switchTab('auth')">
+                <i data-lucide="lock"></i> <span>Authentication</span>
+            </button>
+            <button class="tab-btn" id="tab-admin" onclick="switchTab('admin')" style="display: none;">
+                <i data-lucide="shield-alert"></i> <span>Admin Control Panel</span>
+            </button>
+        </div>
+
+        <!-- 1. LOGIN VIEW -->
+        <div id="view-auth" class="app-view" style="max-width: 440px; margin: 60px auto 0 auto;">
+            <div class="glass-panel" style="border-color: var(--danger);">
+                <h2 style="margin-bottom: 10px; color: var(--danger); display: flex; align-items: center; gap: 10px; justify-content: center;">
+                    <i data-lucide="shield-alert"></i> Admin Portal Sign In
+                </h2>
+                <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 25px;">
+                    Restricted Access. Super-Admin credentials required.
+                </p>
+                
+                <form id="login-form">
+                    <div class="form-group">
+                        <label>Admin Email</label>
+                        <input type="email" id="login-email" class="form-control" placeholder="admin@forensync.gov" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" class="form-control" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px; background: var(--danger); border-color: var(--danger); color: #fff;">
+                        Authenticate Admin <i data-lucide="shield-check"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. ADMIN PORTAL VIEW -->
+        <div id="view-admin" class="app-view">
+            
+            <!-- Desk Stats Metrics Summary -->
+            <h3 style="margin-bottom: 15px; color: var(--neon-cyan); display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="server"></i> Case Assignment & Resolution metrics by Department Desk
+            </h3>
+            <div id="admin-desks-summary" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 35px;">
+                <!-- Filled dynamically by renderDeskSummary -->
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+                <!-- LEFT COLUMN: Employees ledger -->
+                <div class="glass-panel">
+                    <h3 style="color: var(--neon-cyan); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="users"></i> Cyber Crime Team Directory
+                    </h3>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">
+                        Manage cyber investigators, assign desks, or suspend credentials dynamically.
+                    </p>
+                    
+                    <div style="overflow-x: auto;">
+                        <table class="foren-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Assigned Desk</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-employees-table-body">
+                                <!-- Populated dynamically by renderAdminEmployees -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Add new Employee -->
+                <div class="glass-panel">
+                    <h3 style="color: var(--neon-cyan); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="user-plus"></i> Create Cyber Branch Account
+                    </h3>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">
+                        Provision official credentials for a new cyber workstation investigator.
+                    </p>
+                    
+                    <form id="admin-add-employee-form">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="admin-emp-name" class="form-control" placeholder="e.g. Inspector Ramesh Kumar" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Official Email</label>
+                            <input type="email" id="admin-emp-email" class="form-control" placeholder="name@forensync.gov" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Temporary Password</label>
+                            <input type="password" id="admin-emp-pass" class="form-control" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Desk Assignment</label>
+                            <select id="admin-emp-desk" class="form-control" required>
+                                <option value="Financial Fraud Desk">Financial Fraud Desk</option>
+                                <option value="Cyber Social Desk">Cyber Social Desk (Impersonation)</option>
+                                <option value="Cyber Security Desk">Cyber Security Desk (Hacking)</option>
+                                <option value="General Desk">General Desk</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 15px;">
+                            Provision Account <i data-lucide="plus-circle"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- App Frontend JavaScript -->
+    <script src="/frontend/police/police.js"></script>
+</body>
+</html>
+

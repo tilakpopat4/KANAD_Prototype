@@ -17,7 +17,6 @@ sys.path.insert(0, os.path.dirname(__file__))
 import database
 import auth
 import evidence_parser as parser
-import drive_service
 
 if os.environ.get("VERCEL"):
     import seed
@@ -789,6 +788,7 @@ async def upload_slide_image(file: UploadFile = File(...)):
     content = await file.read()
     
     try:
+        import drive_service
         public_url = drive_service.upload_to_drive(content, unique_name, file.content_type)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to upload to Google Drive: {str(e)}")

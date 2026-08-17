@@ -108,6 +108,7 @@ def seed_data():
     import hashlib
     def get_sha256(filepath):
         if not os.path.exists(filepath):
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
             with open(filepath, "w") as f:
                 f.write("dummy content")
         h = hashlib.sha256()

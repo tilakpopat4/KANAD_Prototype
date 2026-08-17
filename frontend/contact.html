@@ -8,7 +8,22 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         .app-view { display: block !important; padding: 20px; }
-        .glass-panel { max-width: 1200px; margin: 20px auto 0 auto; }
+        .glass-panel { max-width: 1400px; margin: 20px auto 0 auto; }
+        .foren-table th, .foren-table td {
+            padding: 12px 14px !important;
+            font-size: 13px !important;
+        }
+        .scroll-hint {
+            display: none;
+            text-align: right;
+            color: var(--neon-cyan);
+            font-size: 13px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        @media (max-width: 1300px) {
+            .scroll-hint { display: block; }
+        }
     </style>
 </head>
 <body>
@@ -37,14 +52,15 @@
                 <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 25px;">
                     National Cyber Crime Reporting Portal - State and Union Territory Nodal / Grievance Officers
                 </p>
+                <div class="scroll-hint"><i data-lucide="arrow-right"></i> Scroll right for full details</div>
                 <div style="overflow-x: auto;">
                     <table class="foren-table" style="font-size: 13px;">
                         <thead>
                             <tr>
                                 <th rowspan="2">S No.</th>
                                 <th rowspan="2">State/UT's</th>
-                                <th colspan="3" style="text-align: center; border-bottom: 1px solid var(--border-color);">Nodal Cyber cell Officer</th>
-                                <th colspan="4" style="text-align: center; border-bottom: 1px solid var(--border-color);">Grievance Officer Details</th>
+                                <th colspan="3" style="text-align: left; border-bottom: 1px solid var(--border-color);">Nodal Cyber cell Officer</th>
+                                <th colspan="4" style="text-align: left; border-bottom: 1px solid var(--border-color);">Grievance Officer Details</th>
                             </tr>
                             <tr>
                                 <th>Name</th>

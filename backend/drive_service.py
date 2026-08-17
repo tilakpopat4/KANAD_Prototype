@@ -1,13 +1,12 @@
 import os
 import json
-import io
+import requests
 from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseUpload
+from google.auth.transport.requests import Request
 
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 
-def get_drive_service():
+def get_credentials():
     creds_json = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON")
     creds_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
     
@@ -24,41 +23,49 @@ def get_drive_service():
     if not creds:
         raise ValueError("Google Drive credentials not found. Please set GOOGLE_APPLICATION_CREDENTIALS or GOOGLE_APPLICATION_CREDENTIALS_JSON in your .env file.")
         
-    return build('drive', 'v3', credentials=creds)
+    # Ensure token is valid
+    if not creds.valid:
+        creds.refresh(Request())
+        
+    return creds
 
 def upload_to_drive(file_bytes: bytes, filename: str, mime_type: str) -> str:
     """
-    Uploads a file to Google Drive and makes it public.
+    Uploads a file to Google Drive and makes it public using the REST API.
     Returns the public direct view link for the image.
     """
-    service = get_drive_service()
+    creds = get_credentials()
+    
+    # 1. Upload the file
+    upload_url = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart"
+    headers = {
+        "Authorization": f"Bearer {creds.token}"
+    }
     
     file_metadata = {'name': filename}
     folder_id = os.environ.get("DRIVE_FOLDER_ID")
     if folder_id:
         file_metadata['parents'] = [folder_id]
         
-    media = MediaIoBaseUpload(io.BytesIO(file_bytes), mimetype=mime_type, resumable=True)
+    files = {
+        'metadata': ('', json.dumps(file_metadata), 'application/json'),
+        'file': (filename, file_bytes, mime_type)
+    }
     
-    # Upload file
-    file = service.files().create(
-        body=file_metadata, 
-        media_body=media, 
-        fields='id'
-    ).execute()
+    response = requests.post(upload_url, headers=headers, files=files)
+    response.raise_for_status()
     
-    file_id = file.get('id')
+    file_id = response.json().get('id')
     
-    # Make it public
-    permission = {
+    # 2. Make it public
+    permission_url = f"https://www.googleapis.com/drive/v3/files/{file_id}/permissions"
+    permission_data = {
         'type': 'anyone',
         'role': 'reader',
     }
-    service.permissions().create(
-        fileId=file_id,
-        body=permission,
-        fields='id'
-    ).execute()
+    
+    perm_response = requests.post(permission_url, headers=headers, json=permission_data)
+    perm_response.raise_for_status()
     
     # Direct view link for images in Google Drive
     return f"https://drive.google.com/uc?export=view&id={file_id}"

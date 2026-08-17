@@ -695,3 +695,25 @@ body > iframe.goog-te-banner-frame {
     }
 }
 
+/* App Footer */
+.app-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    padding: 24px;
+    margin-top: 40px;
+    border-top: 1px solid var(--border-color);
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.app-footer a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.app-footer a:hover {
+    color: var(--neon-cyan);
+}

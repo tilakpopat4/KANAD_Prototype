@@ -1,6 +1,6 @@
 import os
 import pytest
-from parser import normalize_sqlite_timestamp, parse_sqlite, parse_evtx
+from evidence_parser import normalize_sqlite_timestamp, parse_sqlite, parse_evtx
 
 def test_normalize_sqlite_timestamp():
     # Test ISO strings

@@ -1171,9 +1171,32 @@ async function submitAddEmployee(e){
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Failed to create employee');
-    // Firestore doc created by backend; update branch count locally
+    
+    // Create employee profile in Firestore
+    await db.collection('users').doc(data.uid).set({
+      uid: data.uid,
+      name: name,
+      email: email,
+      role: 'employee',
+      branchId: selBranchId,
+      branchName: selBranchData.name,
+      desk: desk,
+      status: 'active',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Update branch employee array and count in Firestore
+    await db.collection('branches').doc(selBranchId).update({
+      employeeCount: firebase.firestore.FieldValue.increment(1),
+      employeeUids:  firebase.firestore.FieldValue.arrayUnion(data.uid)
+    });
+
+    // Update local state
     selBranchData.employeeCount = (selBranchData.employeeCount||0) + 1;
-    allBranches = allBranches.map(b => b.id===selBranchId ? {...b, employeeCount: selBranchData.employeeCount} : b);
+    if (!selBranchData.employeeUids) selBranchData.employeeUids = [];
+    selBranchData.employeeUids.push(data.uid);
+    allBranches = allBranches.map(b => b.id===selBranchId ? {...b, employeeCount: selBranchData.employeeCount, employeeUids: selBranchData.employeeUids} : b);
+
     await loadBranchEmployees();
     closeModal('modal-add-employee');
     e.target.reset();

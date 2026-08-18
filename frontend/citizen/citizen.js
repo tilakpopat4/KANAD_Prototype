@@ -100,6 +100,17 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Generate initial captcha
     generateCaptcha();
+
+    // Populate district select dropdown
+    const distSelect = document.getElementById('complaint-district');
+    if (distSelect && typeof GUJARAT_DISTRICTS !== 'undefined') {
+        GUJARAT_DISTRICTS.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = d;
+            distSelect.appendChild(opt);
+        });
+    }
 });
 
 // ─── SLIDESHOW ────────────────────────────────────────────
@@ -651,13 +662,26 @@ const complaintFormEl = document.getElementById('complaint-form');
 if (complaintFormEl) {
     complaintFormEl.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const description = document.getElementById('complaint-desc').value;
-        const category    = document.getElementById('complaint-cat').value;
+        const description  = document.getElementById('complaint-desc').value;
+        const category     = document.getElementById('complaint-cat').value;
+        const district     = document.getElementById('complaint-district').value;
+        const city         = document.getElementById('complaint-city').value.trim();
+
+        // Determine branch mapping
+        let branchId = null;
+        if (district && typeof DISTRICT_BRANCH_MAP !== 'undefined') {
+            branchId = DISTRICT_BRANCH_MAP[district] || null;
+        }
+
+        // Prepend District & City to the description so investigators see it clearly
+        const fullDescription = `[District: ${district} | City/Town: ${city}]\n\n${description}`;
 
         const formData = new FormData();
-        formData.append('description', description);
+        formData.append('description', fullDescription);
         formData.append('language', currentLang);
         if (category) formData.append('category', category);
+        if (district) formData.append('district', district);
+        if (branchId) formData.append('branch_id', branchId);
 
         try {
             const response = await fetch(`${API_BASE}/complaints`, {

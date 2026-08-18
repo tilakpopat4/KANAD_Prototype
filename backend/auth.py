@@ -48,6 +48,72 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     )
     if not token:
         raise credentials_exception
+
+    # ── Check if it is a Firebase token ──
+    try:
+        unverified = jwt.get_unverified_claims(token)
+        iss = unverified.get("iss", "")
+        if "securetoken.google.com" in iss:
+            import firebase_admin
+            from firebase_admin import auth as fb_auth, firestore
+            
+            decoded = fb_auth.verify_id_token(token)
+            email = decoded.get("email")
+            if not email:
+                raise credentials_exception
+                
+            user = db.query(database.User).filter(database.User.email == email).first()
+            if not user:
+                role = "employee"
+                name = decoded.get("name", email.split("@")[0])
+                desk = "General Desk"
+                branch_id = None
+                
+                try:
+                    fs_db = firestore.client()
+                    doc = fs_db.collection("users").document(decoded.get("uid")).get()
+                    if doc.exists:
+                        fs_data = doc.to_dict()
+                        role = fs_data.get("role", "employee")
+                        name = fs_data.get("name", name)
+                        desk = fs_data.get("desk", desk)
+                        branch_id = fs_data.get("branchId", None)
+                except Exception:
+                    pass
+                
+                user = database.User(
+                    name=name,
+                    email=email,
+                    role=role,
+                    password_hash="firebase_managed",
+                    desk=desk,
+                    branch_id=branch_id,
+                    is_active=1
+                )
+                db.add(user)
+                db.commit()
+                db.refresh(user)
+            else:
+                try:
+                    fs_db = firestore.client()
+                    doc = fs_db.collection("users").document(decoded.get("uid")).get()
+                    if doc.exists:
+                        fs_data = doc.to_dict()
+                        user.role = fs_data.get("role", user.role)
+                        user.desk = fs_data.get("desk", user.desk)
+                        user.branch_id = fs_data.get("branchId", user.branch_id)
+                        user.is_active = 0 if fs_data.get("status") == "suspended" else 1
+                        db.commit()
+                except Exception:
+                    pass
+            
+            if user.is_active == 0:
+                raise HTTPException(status_code=403, detail="User account is deactivated")
+                
+            return user
+    except Exception as e:
+        pass
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")

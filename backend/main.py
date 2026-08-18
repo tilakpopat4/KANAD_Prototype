@@ -429,7 +429,10 @@ def list_cases(
     current_user: database.User = Depends(auth.get_current_employee),
     db: Session = Depends(database.get_db)
 ):
-    complaints = db.query(database.Complaint).all()
+    query = db.query(database.Complaint)
+    if current_user.role != "admin" and current_user.role != "super_admin":
+        query = query.filter(database.Complaint.branch_id == current_user.branch_id)
+    complaints = query.all()
     res = []
     for c in complaints:
         citizen = db.query(database.User).filter(database.User.id == c.citizen_id).first()
@@ -449,6 +452,11 @@ def list_cases(
     res.sort(key=lambda x: x["priority_score"], reverse=True)
     return res
 
+def check_case_access(complaint, current_user):
+    if current_user.role != "admin" and current_user.role != "super_admin":
+        if complaint.branch_id != current_user.branch_id:
+            raise HTTPException(status_code=403, detail="Access restricted to cases in your branch")
+
 @app.get("/cases/{id}/timeline")
 def get_case_timeline(
     id: int,
@@ -458,6 +466,7 @@ def get_case_timeline(
     complaint = db.query(database.Complaint).filter(database.Complaint.id == id).first()
     if not complaint:
         raise HTTPException(status_code=404, detail="Case not found")
+    check_case_access(complaint, current_user)
         
     evidence_ids = [ev.id for ev in complaint.evidences]
     timeline = db.query(database.TimelineEvent).filter(database.TimelineEvent.evidence_id.in_(evidence_ids)).all()
@@ -502,6 +511,7 @@ def get_case_audit_trail(
     complaint = db.query(database.Complaint).filter(database.Complaint.id == id).first()
     if not complaint:
         raise HTTPException(status_code=404, detail="Case not found")
+    check_case_access(complaint, current_user)
         
     evidence_ids = [ev.id for ev in complaint.evidences]
     audits = db.query(database.AuditLog).filter(database.AuditLog.evidence_id.in_(evidence_ids)).order_by(database.AuditLog.timestamp.desc()).all()
@@ -547,6 +557,7 @@ def update_case_status(
     complaint = db.query(database.Complaint).filter(database.Complaint.id == id).first()
     if not complaint:
         raise HTTPException(status_code=404, detail="Case not found")
+    check_case_access(complaint, current_user)
     if status not in ["pending", "investigating", "resolved"]:
         raise HTTPException(status_code=400, detail="Invalid status value")
     complaint.status = status
@@ -562,6 +573,11 @@ def get_case_notes(
     current_user: database.User = Depends(auth.get_current_employee),
     db: Session = Depends(database.get_db)
 ):
+    complaint = db.query(database.Complaint).filter(database.Complaint.id == id).first()
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Case not found")
+    check_case_access(complaint, current_user)
+    
     notes = db.query(database.CaseNote).filter(database.CaseNote.complaint_id == id).order_by(database.CaseNote.created_at.desc()).all()
     res = []
     for n in notes:
@@ -581,6 +597,11 @@ def add_case_note(
     current_user: database.User = Depends(auth.get_current_employee),
     db: Session = Depends(database.get_db)
 ):
+    complaint = db.query(database.Complaint).filter(database.Complaint.id == id).first()
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Case not found")
+    check_case_access(complaint, current_user)
+    
     note = database.CaseNote(complaint_id=id, employee_id=current_user.id, note_text=note_text)
     db.add(note)
     db.commit()
@@ -595,11 +616,13 @@ def get_fir_draft(
     current_user: database.User = Depends(auth.get_current_employee),
     db: Session = Depends(database.get_db)
 ):
+    complaint = db.query(database.Complaint).filter(database.Complaint.id == id).first()
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Case not found")
+    check_case_access(complaint, current_user)
+
     draft = db.query(database.FirDraft).filter(database.FirDraft.complaint_id == id).order_by(database.FirDraft.generated_at.desc()).first()
     if not draft:
-        complaint = db.query(database.Complaint).filter(database.Complaint.id == id).first()
-        if not complaint:
-            raise HTTPException(status_code=404, detail="Case not found")
         citizen = db.query(database.User).filter(database.User.id == complaint.citizen_id).first()
         
         narrative = f"FIRST INFORMATION REPORT\n(Under Section 154 CrPC)\n\n" \
@@ -632,6 +655,11 @@ def file_fir(
     current_user: database.User = Depends(auth.get_current_employee),
     db: Session = Depends(database.get_db)
 ):
+    complaint = db.query(database.Complaint).filter(database.Complaint.id == id).first()
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Case not found")
+    check_case_access(complaint, current_user)
+
     draft = db.query(database.FirDraft).filter(database.FirDraft.complaint_id == id).order_by(database.FirDraft.generated_at.desc()).first()
     if not draft:
         raise HTTPException(status_code=404, detail="FIR draft not generated yet.")

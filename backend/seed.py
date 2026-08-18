@@ -66,6 +66,8 @@ def seed_data():
         assigned_desk="Financial Fraud Desk",
         is_severe=0,
         language="en",
+        branch_id="br_ahm_central",
+        district="Ahmedabad",
         created_at=datetime.datetime.utcnow() - datetime.timedelta(days=2)
     )
     
@@ -79,6 +81,8 @@ def seed_data():
         assigned_desk="Cyber Social Desk",
         is_severe=0,
         language="en",
+        branch_id="br_ahm_central",
+        district="Ahmedabad",
         created_at=datetime.datetime.utcnow() - datetime.timedelta(days=1)
     )
     
@@ -92,6 +96,8 @@ def seed_data():
         assigned_desk="Cyber Security Desk",
         is_severe=1,
         language="en",
+        branch_id="br_ahm_central",
+        district="Ahmedabad",
         created_at=datetime.datetime.utcnow() - datetime.timedelta(days=4)
     )
     db.add_all([c1, c2, c3])

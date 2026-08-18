@@ -762,3 +762,26 @@ function renderCharts(data) {
         });
     }
 }
+
+// ─── FIREBASE LOGIN INTEGRATION HOOK ──────────────────────
+window._onFirebaseLogin = function(branchId) {
+    if (window.FIREBASE_TOKEN && window.EMP_PROFILE) {
+        currentToken = window.FIREBASE_TOKEN;
+        currentUser  = window.EMP_PROFILE;
+
+        // Hide login, show dashboard workstation
+        const authView = document.getElementById('view-auth');
+        const workView = document.getElementById('view-investigator');
+        if (authView) authView.style.display = 'none';
+        if (workView) workView.style.display = 'block';
+
+        const tabInv = document.getElementById('tab-investigator');
+        if (tabInv) tabInv.style.display = 'flex';
+        const tabContainer = document.getElementById('tab-container');
+        if (tabContainer) tabContainer.style.display = 'flex';
+
+        switchTab('investigator');
+        fetchCases();
+    }
+};
+

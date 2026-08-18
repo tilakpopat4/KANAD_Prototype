@@ -7,6 +7,8 @@
     <meta name="description" content="File cyber complaints, track case status, and upload digital evidence with the Ahmedabad Cyber Crime Branch portal.">
     <!-- CSS Stylesheet -->
     <link rel="stylesheet" href="/frontend/style.css">
+    <!-- Firebase config & routing mapping -->
+    <script src="/frontend/firebase-config.js"></script>
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js CDN -->
@@ -188,6 +190,19 @@
                                 <i data-lucide="cpu" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 5px;"></i>
                                 AI Routing Desk: <strong id="suggest-cat">financial_fraud</strong> | Priority: <strong id="suggest-priority">3</strong>
                             </span>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Select Your District</label>
+                            <select id="complaint-district" class="form-control" required>
+                                <option value="">Select District</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Enter City / Town</label>
+                            <input type="text" id="complaint-city" class="form-control" placeholder="e.g. Ahmedabad, Surat" required>
                         </div>
                     </div>
 

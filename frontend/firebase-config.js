@@ -10,12 +10,13 @@
 // ============================================================
 
 const FIREBASE_CONFIG = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId:             "YOUR_APP_ID"
+  apiKey: "AIzaSyBFaZ6MTu1D4xdykQAZFHtkQw3xGfjwXWg",
+  authDomain: "forensync-b3a45.firebaseapp.com",
+  projectId: "forensync-b3a45",
+  storageBucket: "forensync-b3a45.firebasestorage.app",
+  messagingSenderId: "679454217435",
+  appId: "1:679454217435:web:0a2cdd9b569ad340e1e8fe",
+  measurementId: "G-MXH1TP3JF9"
 };
 
 // ── 30 Gujarat Cyber Cell Branches ──────────────────────────

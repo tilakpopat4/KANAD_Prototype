@@ -21,6 +21,7 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     desk = Column(String, nullable=True) # Desk assignment for employee
     is_active = Column(Integer, default=1) # 1 = active, 0 = deactivated
+    branch_id = Column(String, nullable=True) # Cyber Cell Branch ID
 
     complaints = relationship("Complaint", back_populates="citizen", foreign_keys="Complaint.citizen_id")
 

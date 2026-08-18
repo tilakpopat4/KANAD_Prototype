@@ -1083,14 +1083,20 @@ function confirmRemoveEmp(uid, name){
     try {
       const token = await currentUser.getIdToken();
 
-      // 2. Delete from Firebase Auth (backend)
-      const res = await fetch(`/admin/employees/${uid}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.detail || 'Failed to delete from Firebase Auth');
+      // 2. Delete from Firebase Auth via backend — non-blocking
+      // If the backend returns 503 (FIREBASE_CREDENTIALS not set on Vercel),
+      // we warn and continue — Firestore cleanup always runs.
+      try {
+        const res = await fetch(`/admin/employees/${uid}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          console.warn('[Remove] Backend Auth delete failed (' + res.status + '):', errData.detail || res.statusText);
+        }
+      } catch (backendErr) {
+        console.warn('[Remove] Backend unreachable:', backendErr.message);
       }
 
       // 3. Delete Firestore user document
@@ -1112,14 +1118,14 @@ function confirmRemoveEmp(uid, name){
         : b
       );
 
-      // 6. Re-fetch from Firestore to confirm sync (branchEmployees already updated optimistically)
+      // 6. Re-fetch from Firestore to confirm sync
       await loadBranchEmployees();
       renderBranchDetail();
       renderBranchSidebar();
       toast('Employee removed successfully', 'success');
 
     } catch(e) {
-      // Rollback optimistic UI update on error
+      // Only rollback if Firestore itself failed
       branchEmployees = originalEmployees;
       renderBranchDetail();
       toast('Error removing employee: ' + e.message, 'error');

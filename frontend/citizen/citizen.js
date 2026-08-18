@@ -120,8 +120,19 @@ let slideTimeout;
 
 async function initSlideshow() {
     try {
-        const res = await fetch('/api/slides');
-        const slides = await res.json();
+        // Load slides from Firestore for permanent persistence
+        // (SQLite on Vercel resets on cold start; Firestore is always available)
+        const fsApp = firebase.apps.length
+            ? firebase.app()
+            : firebase.initializeApp(FIREBASE_CONFIG);
+        const fsDb = firebase.firestore();
+
+        const snap = await fsDb.collection('slides')
+            .where('is_active', '==', true)
+            .orderBy('created_at', 'desc')
+            .get();
+
+        const slides = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         const container = document.getElementById('slideshow-container');
         const dotsContainer = document.getElementById('slideshow-dots');
 
@@ -130,7 +141,7 @@ async function initSlideshow() {
             return;
         }
 
-        // Remove existing slide elements (but keep arrows and dots container)
+        // Remove existing slide elements (keep arrows and dots container)
         Array.from(container.children).forEach(child => {
             if (child.id !== 'slideshow-dots' && !child.classList.contains('slide-arrow')) {
                 container.removeChild(child);

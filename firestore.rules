@@ -11,6 +11,17 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin';
     }
 
+    // ── Slides (public announcements) ──────────────────────
+    // Anyone can READ slides (shown to unauthenticated citizens).
+    // Only super_admin can create, update, or delete slides.
+    match /slides/{slideId} {
+      allow read:   if true;
+      allow create: if isSuperAdmin();
+      allow update: if isSuperAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
+    // ── Branches ───────────────────────────────────────────
     match /branches/{branchId} {
       allow read:   if isAuth();
       allow create: if isSuperAdmin();
@@ -18,6 +29,7 @@ service cloud.firestore {
       allow delete: if isSuperAdmin();
     }
 
+    // ── Users (employee & admin profiles) ──────────────────
     match /users/{uid} {
       allow read:   if isAuth() && (isSuperAdmin() || request.auth.uid == uid);
       allow create: if isSuperAdmin();

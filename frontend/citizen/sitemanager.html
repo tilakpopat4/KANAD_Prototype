@@ -7,6 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/frontend/style.css">
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="/frontend/firebase-config.js"></script>
     <style>
         body {
             padding: 40px;
@@ -176,15 +180,15 @@
     </div>
 
     <script>
+        // ── Firebase init ──────────────────────────────────────
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const db = firebase.firestore();
         lucide.createIcons();
 
-        let uploadedImageUrl = null;
-
+        // ── Image preview (client-side only, no upload required) ──
         function handleImageSelect(input) {
             const file = input.files[0];
             if (!file) return;
-
-            // Client-side preview
             const reader = new FileReader();
             reader.onload = e => {
                 const preview = document.getElementById('img-preview');
@@ -194,22 +198,18 @@
             reader.readAsDataURL(file);
         }
 
+        // Upload image to backend (only called if user picked a file)
         async function uploadImageIfSelected() {
             const fileInput = document.getElementById('slide-img-file');
             const file = fileInput.files[0];
-            if (!file) return null;
+            if (!file) return null;   // ← text-only slides skip this entirely
 
             const statusEl = document.getElementById('img-upload-status');
             statusEl.textContent = '⏳ Uploading image…';
-
             const formData = new FormData();
             formData.append('file', file);
-
             try {
-                const res = await fetch('/api/slides/upload-image', {
-                    method: 'POST',
-                    body: formData
-                });
+                const res = await fetch('/api/slides/upload-image', { method: 'POST', body: formData });
                 if (!res.ok) {
                     const err = await res.json();
                     statusEl.textContent = '❌ ' + (err.detail || 'Upload failed');
@@ -224,80 +224,81 @@
             }
         }
 
+        // ── Load slides from Firestore ─────────────────────────
         async function loadSlides() {
+            const list = document.getElementById('slide-list');
+            list.innerHTML = '<p style="color:var(--text-secondary);">Loading…</p>';
             try {
-                const res = await fetch('/api/slides');
-                const slides = await res.json();
-                const list = document.getElementById('slide-list');
-                
-                if (slides.length === 0) {
-                    list.innerHTML = '<p style="color:var(--text-secondary);">No active slides found.</p>';
+                const snap = await db.collection('slides')
+                    .where('is_active', '==', true)
+                    .orderBy('created_at', 'desc')
+                    .get();
+
+                if (snap.empty) {
+                    list.innerHTML = '<p style="color:var(--text-secondary);">No active slides. Add one!</p>';
                     return;
                 }
 
-                list.innerHTML = slides.map(s => `
-                    <div class="glass-panel slide-item">
-                        ${s.image_url
-                            ? `<img class="slide-item-thumb" src="${s.image_url}" alt="Slide image">`
-                            : `<div class="slide-item-thumb-placeholder">📢</div>`
-                        }
-                        <div class="slide-item-info">
-                            <h4 style="margin:0 0 4px 0;">${s.title}</h4>
-                            <p style="margin:0; font-size:13px; color:var(--text-secondary); line-clamp:2;">${s.description}</p>
-                            <small style="color:var(--text-secondary);">Icon: ${s.icon} | Colour: ${s.color_scheme}</small>
-                        </div>
-                        <button onclick="deleteSlide(${s.id})" class="btn-secondary" style="flex-shrink:0; padding:8px 14px; font-size:13px; color:var(--danger); border-color:var(--danger);">Remove</button>
-                    </div>
-                `).join('');
-            } catch (e) {
+                list.innerHTML = snap.docs.map(doc => {
+                    const s = { id: doc.id, ...doc.data() };
+                    return `
+                        <div class="glass-panel slide-item">
+                            ${s.image_url
+                                ? `<img class="slide-item-thumb" src="${s.image_url}" alt="Slide">`
+                                : `<div class="slide-item-thumb-placeholder">📢</div>`
+                            }
+                            <div class="slide-item-info">
+                                <h4 style="margin:0 0 4px 0;">${s.title}</h4>
+                                <p style="margin:0; font-size:13px; color:var(--text-secondary);">${s.description}</p>
+                                <small style="color:var(--text-secondary);">Icon: ${s.icon} &nbsp;|&nbsp; Colour: ${s.color_scheme}</small>
+                            </div>
+                            <button onclick="deleteSlide('${s.id}')" class="btn-secondary"
+                                style="flex-shrink:0; padding:8px 14px; font-size:13px; color:var(--danger); border-color:var(--danger);">Remove</button>
+                        </div>`;
+                }).join('');
+            } catch(e) {
                 console.error(e);
-                document.getElementById('slide-list').innerHTML = '<p>Error loading slides.</p>';
+                list.innerHTML = '<p style="color:var(--danger);">Error loading slides: ' + e.message + '</p>';
             }
         }
 
+        // ── Delete slide from Firestore (permanent) ────────────
         async function deleteSlide(id) {
-            if (!confirm('Are you sure you want to remove this slide?')) return;
+            if (!confirm('Remove this slide permanently?')) return;
             try {
-                await fetch(`/api/slides/${id}`, { method: 'DELETE' });
+                await db.collection('slides').doc(id).delete();
                 loadSlides();
-            } catch (e) {
-                alert('Error deleting slide');
+            } catch(e) {
+                alert('Error removing slide: ' + e.message);
             }
         }
 
+        // ── Add slide to Firestore ─────────────────────────────
         document.getElementById('add-slide-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('add-slide-btn');
             btn.disabled = true;
             btn.textContent = 'Saving…';
 
-            // Upload image first (if any)
+            // Image upload is optional — text-only slides are fully supported
             const imageUrl = await uploadImageIfSelected();
 
-            const data = {
-                title: document.getElementById('slide-title').value,
-                description: document.getElementById('slide-desc').value,
-                icon: document.getElementById('slide-icon').value,
-                color_scheme: document.getElementById('slide-color').value,
-                image_url: imageUrl || null
-            };
-
             try {
-                const res = await fetch('/api/slides', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                await db.collection('slides').add({
+                    title:        document.getElementById('slide-title').value.trim(),
+                    description:  document.getElementById('slide-desc').value.trim(),
+                    icon:         document.getElementById('slide-icon').value.trim() || 'info',
+                    color_scheme: document.getElementById('slide-color').value,
+                    image_url:    imageUrl || null,
+                    is_active:    true,
+                    created_at:   firebase.firestore.FieldValue.serverTimestamp()
                 });
-                if (res.ok) {
-                    e.target.reset();
-                    document.getElementById('img-preview').style.display = 'none';
-                    document.getElementById('img-upload-status').textContent = '';
-                    loadSlides();
-                } else {
-                    alert('Error adding slide');
-                }
-            } catch (err) {
-                alert('Error adding slide');
+                e.target.reset();
+                document.getElementById('img-preview').style.display = 'none';
+                document.getElementById('img-upload-status').textContent = '';
+                loadSlides();
+            } catch(err) {
+                alert('Error adding slide: ' + err.message);
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Add Slide';

@@ -1146,6 +1146,35 @@ async function submitAddBranch(e){
 // ────────────────────────────────────────────────
 function openAddEmpModal(){
   if (!selBranchData) return;
+
+  // Clear name and email
+  document.getElementById('ne-name').value = '';
+  document.getElementById('ne-email').value = '';
+
+  // Generate unique password
+  const randDigits = Math.floor(1000 + Math.random() * 9000);
+  document.getElementById('ne-password').value = `ForenSync@${randDigits}`;
+
+  // Reset/generate a unique suffix for email
+  window._currentEmpEmailSuffix = Math.floor(100 + Math.random() * 900);
+
+  // Set up auto-generation of email on name typing
+  if (!window._neNameListenerRegistered) {
+    document.getElementById('ne-name').addEventListener('input', (e) => {
+      const nameVal = e.target.value.trim();
+      if (!nameVal) {
+        document.getElementById('ne-email').value = '';
+        return;
+      }
+      const cleanName = nameVal.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .trim()
+        .replace(/\s+/g, '.');
+      document.getElementById('ne-email').value = `${cleanName}${window._currentEmpEmailSuffix}@forensync.gov.in`;
+    });
+    window._neNameListenerRegistered = true;
+  }
+
   document.getElementById('add-emp-branch-info').innerHTML =
     `Adding employee to <strong>${selBranchData.name}</strong> (${branchEmployees.length}/3 slots used).`;
   const deskSel = document.getElementById('ne-desk');
@@ -1202,7 +1231,15 @@ async function submitAddEmployee(e){
     e.target.reset();
     renderBranchDetail();
     renderBranchSidebar();
-    toast(`Employee ${name} created successfully!`, 'success');
+    
+    // Show credentials modal to Super Admin
+    showConfirm('👤', 'Employee Account Created', 
+      `Account for ${name} has been created successfully.\n\n` + 
+      `📧 Email: ${email}\n` +
+      `🔑 Temporary Password: ${password}\n\n` +
+      `These credentials are now active. Share them with the employee so they can sign in to the Employee Portal immediately.`, 
+      () => {}
+    );
   } catch(err){ toast('Error: ' + err.message, 'error'); }
   btn.disabled = false; btn.textContent = 'Create Employee Account';
 }

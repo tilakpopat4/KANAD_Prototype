@@ -736,6 +736,9 @@ def firebase_delete_employee(
         fb_auth.delete_user(uid)
         return {"message": f"Firebase Auth user {uid} deleted."}
     except Exception as e:
+        err_str = str(e).lower()
+        if "user-not-found" in err_str or "no user record" in err_str or "not found" in err_str:
+            return {"message": f"Firebase Auth user {uid} not found. Proceeding with cleanup."}
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.patch("/admin/employees/{uid}/status")

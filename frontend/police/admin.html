@@ -1072,7 +1072,10 @@ function confirmRemoveEmp(uid, name){
         employeeUids:  firebase.firestore.FieldValue.arrayRemove(uid)
       });
       selBranchData.employeeCount = Math.max(0,(selBranchData.employeeCount||1)-1);
-      allBranches = allBranches.map(b=>b.id===selBranchId?{...b,employeeCount:selBranchData.employeeCount}:b);
+      if (selBranchData.employeeUids) {
+        selBranchData.employeeUids = selBranchData.employeeUids.filter(id => id !== uid);
+      }
+      allBranches = allBranches.map(b => b.id===selBranchId ? {...b, employeeCount: selBranchData.employeeCount, employeeUids: selBranchData.employeeUids} : b);
       await loadBranchEmployees();
       renderBranchDetail();
       renderBranchSidebar();

@@ -537,27 +537,39 @@
     <form onsubmit="submitAddEmployee(event)">
       <div class="mf-group">
         <label>Full Name</label>
-        <input id="ne-name" placeholder="e.g. Inspector Ramesh Kumar" required>
+        <input id="ne-name" placeholder="e.g. Inspector Ramesh Kumar" required autocomplete="off">
       </div>
       <div class="mf-group">
-        <label>Official Email</label>
-        <input id="ne-email" type="email" placeholder="ramesh.kumar@forensync.gov.in" required>
+        <label>Desk Assignment</label>
+        <select id="ne-desk" required>
+          <option value="">Select Desk</option>
+        </select>
       </div>
-      <div class="mf-2col">
-        <div class="mf-group">
-          <label>Temporary Password</label>
-          <input id="ne-password" type="password" placeholder="Min 8 characters" minlength="8" required>
+      <!-- Auto-generated credentials preview -->
+      <div style="background:rgba(24,84,142,.06);border:1.5px solid rgba(24,84,142,.18);border-radius:10px;padding:14px 16px;margin-bottom:18px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#18548e;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+          <i data-lucide="key" style="width:13px;height:13px;"></i> Auto-Generated Login Credentials
         </div>
-        <div class="mf-group">
-          <label>Desk Assignment</label>
-          <select id="ne-desk" required>
-            <option value="">Select Desk</option>
-          </select>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <div style="font-size:11px;color:#6b8499;margin-bottom:4px;">Official Email</div>
+            <div id="ne-email-preview" style="font-size:13px;font-weight:600;color:#0f1923;font-family:monospace;word-break:break-all;">—</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:#6b8499;margin-bottom:4px;">Default Password</div>
+            <div id="ne-password-preview" style="font-size:13px;font-weight:600;color:#0f1923;font-family:monospace;">—</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#6b8499;margin-top:8px;">
+          ⚠️ Credentials are auto-generated based on the employee's name. Share them with the employee after creation.
         </div>
       </div>
+      <!-- Hidden fields for form submission -->
+      <input type="hidden" id="ne-email">
+      <input type="hidden" id="ne-password">
       <div class="modal-actions">
         <button type="button" class="btn-modal-cancel" onclick="closeModal('modal-add-employee')">Cancel</button>
-        <button type="submit" class="btn-modal-confirm" id="ne-submit-btn">Create Employee Account</button>
+        <button type="submit" class="btn-modal-confirm" id="ne-submit-btn" disabled>Create Employee Account</button>
       </div>
     </form>
   </div>
@@ -1062,7 +1074,7 @@ async function setEmpStatus(uid, disabled){
 }
 
 function confirmRemoveEmp(uid, name){
-  showConfirm('🗑️','Remove Employee?',`Permanently delete ${name}'s account from this branch?`, async () => {
+  showConfirm('🗑️','Permanently Remove Employee?',`This will permanently delete "${name}"'s account from Firebase Auth and Firestore. This action CANNOT be undone.`, async () => {
     // 1. Optimistically remove from UI immediately so user sees instant feedback
     const originalEmployees = [...branchEmployees];
     branchEmployees = branchEmployees.filter(e => e.uid !== uid);
@@ -1181,33 +1193,45 @@ async function submitAddBranch(e){
 function openAddEmpModal(){
   if (!selBranchData) return;
 
-  // Clear name and email
-  document.getElementById('ne-name').value = '';
-  document.getElementById('ne-email').value = '';
+  // Clear fields & reset previews
+  document.getElementById('ne-name').value    = '';
+  document.getElementById('ne-email').value   = '';
+  document.getElementById('ne-password').value = '';
+  document.getElementById('ne-email-preview').textContent    = '—';
+  document.getElementById('ne-password-preview').textContent = '—';
+  document.getElementById('ne-submit-btn').disabled = true;
 
-  // Generate unique password
-  const randDigits = Math.floor(1000 + Math.random() * 9000);
-  document.getElementById('ne-password').value = `ForenSync@${randDigits}`;
+  // Auto-generate credentials whenever name changes
+  const nameInput = document.getElementById('ne-name');
 
-  // Reset/generate a unique suffix for email
-  window._currentEmpEmailSuffix = Math.floor(100 + Math.random() * 900);
+  // Remove old listener to avoid duplicates
+  if (window._neNameHandler) nameInput.removeEventListener('input', window._neNameHandler);
 
-  // Set up auto-generation of email on name typing
-  if (!window._neNameListenerRegistered) {
-    document.getElementById('ne-name').addEventListener('input', (e) => {
-      const nameVal = e.target.value.trim();
-      if (!nameVal) {
-        document.getElementById('ne-email').value = '';
-        return;
-      }
-      const cleanName = nameVal.toLowerCase()
-        .replace(/[^a-z0-9\s]/g, '')
-        .trim()
-        .replace(/\s+/g, '.');
-      document.getElementById('ne-email').value = `${cleanName}${window._currentEmpEmailSuffix}@forensync.gov.in`;
-    });
-    window._neNameListenerRegistered = true;
-  }
+  window._neNameHandler = function() {
+    const nameVal = nameInput.value.trim();
+    if (!nameVal) {
+      document.getElementById('ne-email').value   = '';
+      document.getElementById('ne-password').value = '';
+      document.getElementById('ne-email-preview').textContent    = '—';
+      document.getElementById('ne-password-preview').textContent = '—';
+      document.getElementById('ne-submit-btn').disabled = true;
+      return;
+    }
+    // Use only the first word (first name) for credentials
+    const firstName = nameVal.toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .trim()
+      .split(/\s+/)[0];
+    const email    = `${firstName}@forensync.gov`;
+    const password = `${firstName}@123`;
+    document.getElementById('ne-email').value    = email;
+    document.getElementById('ne-password').value = password;
+    document.getElementById('ne-email-preview').textContent    = email;
+    document.getElementById('ne-password-preview').textContent = password;
+    document.getElementById('ne-submit-btn').disabled = false;
+  };
+
+  nameInput.addEventListener('input', window._neNameHandler);
 
   document.getElementById('add-emp-branch-info').innerHTML =
     `Adding employee to <strong>${selBranchData.name}</strong> (${branchEmployees.length}/3 slots used).`;
@@ -1215,6 +1239,7 @@ function openAddEmpModal(){
   deskSel.innerHTML = '<option value="">Select Desk</option>' +
     DESK_OPTIONS.map(d=>`<option>${d}</option>`).join('');
   document.getElementById('modal-add-employee').classList.add('open');
+  lucide.createIcons();
 }
 
 async function submitAddEmployee(e){
@@ -1267,13 +1292,7 @@ async function submitAddEmployee(e){
     renderBranchSidebar();
     
     // Show credentials modal to Super Admin
-    showConfirm('👤', 'Employee Account Created', 
-      `Account for ${name} has been created successfully.\n\n` + 
-      `📧 Email: ${email}\n` +
-      `🔑 Temporary Password: ${password}\n\n` +
-      `These credentials are now active. Share them with the employee so they can sign in to the Employee Portal immediately.`, 
-      () => {}
-    );
+    showCredentialsModal(name, email, password);
   } catch(err){ toast('Error: ' + err.message, 'error'); }
   btn.disabled = false; btn.textContent = 'Create Employee Account';
 }
@@ -1283,7 +1302,30 @@ async function submitAddEmployee(e){
 // ────────────────────────────────────────────────
 function openModal(id)  { document.getElementById(id).classList.add('open'); lucide.createIcons(); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function openAddBranchModal(){ openAddBranchModal(); }
+
+// Credentials modal after employee creation
+function showCredentialsModal(name, email, password) {
+  // Reuse confirm overlay with a custom layout
+  document.getElementById('confirm-icon').textContent  = '🔑';
+  document.getElementById('confirm-title').textContent = 'Employee Account Created!';
+  document.getElementById('confirm-msg').innerHTML =
+    `<strong>${name}</strong>'s account is now active.<br><br>` +
+    `<div style="background:#f0f4f8;border-radius:8px;padding:12px 14px;text-align:left;margin:10px 0;font-family:monospace;font-size:13px;line-height:2;">` +
+    `<span style="color:#6b8499;font-family:var(--font-body);font-size:11px;font-weight:700;display:block;margin-bottom:4px;">EMAIL</span>` +
+    `<strong style="color:#18548e;">${email}</strong><br>` +
+    `<span style="color:#6b8499;font-family:var(--font-body);font-size:11px;font-weight:700;display:block;margin-top:8px;margin-bottom:4px;">PASSWORD</span>` +
+    `<strong style="color:#18548e;">${password}</strong>` +
+    `</div>` +
+    `<span style="font-size:12px;color:#6b8499;">Share these credentials with the employee to access the Employee Portal.</span>`;
+  // Hide the confirm OK button label
+  document.getElementById('confirm-ok-btn').textContent = 'Got it ✓';
+  document.getElementById('confirm-ok-btn').style.background = '#10b981';
+  confirmCallback = () => {
+    document.getElementById('confirm-ok-btn').textContent = 'Confirm';
+    document.getElementById('confirm-ok-btn').style.background = '#ef4444';
+  };
+  document.getElementById('confirm-overlay').classList.add('open');
+}
 
 function showConfirm(icon, title, msg, cb){
   document.getElementById('confirm-icon').textContent  = icon;

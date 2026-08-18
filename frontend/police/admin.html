@@ -1,174 +1,1225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ForenSync - Admin Control Portal</title>
-    <!-- CSS Stylesheet -->
-    <link rel="stylesheet" href="/frontend/style.css">
-    <!-- Lucide Icons CDN -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Control Center &mdash; ForenSync</title>
+  <meta name="description" content="ForenSync Super Admin Control Center — Manage Cyber Cell Branches and Personnel.">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="/frontend/firebase-config.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap">
+  <style>
+    :root{
+      --brand:#18548e; --brand-lt:#289ee7; --brand-dark:#102f52;
+      --success:#10b981; --warn:#f59e0b; --danger:#ef4444;
+      --bg:#f0f4f8; --sidebar-bg:#0f1923; --card:#ffffff;
+      --border:#d1dde8; --text:#2d4a63; --text-sec:#6b8499;
+      --font-head:'Space Grotesk',sans-serif; --font-body:'Outfit',sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font-body);background:var(--bg);color:var(--text);overflow:hidden;height:100vh;}
+
+    /* ── Login Screen ─────────────────────────────── */
+    #login-screen{
+      display:flex;align-items:center;justify-content:center;
+      height:100vh;background:linear-gradient(135deg,#0f1923 0%,#18548e 60%,#289ee7 100%);
+    }
+    .login-card{
+      background:#fff;border-radius:18px;padding:48px 44px;width:440px;
+      box-shadow:0 30px 80px rgba(0,0,0,0.35);
+    }
+    .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;}
+    .login-logo-icon{
+      width:48px;height:48px;border-radius:12px;
+      background:linear-gradient(135deg,#18548e,#289ee7);
+      display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;
+    }
+    .login-logo-text{font-family:var(--font-head);font-size:22px;font-weight:700;color:#18548e;}
+    .login-logo-sub{font-size:11px;color:#6b8499;text-transform:uppercase;letter-spacing:.1em;}
+    .login-card h2{font-family:var(--font-head);font-size:20px;color:#0f1923;margin-bottom:6px;}
+    .login-card p{font-size:13px;color:#6b8499;margin-bottom:28px;}
+    .lf-group{margin-bottom:18px;}
+    .lf-group label{display:block;font-size:13px;font-weight:600;color:#2d4a63;margin-bottom:6px;}
+    .lf-group input{
+      width:100%;padding:12px 14px;border:1.5px solid #d1dde8;border-radius:8px;
+      font-family:var(--font-body);font-size:14px;color:#2d4a63;outline:none;transition:.2s;
+    }
+    .lf-group input:focus{border-color:#18548e;box-shadow:0 0 0 3px rgba(24,84,142,.1);}
+    .btn-login{
+      width:100%;padding:13px;background:#18548e;color:#fff;border:none;border-radius:8px;
+      font-family:var(--font-head);font-size:15px;font-weight:600;cursor:pointer;
+      transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+    .btn-login:hover{background:#289ee7;}
+    .login-err{font-size:13px;color:#ef4444;text-align:center;margin-top:14px;display:none;}
+
+    /* ── Shell Layout ─────────────────────────────── */
+    #admin-shell{display:none;grid-template-rows:56px 1fr;grid-template-columns:300px 1fr;height:100vh;}
+
+    /* Top Bar */
+    .topbar{
+      grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;
+      padding:0 24px;background:#fff;border-bottom:1.5px solid var(--border);
+      box-shadow:0 2px 8px rgba(0,0,0,.05);z-index:10;
+    }
+    .topbar-logo{display:flex;align-items:center;gap:10px;}
+    .topbar-logo-icon{
+      width:32px;height:32px;border-radius:8px;
+      background:linear-gradient(135deg,#18548e,#289ee7);
+      display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;
+    }
+    .topbar-title{font-family:var(--font-head);font-size:16px;font-weight:700;color:#18548e;}
+    .topbar-sub{font-size:11px;color:#6b8499;letter-spacing:.08em;text-transform:uppercase;}
+    .topbar-right{display:flex;align-items:center;gap:16px;}
+    .topbar-admin{display:flex;align-items:center;gap:10px;}
+    .topbar-avatar{
+      width:34px;height:34px;border-radius:50%;
+      background:linear-gradient(135deg,#18548e,#289ee7);
+      display:flex;align-items:center;justify-content:center;color:#fff;
+      font-family:var(--font-head);font-size:13px;font-weight:700;
+    }
+    .topbar-name{font-size:13px;font-weight:600;color:#2d4a63;}
+    .btn-logout{
+      padding:7px 14px;background:transparent;border:1.5px solid #d1dde8;border-radius:7px;
+      font-family:var(--font-head);font-size:12px;font-weight:600;color:#6b8499;cursor:pointer;
+      transition:.2s;display:flex;align-items:center;gap:6px;
+    }
+    .btn-logout:hover{border-color:#ef4444;color:#ef4444;}
+
+    /* Sidebar */
+    .sidebar{
+      background:var(--sidebar-bg);overflow-y:auto;display:flex;flex-direction:column;
+      border-right:1px solid rgba(255,255,255,.06);
+    }
+    .sidebar-head{padding:18px 16px 12px;}
+    .sidebar-search{
+      display:flex;align-items:center;gap:8px;
+      background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+      border-radius:8px;padding:8px 12px;margin-bottom:10px;
+    }
+    .sidebar-search input{
+      background:transparent;border:none;outline:none;color:#fff;font-family:var(--font-body);
+      font-size:13px;flex:1;
+    }
+    .sidebar-search input::placeholder{color:rgba(255,255,255,.35);}
+    .filter-tabs{display:flex;gap:6px;margin-bottom:4px;}
+    .filter-tab{
+      flex:1;padding:5px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.1);
+      background:transparent;color:rgba(255,255,255,.5);font-size:11px;font-weight:600;
+      cursor:pointer;transition:.2s;text-align:center;
+    }
+    .filter-tab.active{background:rgba(40,158,231,.25);border-color:#289ee7;color:#289ee7;}
+    .sidebar-section-label{
+      font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+      color:rgba(255,255,255,.3);padding:12px 16px 4px;
+    }
+    .branch-item{
+      display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;
+      transition:background .15s;border-left:3px solid transparent;
+    }
+    .branch-item:hover{background:rgba(255,255,255,.06);}
+    .branch-item.selected{background:rgba(40,158,231,.15);border-left-color:#289ee7;}
+    .branch-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .branch-dot.active{background:#10b981;}
+    .branch-dot.suspended{background:#ef4444;}
+    .branch-item-info{flex:1;min-width:0;}
+    .branch-item-name{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .branch-item-district{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px;}
+    .branch-emp-badge{
+      font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;
+      background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);flex-shrink:0;
+    }
+    .branch-emp-badge.full{background:rgba(16,185,129,.2);color:#10b981;}
+    .sidebar-add-btn{
+      margin:12px 16px 16px;padding:10px;background:rgba(40,158,231,.15);
+      border:1.5px dashed rgba(40,158,231,.4);border-radius:8px;
+      color:#289ee7;font-size:13px;font-weight:600;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;
+    }
+    .sidebar-add-btn:hover{background:rgba(40,158,231,.25);border-style:solid;}
+
+    /* Main Panel */
+    .main-panel{background:var(--bg);overflow-y:auto;padding:28px;}
+
+    /* Stats Cards */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+    .stat-card{
+      background:#fff;border-radius:12px;padding:20px;
+      border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04);
+    }
+    .stat-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-sec);margin-bottom:8px;}
+    .stat-val{font-family:var(--font-head);font-size:34px;font-weight:800;color:#18548e;}
+    .stat-sub{font-size:12px;color:var(--text-sec);margin-top:4px;}
+
+    /* Branch Detail Header */
+    .branch-header{
+      background:#fff;border-radius:14px;padding:24px;margin-bottom:20px;
+      border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04);
+    }
+    .branch-header-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+    .branch-header h2{font-family:var(--font-head);font-size:22px;color:#0f1923;margin-bottom:4px;}
+    .branch-meta{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;}
+    .branch-meta-item{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-sec);}
+    .status-badge{
+      display:inline-flex;align-items:center;gap:5px;padding:5px 12px;
+      border-radius:20px;font-size:12px;font-weight:700;
+    }
+    .status-badge.active{background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.3);}
+    .status-badge.suspended{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
+    .branch-actions{display:flex;gap:10px;flex-shrink:0;}
+    .btn-action{
+      padding:8px 16px;border-radius:8px;font-family:var(--font-head);font-size:12px;
+      font-weight:600;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px;border:1.5px solid;
+    }
+    .btn-suspend{background:rgba(245,158,11,.08);border-color:#f59e0b;color:#d97706;}
+    .btn-suspend:hover{background:#f59e0b;color:#fff;}
+    .btn-activate{background:rgba(16,185,129,.08);border-color:#10b981;color:#10b981;}
+    .btn-activate:hover{background:#10b981;color:#fff;}
+    .btn-danger{background:rgba(239,68,68,.08);border-color:#ef4444;color:#ef4444;}
+    .btn-danger:hover{background:#ef4444;color:#fff;}
+    .btn-primary{background:#18548e;border-color:#18548e;color:#fff;}
+    .btn-primary:hover{background:#289ee7;border-color:#289ee7;}
+
+    /* Section Panel */
+    .section-panel{background:#fff;border-radius:14px;padding:24px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:20px;}
+    .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .section-title{font-family:var(--font-head);font-size:15px;font-weight:700;color:#0f1923;display:flex;align-items:center;gap:8px;}
+    .count-chip{
+      background:rgba(24,84,142,.1);color:#18548e;padding:3px 10px;
+      border-radius:12px;font-size:11px;font-weight:700;
+    }
+    .count-chip.warn{background:rgba(245,158,11,.12);color:#d97706;}
+
+    /* Employee Cards */
+    .emp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+    .emp-card{
+      border:1.5px solid var(--border);border-radius:12px;padding:18px;
+      transition:border-color .2s,box-shadow .2s;
+    }
+    .emp-card:hover{border-color:#289ee7;box-shadow:0 4px 16px rgba(40,158,231,.1);}
+    .emp-card.suspended{opacity:.65;border-style:dashed;}
+    .emp-card-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+    .emp-avatar{
+      width:44px;height:44px;border-radius:12px;flex-shrink:0;
+      background:linear-gradient(135deg,#18548e,#289ee7);
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;font-family:var(--font-head);font-size:16px;font-weight:700;
+    }
+    .emp-name{font-family:var(--font-head);font-size:14px;font-weight:700;color:#0f1923;}
+    .emp-email{font-size:11px;color:var(--text-sec);margin-top:2px;}
+    .emp-desk-chip{
+      display:inline-block;background:rgba(24,84,142,.08);color:#18548e;
+      padding:3px 9px;border-radius:10px;font-size:11px;font-weight:600;margin-top:6px;
+    }
+    .emp-status-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .emp-actions{display:flex;gap:7px;flex-wrap:wrap;}
+    .btn-sm{
+      padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;
+      cursor:pointer;border:1.5px solid;transition:.2s;
+      display:flex;align-items:center;gap:4px;font-family:var(--font-head);
+    }
+    .btn-sm-view{background:rgba(24,84,142,.08);border-color:#18548e;color:#18548e;}
+    .btn-sm-view:hover{background:#18548e;color:#fff;}
+    .btn-sm-suspend{background:rgba(245,158,11,.08);border-color:#f59e0b;color:#d97706;}
+    .btn-sm-suspend:hover{background:#f59e0b;color:#fff;}
+    .btn-sm-activate{background:rgba(16,185,129,.08);border-color:#10b981;color:#10b981;}
+    .btn-sm-activate:hover{background:#10b981;color:#fff;}
+    .btn-sm-remove{background:rgba(239,68,68,.08);border-color:#ef4444;color:#ef4444;}
+    .btn-sm-remove:hover{background:#ef4444;color:#fff;}
+    .emp-add-card{
+      border:2px dashed #d1dde8;border-radius:12px;padding:18px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:8px;cursor:pointer;transition:.2s;color:#6b8499;min-height:160px;
+    }
+    .emp-add-card:hover{border-color:#289ee7;color:#289ee7;background:rgba(40,158,231,.03);}
+    .emp-add-card.disabled{opacity:.4;cursor:not-allowed;pointer-events:none;}
+    .emp-add-card span{font-size:13px;font-weight:600;}
+
+    /* Cases Table */
+    .cases-table{width:100%;border-collapse:collapse;font-size:13px;}
+    .cases-table th{
+      padding:10px 14px;background:rgba(24,84,142,.06);color:#18548e;
+      font-weight:700;text-align:left;border-bottom:2px solid var(--border);
+      font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+    }
+    .cases-table td{
+      padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text);
+      vertical-align:middle;
+    }
+    .cases-table tr:last-child td{border-bottom:none;}
+    .cases-table tbody tr{cursor:pointer;transition:background .15s;}
+    .cases-table tbody tr:hover td{background:rgba(40,158,231,.04);}
+    .priority-pill{
+      display:inline-block;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;
+    }
+    .p1,.p2{background:rgba(16,185,129,.1);color:#10b981;}
+    .p3{background:rgba(245,158,11,.1);color:#d97706;}
+    .p4,.p5{background:rgba(239,68,68,.1);color:#ef4444;}
+    .status-pill{
+      display:inline-block;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;
+      border:1px solid;
+    }
+    .sp-pending{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:#d97706;}
+    .sp-investigating{background:rgba(24,84,142,.1);border-color:rgba(24,84,142,.3);color:#18548e;}
+    .sp-resolved{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3);color:#10b981;}
+    .empty-state{text-align:center;padding:40px;color:var(--text-sec);}
+    .empty-state i{margin-bottom:12px;opacity:.4;}
+    .empty-state p{font-size:14px;}
+
+    /* Overview */
+    .overview-head{margin-bottom:24px;}
+    .overview-head h2{font-family:var(--font-head);font-size:24px;color:#0f1923;}
+    .overview-head p{font-size:14px;color:var(--text-sec);margin-top:4px;}
+    .branch-list-table{width:100%;border-collapse:collapse;font-size:13px;}
+    .branch-list-table th{
+      padding:10px 14px;background:rgba(24,84,142,.06);color:#18548e;
+      font-weight:700;text-align:left;border-bottom:2px solid var(--border);
+      font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+    }
+    .branch-list-table td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text);}
+    .branch-list-table tbody tr{cursor:pointer;transition:background .15s;}
+    .branch-list-table tbody tr:hover td{background:rgba(40,158,231,.04);}
+
+    /* Modals */
+    .modal-overlay{
+      display:none;position:fixed;inset:0;background:rgba(15,25,35,.55);
+      backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;
+    }
+    .modal-overlay.open{display:flex;}
+    .modal{
+      background:#fff;border-radius:18px;padding:32px;width:500px;max-width:95vw;
+      box-shadow:0 30px 80px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto;
+    }
+    .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+    .modal-head h3{font-family:var(--font-head);font-size:18px;color:#0f1923;}
+    .modal-close{
+      width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);
+      background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-sec);
+    }
+    .modal-close:hover{border-color:#ef4444;color:#ef4444;}
+    .mf-group{margin-bottom:18px;}
+    .mf-group label{display:block;font-size:13px;font-weight:600;color:#2d4a63;margin-bottom:6px;}
+    .mf-group input,.mf-group select,.mf-group textarea{
+      width:100%;padding:11px 14px;border:1.5px solid #d1dde8;border-radius:8px;
+      font-family:var(--font-body);font-size:14px;color:#2d4a63;outline:none;transition:.2s;
+    }
+    .mf-group input:focus,.mf-group select:focus{border-color:#18548e;box-shadow:0 0 0 3px rgba(24,84,142,.1);}
+    .mf-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;}
+    .btn-modal-cancel{
+      padding:10px 20px;border-radius:8px;border:1.5px solid var(--border);
+      background:transparent;color:var(--text-sec);font-family:var(--font-head);font-size:13px;cursor:pointer;
+    }
+    .btn-modal-confirm{
+      padding:10px 20px;border-radius:8px;border:none;
+      background:#18548e;color:#fff;font-family:var(--font-head);font-size:13px;font-weight:600;cursor:pointer;
+      transition:background .2s;
+    }
+    .btn-modal-confirm:hover{background:#289ee7;}
+    .warn-box-modal{
+      background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);
+      border-radius:8px;padding:12px 14px;font-size:12px;color:#92400e;margin-bottom:16px;
+    }
+    .info-box-modal{
+      background:rgba(24,84,142,.06);border:1px solid rgba(24,84,142,.15);
+      border-radius:8px;padding:12px 14px;font-size:12px;color:#1e3a5f;margin-bottom:16px;
+    }
+
+    /* Employee detail modal */
+    .emp-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+    .emp-detail-item label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-sec);display:block;margin-bottom:4px;}
+    .emp-detail-item span{font-size:14px;font-weight:500;color:#0f1923;}
+
+    /* Toast */
+    #toast{
+      position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;
+      font-size:13px;font-weight:600;z-index:2000;display:none;
+      box-shadow:0 8px 24px rgba(0,0,0,.15);animation:slideIn .3s ease;
+    }
+    @keyframes slideIn{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .toast-success{background:#10b981;color:#fff;}
+    .toast-error{background:#ef4444;color:#fff;}
+    .toast-info{background:#18548e;color:#fff;}
+
+    /* Spinner */
+    .spinner{
+      width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);
+      border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;
+    }
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* Confirm overlay */
+    .confirm-overlay{
+      display:none;position:fixed;inset:0;background:rgba(15,25,35,.55);
+      backdrop-filter:blur(4px);z-index:1100;align-items:center;justify-content:center;
+    }
+    .confirm-overlay.open{display:flex;}
+    .confirm-box{
+      background:#fff;border-radius:16px;padding:32px;width:420px;max-width:94vw;
+      box-shadow:0 24px 60px rgba(0,0,0,.2);text-align:center;
+    }
+    .confirm-icon{font-size:40px;margin-bottom:16px;}
+    .confirm-box h3{font-family:var(--font-head);font-size:18px;color:#0f1923;margin-bottom:8px;}
+    .confirm-box p{font-size:13px;color:var(--text-sec);margin-bottom:24px;line-height:1.6;}
+    .confirm-actions{display:flex;gap:10px;justify-content:center;}
+
+    .loading-overlay{
+      position:absolute;inset:0;background:rgba(255,255,255,.7);
+      display:none;align-items:center;justify-content:center;z-index:5;border-radius:14px;
+    }
+
+    /* Scrollbar */
+    .sidebar::-webkit-scrollbar{width:4px;}
+    .sidebar::-webkit-scrollbar-track{background:transparent;}
+    .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px;}
+    .main-panel::-webkit-scrollbar{width:6px;}
+    .main-panel::-webkit-scrollbar-track{background:#e8eff5;}
+    .main-panel::-webkit-scrollbar-thumb{background:#b8cad8;border-radius:3px;}
+
+    /* Setup Banner */
+    .setup-banner{
+      background:linear-gradient(135deg,#18548e,#289ee7);color:#fff;border-radius:12px;
+      padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;
+    }
+    .setup-banner h3{font-family:var(--font-head);font-size:16px;margin-bottom:4px;}
+    .setup-banner p{font-size:12px;opacity:.85;}
+    .btn-setup{
+      padding:9px 20px;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);
+      border-radius:8px;color:#fff;font-family:var(--font-head);font-size:12px;font-weight:600;
+      cursor:pointer;white-space:nowrap;transition:.2s;
+    }
+    .btn-setup:hover{background:rgba(255,255,255,.3);}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- HEADER -->
-        <header class="notranslate">
-            <div class="logo-area" onclick="window.location.href='/'" style="cursor: pointer;">
-                <img src="/frontend/assets/logo.png" alt="CCI Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="logo-icon" style="display:none; align-items:center; justify-content:center; width:40px; height:40px; background: linear-gradient(135deg, #18548e, #289ee7); border-radius:8px; font-size:20px;">ðŸ›¡ï¸</div>
-                <div>
-                    <div class="logo-text">ForenSync</div>
-                    <div class="logo-sub">Cyber Shield Ahmedabad</div>
-                </div>
-            </div>
-            
-            <!-- User Status & Logout -->
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <div id="user-profile-display" style="display: flex; align-items: center; gap: 10px;">
-                    <button id="logout-btn" class="btn-secondary" style="padding: 6px 12px; font-size: 13px; display: none;">
-                        Logout <i data-lucide="log-out" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
-                    </button>
-                </div>
-                
-                <!-- Dynamic Translation Switcher -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <i data-lucide="languages" style="width: 16px; height: 16px; color: var(--neon-cyan);"></i>
-                    <div id="google_translate_element"></div>
-                </div>
-            </div>
-        </header>
 
-        <!-- FEEDBACK ALERT -->
-        <div id="alert-banner" class="alert-feedback"></div>
+<!-- ──────────── LOGIN SCREEN ──────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">&#x1F6E1;&#xFE0F;</div>
+      <div>
+        <div class="login-logo-text">ForenSync</div>
+        <div class="login-logo-sub">Cyber Shield Ahmedabad</div>
+      </div>
+    </div>
+    <h2>Admin Control Center</h2>
+    <p>Super Admin credentials required. Restricted access only.</p>
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="lf-group">
+        <label>Admin Email</label>
+        <input type="email" id="login-email" placeholder="superadmin@forensync.gov.in" required>
+      </div>
+      <div class="lf-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required>
+      </div>
+      <button type="submit" class="btn-login" id="login-btn">
+        Authenticate &nbsp;<i data-lucide="shield-check" style="width:16px;height:16px;"></i>
+      </button>
+    </form>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
 
-        <!-- NAVIGATION TABS -->
-        <div class="tab-container" id="tab-container" style="display: none;">
-            <button class="tab-btn active" id="tab-auth" onclick="switchTab('auth')">
-                <i data-lucide="lock"></i> <span>Authentication</span>
-            </button>
-            <button class="tab-btn" id="tab-admin" onclick="switchTab('admin')" style="display: none;">
-                <i data-lucide="shield-alert"></i> <span>Admin Control Panel</span>
-            </button>
+<!-- ──────────── ADMIN SHELL ──────────── -->
+<div id="admin-shell" style="display:none;display:grid;">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-logo-icon">&#x1F6E1;&#xFE0F;</div>
+      <div>
+        <div class="topbar-title">ForenSync</div>
+        <div class="topbar-sub">Admin Control Center</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-admin">
+        <div class="topbar-avatar" id="admin-avatar">SA</div>
+        <div>
+          <div class="topbar-name" id="admin-name">Super Admin</div>
+          <div style="font-size:11px;color:#6b8499;">super_admin</div>
         </div>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">
+        <i data-lucide="log-out" style="width:13px;height:13px;"></i> Logout
+      </button>
+    </div>
+  </header>
 
-        <!-- 1. LOGIN VIEW -->
-        <div id="view-auth" class="app-view" style="max-width: 440px; margin: 60px auto 0 auto;">
-            <div class="glass-panel" style="border-color: var(--danger);">
-                <h2 style="margin-bottom: 10px; color: var(--danger); display: flex; align-items: center; gap: 10px; justify-content: center;">
-                    <i data-lucide="shield-alert"></i> Admin Portal Sign In
-                </h2>
-                <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 25px;">
-                    Restricted Access. Super-Admin credentials required.
-                </p>
-                
-                <form id="login-form">
-                    <div class="form-group">
-                        <label>Admin Email</label>
-                        <input type="email" id="login-email" class="form-control" placeholder="admin@forensync.gov" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="login-password" class="form-control" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required>
-                    </div>
-                    
-                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px; background: var(--danger); border-color: var(--danger); color: #fff;">
-                        Authenticate Admin <i data-lucide="shield-check"></i>
-                    </button>
-                </form>
-            </div>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="branch-sidebar">
+    <div class="sidebar-head">
+      <div class="sidebar-search">
+        <i data-lucide="search" style="width:14px;height:14px;color:rgba(255,255,255,.4);flex-shrink:0;"></i>
+        <input type="text" id="branch-search" placeholder="Search branches&hellip;" oninput="filterBranches()">
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter('all',this)">All</button>
+        <button class="filter-tab" onclick="setFilter('active',this)">Active</button>
+        <button class="filter-tab" onclick="setFilter('suspended',this)">Suspended</button>
+      </div>
+    </div>
+    <div id="branch-list-container">
+      <div style="padding:20px 16px;text-align:center;color:rgba(255,255,255,.3);font-size:13px;">
+        <div class="spinner" style="border-color:rgba(255,255,255,.15);border-top-color:rgba(255,255,255,.5);margin:0 auto 8px;"></div>
+        Loading branches&hellip;
+      </div>
+    </div>
+    <button class="sidebar-add-btn" onclick="openAddBranchModal()">
+      <i data-lucide="plus-circle" style="width:15px;height:15px;"></i> Add New Branch
+    </button>
+  </aside>
+
+  <!-- Main Panel -->
+  <main class="main-panel" id="main-panel">
+    <!-- Content injected by JS -->
+  </main>
+</div>
+
+<!-- ──────────── MODAL: Add Branch ──────────── -->
+<div class="modal-overlay" id="modal-add-branch">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Add New Cyber Cell Branch</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-branch')">
+        <i data-lucide="x" style="width:15px;height:15px;"></i>
+      </button>
+    </div>
+    <div class="info-box-modal">A new branch will be created with 0 employees. You can add up to 3 employees after creation.</div>
+    <form onsubmit="submitAddBranch(event)">
+      <div class="mf-group">
+        <label>Branch Name</label>
+        <input id="nb-name" placeholder="e.g. Surat Cyber Cell – North" required>
+      </div>
+      <div class="mf-2col">
+        <div class="mf-group">
+          <label>District</label>
+          <select id="nb-district" required>
+            <option value="">Select District</option>
+          </select>
         </div>
-
-        <!-- 2. ADMIN PORTAL VIEW -->
-        <div id="view-admin" class="app-view">
-            
-            <!-- Desk Stats Metrics Summary -->
-            <h3 style="margin-bottom: 15px; color: var(--neon-cyan); display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="server"></i> Case Assignment & Resolution metrics by Department Desk
-            </h3>
-            <div id="admin-desks-summary" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 35px;">
-                <!-- Filled dynamically by renderDeskSummary -->
-            </div>
-
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
-                <!-- LEFT COLUMN: Employees ledger -->
-                <div class="glass-panel">
-                    <h3 style="color: var(--neon-cyan); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                        <i data-lucide="users"></i> Cyber Crime Team Directory
-                    </h3>
-                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">
-                        Manage cyber investigators, assign desks, or suspend credentials dynamically.
-                    </p>
-                    
-                    <div style="overflow-x: auto;">
-                        <table class="foren-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Assigned Desk</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-employees-table-body">
-                                <!-- Populated dynamically by renderAdminEmployees -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- RIGHT COLUMN: Add new Employee -->
-                <div class="glass-panel">
-                    <h3 style="color: var(--neon-cyan); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                        <i data-lucide="user-plus"></i> Create Cyber Branch Account
-                    </h3>
-                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">
-                        Provision official credentials for a new cyber workstation investigator.
-                    </p>
-                    
-                    <form id="admin-add-employee-form">
-                        <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" id="admin-emp-name" class="form-control" placeholder="e.g. Inspector Ramesh Kumar" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Official Email</label>
-                            <input type="email" id="admin-emp-email" class="form-control" placeholder="name@forensync.gov" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Temporary Password</label>
-                            <input type="password" id="admin-emp-pass" class="form-control" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Desk Assignment</label>
-                            <select id="admin-emp-desk" class="form-control" required>
-                                <option value="Financial Fraud Desk">Financial Fraud Desk</option>
-                                <option value="Cyber Social Desk">Cyber Social Desk (Impersonation)</option>
-                                <option value="Cyber Security Desk">Cyber Security Desk (Hacking)</option>
-                                <option value="General Desk">General Desk</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 15px;">
-                            Provision Account <i data-lucide="plus-circle"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-
+        <div class="mf-group">
+          <label>Zone</label>
+          <select id="nb-zone" required>
+            <option value="">Select Zone</option>
+            <option>Central</option><option>East</option><option>West</option>
+            <option>North</option><option>South</option>
+          </select>
         </div>
+      </div>
+      <div class="mf-group">
+        <label>Location / Address</label>
+        <input id="nb-location" placeholder="e.g. Athwa Lines, Surat – 395 001" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-modal-cancel" onclick="closeModal('modal-add-branch')">Cancel</button>
+        <button type="submit" class="btn-modal-confirm" id="nb-submit-btn">Create Branch</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-        <!-- FOOTER -->
-        <footer class="app-footer">
-            <a href="/contact">Contact Us</a>
-            <a href="/privacy-policy">Privacy Policy</a>
-            <span>&copy; Ahmedabad City Police &mdash; Cyber Crime Branch. All rights reserved.</span>
-        </footer>
+<!-- ──────────── MODAL: Add Employee ──────────── -->
+<div class="modal-overlay" id="modal-add-employee">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Add New Employee</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-employee')">
+        <i data-lucide="x" style="width:15px;height:15px;"></i>
+      </button>
+    </div>
+    <div class="info-box-modal" id="add-emp-branch-info"></div>
+    <form onsubmit="submitAddEmployee(event)">
+      <div class="mf-group">
+        <label>Full Name</label>
+        <input id="ne-name" placeholder="e.g. Inspector Ramesh Kumar" required>
+      </div>
+      <div class="mf-group">
+        <label>Official Email</label>
+        <input id="ne-email" type="email" placeholder="ramesh.kumar@forensync.gov.in" required>
+      </div>
+      <div class="mf-2col">
+        <div class="mf-group">
+          <label>Temporary Password</label>
+          <input id="ne-password" type="password" placeholder="Min 8 characters" minlength="8" required>
+        </div>
+        <div class="mf-group">
+          <label>Desk Assignment</label>
+          <select id="ne-desk" required>
+            <option value="">Select Desk</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-modal-cancel" onclick="closeModal('modal-add-employee')">Cancel</button>
+        <button type="submit" class="btn-modal-confirm" id="ne-submit-btn">Create Employee Account</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ──────────── MODAL: Employee Detail ──────────── -->
+<div class="modal-overlay" id="modal-emp-detail">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Employee Details</h3>
+      <button class="modal-close" onclick="closeModal('modal-emp-detail')">
+        <i data-lucide="x" style="width:15px;height:15px;"></i>
+      </button>
+    </div>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div class="emp-avatar" id="ed-avatar" style="margin:0 auto 12px;width:60px;height:60px;font-size:22px;border-radius:16px;"></div>
+      <div style="font-family:var(--font-head);font-size:18px;font-weight:700;color:#0f1923;" id="ed-name"></div>
+      <div style="font-size:12px;color:var(--text-sec);margin-top:4px;" id="ed-email"></div>
+      <div style="margin-top:8px;" id="ed-status-badge"></div>
+    </div>
+    <div class="emp-detail-grid">
+      <div class="emp-detail-item"><label>Branch</label><span id="ed-branch"></span></div>
+      <div class="emp-detail-item"><label>District</label><span id="ed-district"></span></div>
+      <div class="emp-detail-item"><label>Desk</label><span id="ed-desk"></span></div>
+      <div class="emp-detail-item"><label>Role</label><span id="ed-role"></span></div>
+      <div class="emp-detail-item"><label>Account Created</label><span id="ed-created"></span></div>
+      <div class="emp-detail-item"><label>Firebase UID</label><span id="ed-uid" style="font-size:11px;word-break:break-all;"></span></div>
+    </div>
+    <div class="modal-actions" id="ed-actions"></div>
+  </div>
+</div>
+
+<!-- ──────────── CONFIRM DIALOG ──────────── -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirm-icon">⚠️</div>
+    <h3 id="confirm-title">Are you sure?</h3>
+    <p id="confirm-msg">This action cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="btn-modal-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-modal-confirm" id="confirm-ok-btn" style="background:#ef4444;">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────── TOAST ──────────── -->
+<div id="toast"></div>
+
+<script>
+// ────────────────────────────────────────────────
+// 0. FIREBASE INIT
+// ────────────────────────────────────────────────
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ────────────────────────────────────────────────
+// 1. STATE
+// ────────────────────────────────────────────────
+let currentUser   = null;
+let userProfile   = null;
+let allBranches   = [];   // {id, name, district, zone, location, status, employeeCount, employeeUids}
+let selBranchId   = null;
+let selBranchData = null;
+let branchEmployees = [];
+let branchCases     = [];
+let filterStatus  = 'all';
+let confirmCallback = null;
+
+// ────────────────────────────────────────────────
+// 2. AUTH LISTENER
+// ────────────────────────────────────────────────
+auth.onAuthStateChanged(async user => {
+  if (!user) { showLogin(); return; }
+  try {
+    const profileDoc = await db.collection('users').doc(user.uid).get();
+    if (!profileDoc.exists || profileDoc.data().role !== 'super_admin') {
+      await auth.signOut();
+      showLoginError('Access denied. Super Admin account required.');
+      return;
+    }
+    userProfile = profileDoc.data();
+    currentUser = user;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-shell').style.display  = 'grid';
+    const initials = (userProfile.name || 'SA').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    document.getElementById('admin-avatar').textContent = initials;
+    document.getElementById('admin-name').textContent   = userProfile.name || 'Super Admin';
+    lucide.createIcons();
+    await loadBranches();
+    renderOverview();
+  } catch(e) {
+    showLoginError('Error loading profile: ' + e.message);
+    await auth.signOut();
+  }
+});
+
+function showLogin(){
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('admin-shell').style.display  = 'none';
+}
+
+// ────────────────────────────────────────────────
+// 3. LOGIN / LOGOUT
+// ────────────────────────────────────────────────
+async function handleLogin(e){
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  btn.innerHTML = '<span class="spinner"></span>&nbsp;Authenticating&hellip;';
+  btn.disabled = true;
+  const email = document.getElementById('login-email').value;
+  const pass  = document.getElementById('login-password').value;
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(err) {
+    showLoginError(err.message);
+    btn.innerHTML = 'Authenticate &nbsp;<i data-lucide="shield-check" style="width:16px;height:16px;"></i>';
+    btn.disabled = false;
+    lucide.createIcons();
+  }
+}
+
+async function handleLogout(){
+  await auth.signOut();
+  selBranchId = null; selBranchData = null;
+  allBranches = []; branchEmployees = []; branchCases = [];
+}
+
+function showLoginError(msg){
+  const el = document.getElementById('login-err');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+// ────────────────────────────────────────────────
+// 4. BRANCHES — LOAD & RENDER SIDEBAR
+// ────────────────────────────────────────────────
+async function loadBranches(){
+  try {
+    const snap = await db.collection('branches').orderBy('name').get();
+    if (snap.empty) {
+      await seedBranches();
+      return loadBranches();
+    }
+    allBranches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderBranchSidebar();
+  } catch(e) { toast('Failed to load branches: ' + e.message, 'error'); }
+}
+
+async function seedBranches(){
+  toast('Seeding 30 branches for first time setup&hellip;', 'info');
+  const batch = db.batch();
+  CYBER_BRANCHES.forEach(b => {
+    const ref = db.collection('branches').doc(b.id);
+    batch.set(ref, { ...b, status:'active', employeeCount:0, employeeUids:[],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(), createdBy: currentUser.uid });
+  });
+  await batch.commit();
+  toast('30 branches seeded successfully!', 'success');
+}
+
+function renderBranchSidebar(){
+  const q     = document.getElementById('branch-search').value.toLowerCase();
+  const list  = allBranches.filter(b => {
+    if (filterStatus !== 'all' && b.status !== filterStatus) return false;
+    return !q || b.name.toLowerCase().includes(q) || b.district.toLowerCase().includes(q);
+  });
+
+  // Group by zone
+  const groups = {};
+  list.forEach(b => {
+    const g = b.district;
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(b);
+  });
+
+  let html = '';
+  Object.keys(groups).sort().forEach(district => {
+    html += `<div class="sidebar-section-label">${district}</div>`;
+    groups[district].forEach(b => {
+      const ec = b.employeeCount || 0;
+      const isFull = ec >= 3;
+      html += `
+        <div class="branch-item${selBranchId===b.id?' selected':''}" onclick="selectBranch('${b.id}')">
+          <div class="branch-dot ${b.status}"></div>
+          <div class="branch-item-info">
+            <div class="branch-item-name">${b.name.replace('Cyber Cell','CC').replace('Zone','Z').replace('Central','C').replace('East','E').replace('West','W').replace('North','N').replace('South','S')}</div>
+            <div class="branch-item-district">${b.zone} Zone</div>
+          </div>
+          <span class="branch-emp-badge${isFull?' full':''}">${ec}/3</span>
+        </div>`;
+    });
+  });
+
+  if (!html) html = '<div style="padding:20px 16px;text-align:center;color:rgba(255,255,255,.3);font-size:12px;">No branches found</div>';
+  document.getElementById('branch-list-container').innerHTML = html;
+}
+
+function filterBranches(){ renderBranchSidebar(); }
+function setFilter(f, btn){
+  filterStatus = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderBranchSidebar();
+}
+
+// ────────────────────────────────────────────────
+// 5. OVERVIEW
+// ────────────────────────────────────────────────
+function renderOverview(){
+  const totalBranches  = allBranches.length;
+  const activeBranches = allBranches.filter(b=>b.status==='active').length;
+  const totalEmployees = allBranches.reduce((a,b)=>a+(b.employeeCount||0),0);
+
+  const suspendedBranches = allBranches.filter(b=>b.status==='suspended');
+  const recentlyAdded     = [...allBranches].slice(0,8);
+
+  document.getElementById('main-panel').innerHTML = `
+    <div class="overview-head">
+      <h2>Welcome, ${userProfile.name || 'Super Admin'}</h2>
+      <p>Gujarat Police &mdash; Cyber Crime Branch &mdash; Admin Control Center</p>
+    </div>
+    ${FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY' ? `
+    <div class="setup-banner" style="margin-bottom:24px;">
+      <div>
+        <h3>&#x26A0; Firebase Config Not Set</h3>
+        <p>Update <code>frontend/firebase-config.js</code> with your Firebase project credentials to activate all features.</p>
+      </div>
+    </div>` : ''}
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Branches</div>
+        <div class="stat-val">${totalBranches}</div>
+        <div class="stat-sub">Across Gujarat</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Branches</div>
+        <div class="stat-val" style="color:#10b981;">${activeBranches}</div>
+        <div class="stat-sub">${totalBranches - activeBranches} suspended</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Employees</div>
+        <div class="stat-val">${totalEmployees}</div>
+        <div class="stat-sub">Max capacity: ${totalBranches * 3}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Zones Covered</div>
+        <div class="stat-val">5</div>
+        <div class="stat-sub">N · S · E · W · Central</div>
+      </div>
     </div>
 
-    <!-- App Frontend JavaScript -->
-    <script src="/frontend/police/police.js"></script>
+    ${suspendedBranches.length > 0 ? `
+    <div class="section-panel" style="border-left:4px solid #ef4444;">
+      <div class="section-head">
+        <div class="section-title"><i data-lucide="alert-triangle" style="width:16px;height:16px;color:#ef4444;"></i> Suspended Branches</div>
+        <span class="count-chip warn">${suspendedBranches.length}</span>
+      </div>
+      <table class="branch-list-table">
+        <thead><tr><th>Branch</th><th>District</th><th>Employees</th><th>Action</th></tr></thead>
+        <tbody>${suspendedBranches.map(b=>`
+          <tr onclick="selectBranch('${b.id}')">
+            <td><strong>${b.name}</strong></td>
+            <td>${b.district}</td>
+            <td>${b.employeeCount||0}/3</td>
+            <td><span class="status-badge suspended">&#x23F8; Suspended</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>` : ''}
+
+    <div class="section-panel">
+      <div class="section-head">
+        <div class="section-title"><i data-lucide="git-branch" style="width:16px;height:16px;"></i> All Branches</div>
+        <button class="btn-action btn-primary" style="font-size:12px;padding:7px 14px;" onclick="openAddBranchModal()">
+          <i data-lucide="plus" style="width:13px;height:13px;"></i> New Branch
+        </button>
+      </div>
+      <table class="branch-list-table">
+        <thead>
+          <tr><th>Branch Name</th><th>District</th><th>Zone</th><th>Employees</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          ${recentlyAdded.map(b=>`
+            <tr onclick="selectBranch('${b.id}')">
+              <td><strong>${b.name}</strong></td>
+              <td>${b.district}</td>
+              <td>${b.zone}</td>
+              <td>${b.employeeCount||0} / 3</td>
+              <td><span class="status-badge ${b.status}">&#x25CF; ${b.status.charAt(0).toUpperCase()+b.status.slice(1)}</span></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  lucide.createIcons();
+}
+
+// ────────────────────────────────────────────────
+// 6. BRANCH DETAIL
+// ────────────────────────────────────────────────
+async function selectBranch(branchId){
+  selBranchId   = branchId;
+  selBranchData = allBranches.find(b => b.id === branchId);
+  renderBranchSidebar();
+  renderBranchDetail();
+  await Promise.all([ loadBranchEmployees(), loadBranchCases() ]);
+  renderBranchDetail();
+}
+
+async function loadBranchEmployees(){
+  const snap = await db.collection('users').where('branchId','==',selBranchId).get();
+  branchEmployees = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+}
+
+async function loadBranchCases(){
+  try {
+    const token = await currentUser.getIdToken();
+    const res   = await fetch(`/admin/cases?branch_id=${selBranchId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    branchCases = res.ok ? await res.json() : [];
+  } catch { branchCases = []; }
+}
+
+function renderBranchDetail(){
+  const b = selBranchData;
+  if (!b) return;
+  const isSuspended = b.status === 'suspended';
+  const empCount    = branchEmployees.length;
+  const canAddEmp   = empCount < 3 && !isSuspended;
+
+  const empCardsHtml = branchEmployees.map(emp => {
+    const initials = (emp.name||'').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const isSusp = emp.status === 'suspended';
+    return `
+      <div class="emp-card${isSusp?' suspended':''}">
+        <div class="emp-card-top">
+          <div class="emp-avatar">${initials}</div>
+          <div>
+            <div class="emp-name">${emp.name||'Unknown'}</div>
+            <div class="emp-email">${emp.email||''}</div>
+            <div class="emp-desk-chip">${emp.desk||'General Desk'}</div>
+          </div>
+        </div>
+        <div class="emp-status-row">
+          <span class="status-badge ${emp.status||'active'}">&#x25CF; ${(emp.status||'active').charAt(0).toUpperCase()+(emp.status||'active').slice(1)}</span>
+        </div>
+        <div class="emp-actions">
+          <button class="btn-sm btn-sm-view" onclick="viewEmployee('${emp.uid}')">
+            <i data-lucide="eye" style="width:11px;height:11px;"></i> View
+          </button>
+          ${isSusp
+            ? `<button class="btn-sm btn-sm-activate" onclick="setEmpStatus('${emp.uid}',false)"><i data-lucide="play" style="width:11px;height:11px;"></i> Activate</button>`
+            : `<button class="btn-sm btn-sm-suspend" onclick="setEmpStatus('${emp.uid}',true)"><i data-lucide="pause" style="width:11px;height:11px;"></i> Suspend</button>`}
+          <button class="btn-sm btn-sm-remove" onclick="confirmRemoveEmp('${emp.uid}','${(emp.name||'').replace(/'/g,"\\'")}')">
+            <i data-lucide="trash-2" style="width:11px;height:11px;"></i> Remove
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+
+  const casesHtml = branchCases.length === 0
+    ? `<div class="empty-state"><i data-lucide="folder-open" style="width:32px;height:32px;display:block;margin:0 auto;"></i><p>No cases assigned to this branch yet.</p></div>`
+    : `<div style="overflow-x:auto;">
+        <table class="cases-table">
+          <thead><tr><th>Ticket</th><th>Category</th><th>Complainant</th><th>Priority</th><th>Status</th><th>Filed</th></tr></thead>
+          <tbody>
+            ${branchCases.map(c=>`
+              <tr>
+                <td><strong style="font-family:var(--font-head);color:#18548e;">${c.ticket_id}</strong></td>
+                <td>${(c.category||'').replace(/_/g,' ')}</td>
+                <td>${c.citizen_name||'N/A'}</td>
+                <td><span class="priority-pill p${c.priority_score||1}">P${c.priority_score||1}</span></td>
+                <td><span class="status-pill sp-${c.status||'pending'}">${(c.status||'pending').toUpperCase()}</span></td>
+                <td style="font-size:12px;color:var(--text-sec);">${c.created_at ? new Date(c.created_at).toLocaleDateString('en-IN') : 'N/A'}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+
+  document.getElementById('main-panel').innerHTML = `
+    <div class="branch-header">
+      <div class="branch-header-top">
+        <div>
+          <h2>${b.name}</h2>
+          <div class="branch-meta">
+            <div class="branch-meta-item"><i data-lucide="map-pin" style="width:13px;height:13px;"></i>${b.location||''}</div>
+            <div class="branch-meta-item"><i data-lucide="landmark" style="width:13px;height:13px;"></i>${b.district||''} District</div>
+            <div class="branch-meta-item"><i data-lucide="compass" style="width:13px;height:13px;"></i>${b.zone||''} Zone</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;flex-shrink:0;">
+          <span class="status-badge ${b.status}">&#x25CF; ${isSuspended?'Suspended':'Active'}</span>
+        </div>
+      </div>
+      <div class="branch-actions">
+        ${isSuspended
+          ? `<button class="btn-action btn-activate" onclick="setBranchStatus('active')"><i data-lucide="play" style="width:13px;height:13px;"></i> Open Branch</button>`
+          : `<button class="btn-action btn-suspend" onclick="setBranchStatus('suspended')"><i data-lucide="pause" style="width:13px;height:13px;"></i> Suspend Branch</button>`}
+        <button class="btn-action btn-danger" onclick="confirmDeleteBranch()">
+          <i data-lucide="trash-2" style="width:13px;height:13px;"></i> Delete Branch
+        </button>
+      </div>
+    </div>
+
+    <div class="section-panel">
+      <div class="section-head">
+        <div class="section-title">
+          <i data-lucide="users" style="width:16px;height:16px;"></i> Employees
+          <span class="count-chip${empCount>=3?' full':''}">${empCount} / 3</span>
+        </div>
+        ${isSuspended ? `<span style="font-size:12px;color:#ef4444;">Branch suspended — employee management disabled</span>` : ''}
+      </div>
+      <div class="emp-grid">
+        ${empCardsHtml}
+        <div class="emp-add-card${canAddEmp?'':' disabled'}" onclick="${canAddEmp?'openAddEmpModal()':'void(0)'}">
+          <i data-lucide="user-plus" style="width:28px;height:28px;"></i>
+          <span>${empCount>=3?'Branch Full (Max 3 Employees)':isSuspended?'Branch Suspended':'Add Employee'}</span>
+          ${empCount<3 && !isSuspended ? `<span style="font-size:11px;color:#9bb5c8;">${3-empCount} slot(s) available</span>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="section-panel">
+      <div class="section-head">
+        <div class="section-title">
+          <i data-lucide="folder" style="width:16px;height:16px;"></i> Cases Assigned to This Branch
+          <span class="count-chip">${branchCases.length}</span>
+        </div>
+      </div>
+      ${casesHtml}
+    </div>`;
+  lucide.createIcons();
+}
+
+// ────────────────────────────────────────────────
+// 7. BRANCH ACTIONS
+// ────────────────────────────────────────────────
+async function setBranchStatus(status){
+  const verb = status === 'suspended' ? 'suspend' : 'reactivate';
+  showConfirm(
+    status==='suspended'?'⏸':'▶️',
+    `${status==='suspended'?'Suspend':'Reactivate'} Branch?`,
+    `This will ${verb} "${selBranchData.name}". ${status==='suspended'?'All employees will be unable to log in.':''}`,
+    async () => {
+      try {
+        await db.collection('branches').doc(selBranchId).update({ status });
+        selBranchData.status = status;
+        allBranches = allBranches.map(b => b.id===selBranchId ? {...b,status} : b);
+        renderBranchDetail();
+        renderBranchSidebar();
+        toast(`Branch ${status==='suspended'?'suspended':'reactivated'} successfully`, 'success');
+      } catch(e){ toast('Error: ' + e.message, 'error'); }
+    }
+  );
+}
+
+function confirmDeleteBranch(){
+  if ((selBranchData.employeeCount||0) > 0){
+    toast('Remove all employees before deleting the branch.', 'error'); return;
+  }
+  showConfirm('🗑️','Delete Branch?',`Permanently delete "${selBranchData.name}"? This cannot be undone.`, async () => {
+    try {
+      await db.collection('branches').doc(selBranchId).delete();
+      allBranches = allBranches.filter(b => b.id !== selBranchId);
+      selBranchId = null; selBranchData = null; branchEmployees = []; branchCases = [];
+      renderBranchSidebar();
+      renderOverview();
+      toast('Branch deleted successfully', 'success');
+    } catch(e){ toast('Error: ' + e.message, 'error'); }
+  });
+}
+
+// ────────────────────────────────────────────────
+// 8. EMPLOYEE ACTIONS
+// ────────────────────────────────────────────────
+async function setEmpStatus(uid, disabled){
+  const emp = branchEmployees.find(e=>e.uid===uid);
+  showConfirm(
+    disabled?'⏸':'▶️',
+    `${disabled?'Suspend':'Reactivate'} Employee?`,
+    `${disabled?'Suspend':'Reactivate'} ${emp?.name||'this employee'}?`,
+    async () => {
+      try {
+        const token = await currentUser.getIdToken();
+        const res = await fetch(`/admin/employees/${uid}/status`, {
+          method: 'PATCH',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ disabled })
+        });
+        if (!res.ok) throw new Error((await res.json()).detail);
+        await db.collection('users').doc(uid).update({ status: disabled?'suspended':'active' });
+        await loadBranchEmployees();
+        renderBranchDetail();
+        toast(`Employee ${disabled?'suspended':'reactivated'}`, 'success');
+      } catch(e){ toast('Error: ' + e.message, 'error'); }
+    }
+  );
+}
+
+function confirmRemoveEmp(uid, name){
+  showConfirm('🗑️','Remove Employee?',`Permanently delete ${name}'s account from this branch?`, async () => {
+    try {
+      const token = await currentUser.getIdToken();
+      const res = await fetch(`/admin/employees/${uid}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error((await res.json()).detail);
+      await db.collection('users').doc(uid).delete();
+      await db.collection('branches').doc(selBranchId).update({
+        employeeCount: firebase.firestore.FieldValue.increment(-1),
+        employeeUids:  firebase.firestore.FieldValue.arrayRemove(uid)
+      });
+      selBranchData.employeeCount = Math.max(0,(selBranchData.employeeCount||1)-1);
+      allBranches = allBranches.map(b=>b.id===selBranchId?{...b,employeeCount:selBranchData.employeeCount}:b);
+      await loadBranchEmployees();
+      renderBranchDetail();
+      renderBranchSidebar();
+      toast('Employee removed successfully', 'success');
+    } catch(e){ toast('Error: ' + e.message, 'error'); }
+  });
+}
+
+function viewEmployee(uid){
+  const emp = branchEmployees.find(e=>e.uid===uid);
+  if (!emp) return;
+  const initials = (emp.name||'').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('ed-avatar').textContent = initials;
+  document.getElementById('ed-name').textContent   = emp.name||'';
+  document.getElementById('ed-email').textContent  = emp.email||'';
+  document.getElementById('ed-branch').textContent = emp.branchName||selBranchData?.name||'';
+  document.getElementById('ed-district').textContent = selBranchData?.district||'';
+  document.getElementById('ed-desk').textContent   = emp.desk||'General Desk';
+  document.getElementById('ed-role').textContent   = emp.role||'employee';
+  document.getElementById('ed-created').textContent = emp.createdAt?.toDate ? emp.createdAt.toDate().toLocaleDateString('en-IN') : 'N/A';
+  document.getElementById('ed-uid').textContent    = emp.uid;
+  document.getElementById('ed-status-badge').innerHTML = `<span class="status-badge ${emp.status||'active'}">&#x25CF; ${(emp.status||'active').toUpperCase()}</span>`;
+  document.getElementById('ed-actions').innerHTML = `
+    ${emp.status==='suspended'
+      ? `<button class="btn-action btn-activate" onclick="setEmpStatus('${emp.uid}',false);closeModal('modal-emp-detail')"><i data-lucide="play" style="width:13px;height:13px;"></i> Reactivate</button>`
+      : `<button class="btn-action btn-suspend" onclick="setEmpStatus('${emp.uid}',true);closeModal('modal-emp-detail')"><i data-lucide="pause" style="width:13px;height:13px;"></i> Suspend</button>`}
+    <button class="btn-action btn-danger" onclick="confirmRemoveEmp('${emp.uid}','${(emp.name||'').replace(/'/g,"\\'")}');closeModal('modal-emp-detail')">
+      <i data-lucide="trash-2" style="width:13px;height:13px;"></i> Remove
+    </button>`;
+  document.getElementById('modal-emp-detail').classList.add('open');
+  lucide.createIcons();
+}
+
+// ────────────────────────────────────────────────
+// 9. ADD BRANCH MODAL
+// ────────────────────────────────────────────────
+function openAddBranchModal(){
+  const sel = document.getElementById('nb-district');
+  sel.innerHTML = '<option value="">Select District</option>' +
+    GUJARAT_DISTRICTS.map(d=>`<option>${d}</option>`).join('');
+  document.getElementById('modal-add-branch').classList.add('open');
+}
+
+async function submitAddBranch(e){
+  e.preventDefault();
+  const btn = document.getElementById('nb-submit-btn');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  const name     = document.getElementById('nb-name').value.trim();
+  const district = document.getElementById('nb-district').value;
+  const zone     = document.getElementById('nb-zone').value;
+  const location = document.getElementById('nb-location').value.trim();
+  const id       = 'br_' + name.toLowerCase().replace(/[^a-z0-9]+/g,'_').substring(0,30) + '_' + Date.now().toString(36);
+  try {
+    await db.collection('branches').doc(id).set({
+      id, name, district, zone, location, status:'active', employeeCount:0, employeeUids:[],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(), createdBy: currentUser.uid
+    });
+    allBranches.push({ id, name, district, zone, location, status:'active', employeeCount:0, employeeUids:[] });
+    allBranches.sort((a,b)=>a.name.localeCompare(b.name));
+    closeModal('modal-add-branch');
+    e.target.reset();
+    renderBranchSidebar();
+    renderOverview();
+    toast('Branch created successfully!', 'success');
+  } catch(err){ toast('Error: ' + err.message, 'error'); }
+  btn.disabled = false; btn.textContent = 'Create Branch';
+}
+
+// ────────────────────────────────────────────────
+// 10. ADD EMPLOYEE MODAL
+// ────────────────────────────────────────────────
+function openAddEmpModal(){
+  if (!selBranchData) return;
+  document.getElementById('add-emp-branch-info').innerHTML =
+    `Adding employee to <strong>${selBranchData.name}</strong> (${branchEmployees.length}/3 slots used).`;
+  const deskSel = document.getElementById('ne-desk');
+  deskSel.innerHTML = '<option value="">Select Desk</option>' +
+    DESK_OPTIONS.map(d=>`<option>${d}</option>`).join('');
+  document.getElementById('modal-add-employee').classList.add('open');
+}
+
+async function submitAddEmployee(e){
+  e.preventDefault();
+  const btn = document.getElementById('ne-submit-btn');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  const name     = document.getElementById('ne-name').value.trim();
+  const email    = document.getElementById('ne-email').value.trim();
+  const password = document.getElementById('ne-password').value;
+  const desk     = document.getElementById('ne-desk').value;
+  try {
+    const token = await currentUser.getIdToken();
+    const res = await fetch('/admin/employees', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, desk, branchId: selBranchId, branchName: selBranchData.name })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Failed to create employee');
+    // Firestore doc created by backend; update branch count locally
+    selBranchData.employeeCount = (selBranchData.employeeCount||0) + 1;
+    allBranches = allBranches.map(b => b.id===selBranchId ? {...b, employeeCount: selBranchData.employeeCount} : b);
+    await loadBranchEmployees();
+    closeModal('modal-add-employee');
+    e.target.reset();
+    renderBranchDetail();
+    renderBranchSidebar();
+    toast(`Employee ${name} created successfully!`, 'success');
+  } catch(err){ toast('Error: ' + err.message, 'error'); }
+  btn.disabled = false; btn.textContent = 'Create Employee Account';
+}
+
+// ────────────────────────────────────────────────
+// 11. HELPERS
+// ────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); lucide.createIcons(); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openAddBranchModal(){ openAddBranchModal(); }
+
+function showConfirm(icon, title, msg, cb){
+  document.getElementById('confirm-icon').textContent  = icon;
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent   = msg;
+  confirmCallback = cb;
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+function closeConfirm(){ document.getElementById('confirm-overlay').classList.remove('open'); confirmCallback = null; }
+document.getElementById('confirm-ok-btn').addEventListener('click', () => {
+  closeConfirm();
+  if (confirmCallback) { confirmCallback(); confirmCallback = null; }
+});
+
+function toast(msg, type='info'){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast-${type}`;
+  el.style.display = 'block';
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => { el.style.display = 'none'; }, 3800);
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+
+// Init icons
+lucide.createIcons();
+</script>
 </body>
 </html>
-

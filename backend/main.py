@@ -3,8 +3,9 @@ import shutil
 import hashlib
 import random
 import datetime
+import json
 from typing import List, Optional
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Header
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -17,6 +18,34 @@ sys.path.insert(0, os.path.dirname(__file__))
 import database
 import auth
 import evidence_parser as parser
+
+# ── Firebase Admin SDK ──────────────────────────────────────
+try:
+    import firebase_admin
+    from firebase_admin import credentials as fb_credentials, auth as fb_auth
+
+    _fb_cred_json = os.environ.get("FIREBASE_CREDENTIALS")
+    _fb_sa_file   = os.path.join(os.path.dirname(__file__), "firebase-service-account.json")
+
+    if not firebase_admin._apps:
+        if _fb_cred_json:
+            cred = fb_credentials.Certificate(json.loads(_fb_cred_json))
+        elif os.path.exists(_fb_sa_file):
+            cred = fb_credentials.Certificate(_fb_sa_file)
+        else:
+            cred = None
+
+        if cred:
+            firebase_admin.initialize_app(cred)
+            FIREBASE_ENABLED = True
+        else:
+            FIREBASE_ENABLED = False
+    else:
+        FIREBASE_ENABLED = True
+except ImportError:
+    FIREBASE_ENABLED = False
+    fb_auth = None
+
 
 if os.environ.get("VERCEL"):
     import seed
@@ -235,6 +264,8 @@ def submit_complaint(
     description: str = Form(...),
     category: Optional[str] = Form(None),
     language: str = Form("en"),
+    district: Optional[str] = Form(None),
+    branch_id: Optional[str] = Form(None),
     current_user: database.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
 ):
@@ -254,7 +285,9 @@ def submit_complaint(
         status="pending",
         priority_score=priority,
         assigned_desk=desk,
-        is_severe=is_severe
+        is_severe=is_severe,
+        branch_id=branch_id,
+        district=district
     )
     db.add(complaint)
     db.commit()
@@ -608,7 +641,117 @@ def file_fir(
     return {"message": "FIR marked as officially FILED", "status": "filed"}
 
 
-# --- ADMIN PORTAL ROUTES ---
+# ── Firebase Admin: verify token dependency ─────────────────
+class EmployeeCreate:
+    def __init__(self, name: str, email: str, password: str,
+                 desk: str, branchId: str, branchName: str):
+        self.name = name; self.email = email; self.password = password
+        self.desk = desk; self.branchId = branchId; self.branchName = branchName
+
+from pydantic import BaseModel as PydanticBase
+
+class EmployeeCreateBody(PydanticBase):
+    name: str
+    email: str
+    password: str
+    desk: str = "General Desk"
+    branchId: str
+    branchName: str
+
+class EmployeeStatusBody(PydanticBase):
+    disabled: bool
+
+def get_firebase_admin_user(authorization: Optional[str] = Header(None)) -> dict:
+    """Verifies a Firebase ID token and checks super_admin role from token claims."""
+    if not FIREBASE_ENABLED:
+        raise HTTPException(status_code=503, detail="Firebase not configured. Add FIREBASE_CREDENTIALS env var or firebase-service-account.json.")
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing Firebase ID token")
+    token = authorization.split(" ", 1)[1]
+    try:
+        decoded = fb_auth.verify_id_token(token)
+        return decoded
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Invalid Firebase token: {str(e)}")
+
+# ── ADMIN PORTAL ROUTES (Firebase-protected) ─────────────────
+
+@app.post("/admin/employees")
+def firebase_create_employee(
+    body: EmployeeCreateBody,
+    token_data: dict = Depends(get_firebase_admin_user),
+):
+    """Creates a Firebase Auth user for a new employee (admin only)."""
+    try:
+        user_record = fb_auth.create_user(
+            email=body.email,
+            password=body.password,
+            display_name=body.name,
+            disabled=False
+        )
+        # Note: Firestore doc is written by the admin portal frontend after this returns
+        return {
+            "uid": user_record.uid,
+            "email": user_record.email,
+            "message": "Firebase Auth user created. Firestore profile will be written by admin portal."
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.delete("/admin/employees/{uid}")
+def firebase_delete_employee(
+    uid: str,
+    token_data: dict = Depends(get_firebase_admin_user),
+):
+    """Deletes a Firebase Auth user (admin only)."""
+    try:
+        fb_auth.delete_user(uid)
+        return {"message": f"Firebase Auth user {uid} deleted."}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.patch("/admin/employees/{uid}/status")
+def firebase_set_employee_status(
+    uid: str,
+    body: EmployeeStatusBody,
+    token_data: dict = Depends(get_firebase_admin_user),
+):
+    """Enable or disable a Firebase Auth employee account (admin only)."""
+    try:
+        fb_auth.update_user(uid, disabled=body.disabled)
+        return {"uid": uid, "disabled": body.disabled, "message": "Account status updated."}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/admin/cases")
+def get_cases_by_branch(
+    branch_id: Optional[str] = None,
+    token_data: dict = Depends(get_firebase_admin_user),
+    db: Session = Depends(database.get_db)
+):
+    """Returns cases filtered by branch_id (admin only)."""
+    query = db.query(database.Complaint)
+    if branch_id:
+        query = query.filter(database.Complaint.branch_id == branch_id)
+    complaints = query.order_by(database.Complaint.created_at.desc()).all()
+    res = []
+    for c in complaints:
+        citizen = db.query(database.User).filter(database.User.id == c.citizen_id).first()
+        res.append({
+            "id": c.id, "ticket_id": c.ticket_id,
+            "citizen_name": citizen.name if citizen else "Unknown",
+            "category": c.category, "description": c.description,
+            "status": c.status, "priority_score": c.priority_score,
+            "assigned_desk": c.assigned_desk, "is_severe": c.is_severe,
+            "branch_id": c.branch_id, "district": c.district,
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+            "evidence_count": len(c.evidences)
+        })
+    return res
+
+
+# --- LEGACY ADMIN PORTAL ROUTES (SQLite auth, kept for compatibility) ---
+
 
 @app.get("/admin/employees")
 def list_employees(

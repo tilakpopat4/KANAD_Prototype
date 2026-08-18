@@ -6,6 +6,11 @@
     <title>ForenSync - Employee Workstation</title>
     <!-- CSS Stylesheet -->
     <link rel="stylesheet" href="/frontend/style.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="/frontend/firebase-config.js"></script>
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js CDN -->
@@ -26,6 +31,11 @@
             
             <!-- User Status & Logout -->
             <div style="display: flex; align-items: center; gap: 20px;">
+                <!-- Branch Info (shown after login) -->
+                <div id="branch-badge" style="display:none; background:rgba(40,158,231,.12); border:1px solid rgba(40,158,231,.3); border-radius:8px; padding:5px 12px; font-size:12px; font-weight:600; color:var(--neon-cyan);">
+                    <i data-lucide="git-branch" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i>
+                    <span id="branch-badge-text">Branch</span>
+                </div>
                 <div id="user-profile-display" style="display: flex; align-items: center; gap: 10px;">
                     <button id="logout-btn" class="btn-secondary" style="padding: 6px 12px; font-size: 13px; display: none;">
                         Logout <i data-lucide="log-out" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
@@ -327,6 +337,121 @@
         </div>
     </div>
 
+    <!-- Firebase Auth Integration for Employee Portal -->
+    <script>
+    (function() {
+      firebase.initializeApp(FIREBASE_CONFIG);
+      const fbAuth = firebase.auth();
+      const fbDb   = firebase.firestore();
+
+      let empProfile = null; // Firestore user profile
+      let fbToken    = null; // Firebase ID token (for API calls)
+
+      // ── Auth State Listener ──────────────────────────────────
+      fbAuth.onAuthStateChanged(async user => {
+        if (!user) {
+          // Not logged in – show login form, reset state
+          if (typeof window._fbAuthReady !== 'undefined') {
+            document.getElementById('view-auth').style.display = 'block';
+            document.getElementById('view-investigator').style.display = 'none';
+            document.getElementById('logout-btn').style.display = 'none';
+            document.getElementById('branch-badge').style.display = 'none';
+          }
+          window._fbAuthReady = true;
+          return;
+        }
+        try {
+          fbToken = await user.getIdToken();
+          // Load profile from Firestore
+          const profileDoc = await fbDb.collection('users').doc(user.uid).get();
+          if (!profileDoc.exists) {
+            showFbAlert('Your account profile was not found. Contact your administrator.', 'error');
+            await fbAuth.signOut(); return;
+          }
+          empProfile = profileDoc.data();
+          // Check role
+          if (empProfile.role !== 'employee' && empProfile.role !== 'super_admin') {
+            showFbAlert('This portal is for police personnel only.', 'error');
+            await fbAuth.signOut(); return;
+          }
+          // Check if suspended
+          if (empProfile.status === 'suspended') {
+            showFbAlert('Your account has been suspended. Contact the admin.', 'error');
+            await fbAuth.signOut(); return;
+          }
+
+          // Show workstation; store token globally for police.js
+          window.FIREBASE_TOKEN  = fbToken;
+          window.EMP_BRANCH_ID   = empProfile.branchId || null;
+          window.EMP_PROFILE     = empProfile;
+
+          // Update branch badge
+          const badge = document.getElementById('branch-badge');
+          badge.style.display = 'inline-flex';
+          document.getElementById('branch-badge-text').textContent = empProfile.branchName || 'My Branch';
+
+          document.getElementById('logout-btn').style.display = 'inline-block';
+
+          // Trigger the existing police.js login success handler
+          if (typeof window._onFirebaseLogin === 'function') {
+            window._onFirebaseLogin(empProfile.branchId);
+          } else {
+            // Fallback: show view manually
+            document.getElementById('view-auth').style.display = 'none';
+            document.getElementById('view-investigator').style.display = 'block';
+            if (typeof loadCases === 'function') loadCases();
+          }
+        } catch(e) {
+          showFbAlert('Login error: ' + e.message, 'error');
+          await fbAuth.signOut();
+        }
+        window._fbAuthReady = true;
+      });
+
+      // ── Login Form Handler ───────────────────────────────────
+      document.getElementById('login-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email    = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        const btn      = this.querySelector('button[type=submit]');
+        btn.disabled = true;
+        btn.innerHTML = 'Authenticating&hellip;';
+        try {
+          await fbAuth.signInWithEmailAndPassword(email, password);
+          // onAuthStateChanged handles everything else
+        } catch(err) {
+          showFbAlert(err.message, 'error');
+          btn.disabled = false;
+          btn.innerHTML = 'Secure Login <i data-lucide="key"></i>';
+          lucide.createIcons();
+        }
+      });
+
+      // ── Logout ───────────────────────────────────────────────
+      document.getElementById('logout-btn').addEventListener('click', async () => {
+        await fbAuth.signOut();
+        window.FIREBASE_TOKEN = null;
+        window.EMP_BRANCH_ID  = null;
+        window.EMP_PROFILE    = null;
+        location.reload();
+      });
+
+      // Token refresh every 55 min
+      setInterval(async () => {
+        const user = fbAuth.currentUser;
+        if (user) { window.FIREBASE_TOKEN = await user.getIdToken(true); }
+      }, 55 * 60 * 1000);
+
+      function showFbAlert(msg, type) {
+        const el = document.getElementById('alert-banner');
+        if (!el) return;
+        el.textContent = msg;
+        el.className   = 'alert-feedback ' + (type === 'error' ? 'alert-error' : 'alert-success');
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 5000);
+      }
+    })();
+    </script>
     <!-- App Frontend JavaScript -->
     <script src="/frontend/police/police.js"></script>
 </body>

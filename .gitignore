@@ -26,6 +26,10 @@ backend/uploads/
 .env
 *.env
 
+# Firebase service account private key — NEVER commit this!
+backend/firebase-service-account.json
+firebase-service-account.json
+
 # pytest cache
 .pytest_cache/
 .cache/

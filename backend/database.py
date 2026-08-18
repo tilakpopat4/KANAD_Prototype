@@ -36,6 +36,8 @@ class Complaint(Base):
     priority_score = Column(Integer, default=1)  # 1 to 5
     assigned_desk = Column(String, default="General Desk")
     is_severe = Column(Integer, default=0) # 0 = routine, 1 = severe
+    branch_id = Column(String, nullable=True)  # Firebase Firestore branch ID
+    district = Column(String, nullable=True)   # Gujarat district name
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     citizen = relationship("User", back_populates="complaints", foreign_keys=[citizen_id])

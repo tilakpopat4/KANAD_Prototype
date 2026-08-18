@@ -867,7 +867,11 @@ async function selectBranch(branchId){
 }
 
 async function loadBranchEmployees(){
-  const snap = await db.collection('users').where('branchId','==',selBranchId).get();
+  // Force server fetch (bypass Firestore cache) so deletions are immediately reflected
+  const snap = await db.collection('users')
+    .where('branchId', '==', selBranchId)
+    .where('role', '==', 'employee')
+    .get({ source: 'server' });
   branchEmployees = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
 }
 
@@ -1059,28 +1063,55 @@ async function setEmpStatus(uid, disabled){
 
 function confirmRemoveEmp(uid, name){
   showConfirm('🗑️','Remove Employee?',`Permanently delete ${name}'s account from this branch?`, async () => {
+    // 1. Optimistically remove from UI immediately so user sees instant feedback
+    const originalEmployees = [...branchEmployees];
+    branchEmployees = branchEmployees.filter(e => e.uid !== uid);
+    renderBranchDetail();
+
     try {
       const token = await currentUser.getIdToken();
+
+      // 2. Delete from Firebase Auth (backend)
       const res = await fetch(`/admin/employees/${uid}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!res.ok) throw new Error((await res.json()).detail);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.detail || 'Failed to delete from Firebase Auth');
+      }
+
+      // 3. Delete Firestore user document
       await db.collection('users').doc(uid).delete();
+
+      // 4. Update branch document in Firestore
       await db.collection('branches').doc(selBranchId).update({
         employeeCount: firebase.firestore.FieldValue.increment(-1),
         employeeUids:  firebase.firestore.FieldValue.arrayRemove(uid)
       });
-      selBranchData.employeeCount = Math.max(0,(selBranchData.employeeCount||1)-1);
+
+      // 5. Update local branch state
+      selBranchData.employeeCount = Math.max(0, (selBranchData.employeeCount || 1) - 1);
       if (selBranchData.employeeUids) {
         selBranchData.employeeUids = selBranchData.employeeUids.filter(id => id !== uid);
       }
-      allBranches = allBranches.map(b => b.id===selBranchId ? {...b, employeeCount: selBranchData.employeeCount, employeeUids: selBranchData.employeeUids} : b);
+      allBranches = allBranches.map(b => b.id === selBranchId
+        ? {...b, employeeCount: selBranchData.employeeCount, employeeUids: selBranchData.employeeUids}
+        : b
+      );
+
+      // 6. Re-fetch from Firestore to confirm sync (branchEmployees already updated optimistically)
       await loadBranchEmployees();
       renderBranchDetail();
       renderBranchSidebar();
       toast('Employee removed successfully', 'success');
-    } catch(e){ toast('Error: ' + e.message, 'error'); }
+
+    } catch(e) {
+      // Rollback optimistic UI update on error
+      branchEmployees = originalEmployees;
+      renderBranchDetail();
+      toast('Error removing employee: ' + e.message, 'error');
+    }
   });
 }
 

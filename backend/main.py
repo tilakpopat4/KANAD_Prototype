@@ -20,6 +20,8 @@ import auth
 import evidence_parser as parser
 
 # ── Firebase Admin SDK ──────────────────────────────────────
+fb_auth = None
+FIREBASE_ENABLED = False
 try:
     import firebase_admin
     from firebase_admin import credentials as fb_credentials, auth as fb_auth
@@ -34,17 +36,21 @@ try:
             cred = fb_credentials.Certificate(_fb_sa_file)
         else:
             cred = None
+            print("[Firebase] WARNING: No credentials found — set FIREBASE_CREDENTIALS env var or add firebase-service-account.json next to main.py")
 
         if cred:
             firebase_admin.initialize_app(cred)
             FIREBASE_ENABLED = True
+            print("[Firebase] Initialized successfully")
         else:
             FIREBASE_ENABLED = False
     else:
         FIREBASE_ENABLED = True
-except ImportError:
+        print("[Firebase] Already initialized")
+except Exception as _fb_init_error:
     FIREBASE_ENABLED = False
     fb_auth = None
+    print(f"[Firebase] Failed to initialize: {_fb_init_error}")
 
 
 if os.environ.get("VERCEL"):

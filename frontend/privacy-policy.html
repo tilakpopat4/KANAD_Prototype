@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — Ahmedabad Cyber Crime Portal (ForenSync)</title>
+    <meta name="description" content="Official Privacy Policy for the Ahmedabad Cyber Crime Branch's ForenSync Cyber Portal. Learn how we collect, use, and protect citizen data under Indian law.">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="/frontend/style.css">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .policy-hero {
+            background: linear-gradient(135deg, #18548e 0%, #1a6db5 60%, #289ee7 100%);
+            border-radius: 16px;
+            padding: 48px 40px 40px;
+            margin-bottom: 36px;
+            position: relative;
+            overflow: hidden;
+            color: #fff;
+        }
+        .policy-hero::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 260px; height: 260px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+        .policy-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -40px;
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+        }
+        .policy-hero h1 { color: #fff; font-size: 30px; margin-bottom: 10px; position: relative; z-index: 1; }
+        .policy-hero p  { color: rgba(255,255,255,0.82); font-size: 14px; position: relative; z-index: 1; max-width: 700px; }
+        .policy-meta-row { display: flex; gap: 30px; flex-wrap: wrap; margin-top: 24px; position: relative; z-index: 1; }
+        .policy-meta-item {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px; padding: 8px 16px; font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 600;
+        }
+        .policy-layout { display: grid; grid-template-columns: 260px 1fr; gap: 30px; align-items: start; }
+        .policy-toc { position: sticky; top: 20px; }
+        .policy-toc-title {
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;
+            color: var(--text-secondary); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color);
+        }
+        .policy-toc a {
+            display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 6px;
+            font-size: 13px; color: var(--text-secondary); text-decoration: none; transition: all 0.2s;
+            margin-bottom: 2px; border: 1px solid transparent;
+        }
+        .policy-toc a:hover { color: var(--neon-cyan); background: rgba(24,84,142,0.06); border-color: rgba(24,84,142,0.1); }
+        .policy-toc a.active { color: #18548e; background: rgba(24,84,142,0.08); border-color: rgba(24,84,142,0.15); font-weight: 600; }
+        .policy-toc a .toc-num {
+            width: 20px; height: 20px; border-radius: 4px; background: rgba(24,84,142,0.1);
+            display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #18548e; flex-shrink: 0;
+        }
+        .policy-section { scroll-margin-top: 20px; margin-bottom: 36px; }
+        .policy-section-header {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+            padding-bottom: 14px; border-bottom: 2px solid rgba(24,84,142,0.1);
+        }
+        .policy-section-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: linear-gradient(135deg, rgba(24,84,142,0.12), rgba(40,158,231,0.12));
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #18548e;
+        }
+        .policy-section h2 { font-size: 18px; color: #18548e; margin: 0; }
+        .policy-section p  { font-size: 14px; color: var(--text-primary); line-height: 1.8; margin-bottom: 14px; }
+        .policy-section ul, .policy-section ol { padding-left: 20px; font-size: 14px; color: var(--text-primary); line-height: 1.9; margin-bottom: 14px; }
+        .policy-section ul li, .policy-section ol li { margin-bottom: 6px; }
+        .policy-section strong { color: #18548e; }
+        .info-box {
+            background: rgba(24,84,142,0.05); border: 1px solid rgba(24,84,142,0.15);
+            border-left: 4px solid #18548e; border-radius: 8px; padding: 14px 18px;
+            margin-bottom: 16px; font-size: 13px; color: var(--text-primary); line-height: 1.7;
+        }
+        .warn-box {
+            background: rgba(157,112,90,0.06); border: 1px solid rgba(157,112,90,0.25);
+            border-left: 4px solid #9d705a; border-radius: 8px; padding: 14px 18px;
+            margin-bottom: 16px; font-size: 13px; color: var(--text-primary); line-height: 1.7;
+        }
+        .success-box {
+            background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2);
+            border-left: 4px solid #10b981; border-radius: 8px; padding: 14px 18px;
+            margin-bottom: 16px; font-size: 13px; color: var(--text-primary); line-height: 1.7;
+        }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 18px; }
+        .data-table th {
+            background: rgba(24,84,142,0.08); color: #18548e; font-weight: 700; padding: 10px 14px;
+            text-align: left; border-bottom: 2px solid rgba(24,84,142,0.15);
+            font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); line-height: 1.6; }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background: rgba(24,84,142,0.02); }
+        .contact-card { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 16px; }
+        .contact-item { display: flex; align-items: flex-start; gap: 12px; padding: 16px; background: rgba(24,84,142,0.04); border: 1px solid rgba(24,84,142,0.12); border-radius: 10px; }
+        .contact-item-icon { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #18548e, #289ee7); display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
+        .contact-item-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); margin-bottom: 3px; }
+        .contact-item-val { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+        .contact-item-val a { color: #18548e; text-decoration: none; }
+        .contact-item-val a:hover { text-decoration: underline; }
+        .legal-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(24,84,142,0.08); border: 1px solid rgba(24,84,142,0.15);
+            border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; color: #18548e; margin: 2px 3px;
+        }
+        @media (max-width: 900px) {
+            .policy-layout { grid-template-columns: 1fr; }
+            .policy-toc { position: static; display: flex; flex-wrap: wrap; gap: 6px; padding: 16px; margin-bottom: 16px; }
+            .policy-toc a { font-size: 12px; padding: 6px 10px; }
+        }
+        @media (max-width: 600px) {
+            .policy-hero { padding: 28px 20px; }
+            .policy-hero h1 { font-size: 22px; }
+            .policy-meta-row { gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="notranslate">
+            <div class="logo-area" onclick="window.location.href='/'" style="cursor: pointer;">
+                <img src="/frontend/assets/logo.png" alt="CCI Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="logo-icon" style="display:none; align-items:center; justify-content:center; width:40px; height:40px; background: linear-gradient(135deg, #18548e, #289ee7); border-radius:8px; font-size:20px;">&#x1F6E1;&#xFE0F;</div>
+                <div>
+                    <div class="logo-text">ForenSync</div>
+                    <div class="logo-sub">Cyber Shield Ahmedabad</div>
+                </div>
+            </div>
+            <div>
+                <a href="/" class="btn-secondary" style="padding: 8px 18px; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to Portal
+                </a>
+            </div>
+        </header>
+
+        <!-- HERO BANNER -->
+        <div class="policy-hero">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+                <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="shield-check" style="width:26px;height:26px;color:#fff;"></i>
+                </div>
+                <div>
+                    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:rgba(255,255,255,0.7);margin-bottom:2px;">Official Government Document</div>
+                    <h1 style="font-size:26px;margin:0;">Privacy Policy</h1>
+                </div>
+            </div>
+            <p>
+                This Privacy Policy governs the collection, use, storage, and disclosure of personal and sensitive data
+                submitted to the <strong style="color:#fff;">Ahmedabad Cyber Crime Branch &mdash; ForenSync Cyber Portal</strong>,
+                operated under the authority of the <strong style="color:#fff;">Gujarat Police, Ahmedabad City</strong>.
+                This policy is issued in compliance with applicable Indian law and is binding on all users of this portal.
+            </p>
+            <div class="policy-meta-row">
+                <div class="policy-meta-item"><i data-lucide="calendar" style="width:13px;height:13px;"></i> Effective: 1 January 2025</div>
+                <div class="policy-meta-item"><i data-lucide="refresh-cw" style="width:13px;height:13px;"></i> Last Revised: August 2026</div>
+                <div class="policy-meta-item"><i data-lucide="landmark" style="width:13px;height:13px;"></i> Jurisdiction: Republic of India</div>
+                <div class="policy-meta-item"><i data-lucide="file-text" style="width:13px;height:13px;"></i> Version 2.1</div>
+            </div>
+        </div>
+
+        <!-- LEGAL CHIPS -->
+        <div style="margin-bottom:30px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+            <span style="font-size:12px;color:var(--text-secondary);font-weight:600;margin-right:4px;">Governed by:</span>
+            <span class="legal-chip"><i data-lucide="gavel" style="width:10px;height:10px;"></i> IT Act, 2000 &amp; IT Amendment Act, 2008</span>
+            <span class="legal-chip"><i data-lucide="gavel" style="width:10px;height:10px;"></i> DPDP Act, 2023</span>
+            <span class="legal-chip"><i data-lucide="gavel" style="width:10px;height:10px;"></i> IT (Reasonable Security Practices) Rules, 2011</span>
+            <span class="legal-chip"><i data-lucide="gavel" style="width:10px;height:10px;"></i> CrPC, 1973</span>
+            <span class="legal-chip"><i data-lucide="gavel" style="width:10px;height:10px;"></i> Indian Evidence Act, 1872</span>
+            <span class="legal-chip"><i data-lucide="gavel" style="width:10px;height:10px;"></i> POCSO Act, 2012</span>
+        </div>
+
+        <!-- MAIN LAYOUT -->
+        <div class="policy-layout">
+
+            <!-- TABLE OF CONTENTS -->
+            <div class="policy-toc glass-panel" style="padding: 20px;">
+                <div class="policy-toc-title">Table of Contents</div>
+                <a href="#sec1"><span class="toc-num">1</span> Overview &amp; Scope</a>
+                <a href="#sec2"><span class="toc-num">2</span> Data We Collect</a>
+                <a href="#sec3"><span class="toc-num">3</span> Purpose of Collection</a>
+                <a href="#sec4"><span class="toc-num">4</span> Legal Basis</a>
+                <a href="#sec5"><span class="toc-num">5</span> Data Storage &amp; Security</a>
+                <a href="#sec6"><span class="toc-num">6</span> Data Sharing &amp; Disclosure</a>
+                <a href="#sec7"><span class="toc-num">7</span> Digital Evidence Handling</a>
+                <a href="#sec8"><span class="toc-num">8</span> Cookies &amp; Session Data</a>
+                <a href="#sec9"><span class="toc-num">9</span> Your Rights (DPDP 2023)</a>
+                <a href="#sec10"><span class="toc-num">10</span> Retention Policy</a>
+                <a href="#sec11"><span class="toc-num">11</span> Children's Privacy</a>
+                <a href="#sec12"><span class="toc-num">12</span> Third-Party Services</a>
+                <a href="#sec13"><span class="toc-num">13</span> Policy Changes</a>
+                <a href="#sec14"><span class="toc-num">14</span> Grievance Redressal</a>
+                <a href="#sec15"><span class="toc-num">15</span> Contact &amp; DPO</a>
+            </div>
+
+            <!-- POLICY SECTIONS -->
+            <div>
+
+                <!-- 1. Overview -->
+                <div class="glass-panel policy-section" id="sec1">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="info" style="width:18px;height:18px;"></i></div>
+                        <h2>1. Overview &amp; Scope</h2>
+                    </div>
+                    <p>The <strong>Ahmedabad Cyber Crime Branch &mdash; ForenSync Cyber Portal</strong> (&ldquo;Portal&rdquo;, &ldquo;We&rdquo;, &ldquo;Us&rdquo;) is an official law-enforcement digital infrastructure operated by the <strong>Ahmedabad City Police, Gujarat Police</strong>, under the Ministry of Home Affairs, Government of India. The Portal enables citizens to:</p>
+                    <ul>
+                        <li>File cyber crime complaints electronically</li>
+                        <li>Track complaint status via unique Ticket IDs</li>
+                        <li>Upload digital forensic evidence for ongoing investigations</li>
+                        <li>Receive public advisory notifications regarding cyber threats</li>
+                    </ul>
+                    <p>This Privacy Policy applies to all natural persons (&ldquo;Data Principals&rdquo;) who interact with this Portal, including citizens filing complaints, witnesses uploading evidence, and law-enforcement personnel operating the internal investigator workstation. It does <strong>not</strong> apply to third-party websites linked from this Portal.</p>
+                    <div class="info-box">
+                        <strong>&#x1F3DB;&#xFE0F; Statutory Authority:</strong> This Portal is established under powers vested by Sections 66C, 66D, and 78 of the Information Technology Act, 2000, read with Section 154 of the Code of Criminal Procedure, 1973 (for FIR registration). Use of this Portal constitutes acceptance of this Policy.
+                    </div>
+                </div>
+
+                <!-- 2. Data Collected -->
+                <div class="glass-panel policy-section" id="sec2">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="database" style="width:18px;height:18px;"></i></div>
+                        <h2>2. Personal Data We Collect</h2>
+                    </div>
+                    <p>We collect the minimum data necessary for lawful law-enforcement purposes (data minimisation principle):</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Category</th><th>Data Items</th><th>Collection Point</th><th>Sensitivity</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Identity &amp; Contact</strong></td><td>Email address (OTP-verified)</td><td>Citizen OTP Flow</td><td>Personal</td></tr>
+                            <tr><td><strong>Complaint Details</strong></td><td>Incident description, category, investigation fields (UPI ID, suspect platform, URLs, etc.)</td><td>Complaint Form</td><td>Personal / Sensitive</td></tr>
+                            <tr><td><strong>Digital Evidence</strong></td><td>Uploaded files (.evtx, .sqlite), filenames, SHA-256 hashes</td><td>Evidence Upload</td><td>Sensitive / Forensic</td></tr>
+                            <tr><td><strong>System Metadata</strong></td><td>Anonymised IP, browser user-agent, session token (ephemeral), submission timestamp</td><td>Automatic (server-side)</td><td>Technical</td></tr>
+                            <tr><td><strong>Employee Credentials</strong></td><td>Official email, bcrypt-hashed password, assigned desk, role</td><td>Admin Provisioning (internal)</td><td>Official — Internal Only</td></tr>
+                            <tr><td><strong>Case Notes &amp; Audit</strong></td><td>Investigator annotations, FIR draft text, status change log entries</td><td>Investigator Workstation</td><td>Official — Internal Only</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="warn-box">
+                        <strong>&#x26A0;&#xFE0F; Note:</strong> We do <u>not</u> collect Aadhaar numbers, PAN numbers, bank account details, biometric data, or financial credentials through this Portal. Where such data appears as evidence of fraud, it is handled under forensic chain-of-custody procedures (see Section 7).
+                    </div>
+                </div>
+
+                <!-- 3. Purpose -->
+                <div class="glass-panel policy-section" id="sec3">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="target" style="width:18px;height:18px;"></i></div>
+                        <h2>3. Purpose of Data Collection</h2>
+                    </div>
+                    <p>Personal data is used exclusively for the following specified and lawful purposes:</p>
+                    <ol>
+                        <li><strong>Complaint Registration &amp; Ticketing:</strong> Generate a Ticket ID, route the complaint to the appropriate desk, and notify the complainant.</li>
+                        <li><strong>Active Investigation:</strong> Enable investigators to review, annotate, prioritise, and resolve complaints within their designated jurisdiction.</li>
+                        <li><strong>Forensic Evidence Preservation:</strong> Securely store uploaded evidence with SHA-256 integrity hashes and a legally admissible chain-of-custody audit trail.</li>
+                        <li><strong>AI-Assisted Routing:</strong> Keyword-based NLP auto-routes complaints and assigns priority scores. No individual profiling is performed.</li>
+                        <li><strong>FIR &amp; Legal Proceedings:</strong> Auto-generate structured FIR draft documents for official filing under CrPC Section 154.</li>
+                        <li><strong>Crime Analytics:</strong> Aggregated, anonymised statistics for internal crime trend analysis and resource allocation only. No individual-level data is published.</li>
+                        <li><strong>Portal Security:</strong> CAPTCHA verification and session management to prevent abuse and unauthorised access.</li>
+                    </ol>
+                    <div class="success-box">
+                        <strong>&#x2705; Purpose Limitation:</strong> Data collected for a specific purpose will not be used for any other purpose without a fresh lawful basis, in line with the Digital Personal Data Protection Act, 2023 (DPDP Act).
+                    </div>
+                </div>
+
+                <!-- 4. Legal Basis -->
+                <div class="glass-panel policy-section" id="sec4">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="landmark" style="width:18px;height:18px;"></i></div>
+                        <h2>4. Legal Basis for Processing</h2>
+                    </div>
+                    <p>All data processing is grounded in one or more of the following statutory bases under Indian law:</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Processing Activity</th><th>Legal Basis</th><th>Statute / Rule</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Receiving &amp; processing citizen cyber complaints</td><td>Voluntary consent + Legitimate law-enforcement function</td><td>IT Act §66C, §66D; CrPC §154</td></tr>
+                            <tr><td>Storing evidence files with integrity hashes</td><td>Statutory necessity for judicial proceedings</td><td>Indian Evidence Act §65B; IT Act §79A</td></tr>
+                            <tr><td>Employee access credential management</td><td>Employment contract + statutory obligation</td><td>IT Act §43A; DPDP Act §9</td></tr>
+                            <tr><td>Retaining case records post-resolution</td><td>Legal obligation (criminal record-keeping)</td><td>CrPC §173; Police Act, 1861</td></tr>
+                            <tr><td>Email OTP verification</td><td>Voluntary consent by the data principal</td><td>DPDP Act §6; IT Act §43A</td></tr>
+                            <tr><td>Aggregated crime analytics</td><td>Public task / sovereign law-enforcement function</td><td>DPDP Act §7(b); IT Act §84A</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 5. Security -->
+                <div class="glass-panel policy-section" id="sec5">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="lock" style="width:18px;height:18px;"></i></div>
+                        <h2>5. Data Storage &amp; Security Measures</h2>
+                    </div>
+                    <p>We implement <strong>&ldquo;Reasonable Security Practices and Procedures&rdquo;</strong> as mandated by Rule 8 of the IT (Reasonable Security Practices) Rules, 2011. Safeguards include:</p>
+                    <ul>
+                        <li><strong>Transport Encryption:</strong> All data in transit is encrypted using TLS 1.3. Plain HTTP is auto-redirected to HTTPS.</li>
+                        <li><strong>Password Storage:</strong> Employee passwords are bcrypt-hashed (salt-factor 12+). Plaintext passwords are never stored.</li>
+                        <li><strong>OTP Expiry:</strong> Email OTPs expire within 10 minutes and are single-use to prevent replay attacks.</li>
+                        <li><strong>Evidence Integrity:</strong> SHA-256 hash is computed at upload and re-verified on every access to detect tampering.</li>
+                        <li><strong>Role-Based Access Control (RBAC):</strong> Investigators access only cases assigned to their desk. Admin privileges are separately provisioned.</li>
+                        <li><strong>Audit Logging:</strong> All evidence access, status changes, and FIR filings are timestamped and logged immutably.</li>
+                        <li><strong>CAPTCHA:</strong> Canvas-rendered CAPTCHA prevents automated abuse of the complaint submission endpoint.</li>
+                        <li><strong>Data Storage:</strong> The backend database resides on government-controlled secure server infrastructure.</li>
+                    </ul>
+                    <div class="warn-box">
+                        <strong>&#x26A0;&#xFE0F; No System is Infallible:</strong> In the event of a data breach affecting your rights, we will notify affected data principals and the designated authority under the DPDP Act, 2023, within the prescribed timeframe.
+                    </div>
+                </div>
+
+                <!-- 6. Sharing -->
+                <div class="glass-panel policy-section" id="sec6">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="share-2" style="width:18px;height:18px;"></i></div>
+                        <h2>6. Data Sharing &amp; Disclosure</h2>
+                    </div>
+                    <p>Citizen data is treated as <strong>strictly confidential</strong> and is not sold, rented, or traded. Data may be shared only in the following circumstances:</p>
+                    <ol>
+                        <li><strong>Law Enforcement Agencies:</strong> Data may be shared with other police units, the CBI, the National Cyber Crime Reporting Portal (cybercrime.gov.in), or CERT-In as required for investigation or pursuant to a lawful order.</li>
+                        <li><strong>Courts &amp; Judiciary:</strong> Evidence files, audit trails, and FIR drafts may be produced before courts of competent jurisdiction in India as required under CrPC.</li>
+                        <li><strong>Government Ministries / Departments:</strong> Aggregated, anonymised crime statistics may be shared with the Ministry of Home Affairs, NITI Aayog, or the State Home Department for policy purposes only.</li>
+                        <li><strong>International Cooperation:</strong> Where crimes involve foreign actors, relevant data may be shared through established MLAT channels, subject to Central Government approval.</li>
+                        <li><strong>OTP Email Service:</strong> Your email address is transmitted to an approved SMTP provider solely for OTP delivery. This service does not receive any complaint or case data.</li>
+                    </ol>
+                    <div class="info-box">
+                        <strong>&#x1F512; No Commercial Sharing:</strong> Data submitted through this Portal will <u>never</u> be shared with private companies, advertisers, data brokers, or any entity for commercial purposes.
+                    </div>
+                </div>
+
+                <!-- 7. Digital Evidence -->
+                <div class="glass-panel policy-section" id="sec7">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="hard-drive" style="width:18px;height:18px;"></i></div>
+                        <h2>7. Digital Evidence Handling &amp; Chain of Custody</h2>
+                    </div>
+                    <p>This Portal employs a <strong>forensically sound digital evidence workflow</strong> aligned with Section 65B of the Indian Evidence Act, 1872, and the guidelines issued by CERT-In and NFSU (Gandhinagar).</p>
+                    <ul>
+                        <li>Upon upload, each evidence file is assigned a unique exhibit reference and a SHA-256 hash is stored as the <strong>baseline integrity fingerprint</strong>.</li>
+                        <li>Every subsequent access generates an immutable <strong>chain-of-custody log entry</strong> recording: actor identity, UTC timestamp, and action performed.</li>
+                        <li>Any hash mismatch on re-computation triggers an automatic <strong>tamper alert</strong> and flags the evidence as potentially compromised.</li>
+                        <li>Evidence files are stored in a dedicated, access-controlled directory, not publicly accessible via URL.</li>
+                        <li>All evidence handling by investigators is governed by the <strong>Ahmedabad Cyber Crime Branch's Standard Operating Procedures (SOPs)</strong> for digital forensics.</li>
+                    </ul>
+                    <div class="success-box">
+                        <strong>&#x2705; Forensic Integrity:</strong> The SHA-256 chain-of-custody mechanism ensures digital evidence remains admissible and unimpeachable in Indian courts as per the Section 65B certification requirements.
+                    </div>
+                </div>
+
+                <!-- 8. Cookies -->
+                <div class="glass-panel policy-section" id="sec8">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="cookie" style="width:18px;height:18px;"></i></div>
+                        <h2>8. Cookies, Session Storage &amp; Local Storage</h2>
+                    </div>
+                    <p>This Portal uses minimal, strictly necessary client-side storage:</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Storage Type</th><th>Data Stored</th><th>Purpose</th><th>Duration</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Session Storage</td><td>Verified email, auth token (ephemeral)</td><td>Maintain login state within browser tab</td><td>Tab session (cleared on close)</td></tr>
+                            <tr><td>Local Storage</td><td>Offline evidence upload queue (filenames only)</td><td>Retry upload when connectivity is restored</td><td>Until upload succeeds or user clears</td></tr>
+                            <tr><td>Functional Cookies</td><td>Google Translate language preference</td><td>Language selection persistence</td><td>1 year (Google-set)</td></tr>
+                        </tbody>
+                    </table>
+                    <p>This Portal does <strong>not</strong> use tracking cookies, analytics cookies, advertising pixels, or third-party profiling technologies. The Google Translate widget is governed by <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color:#18548e;">Google&rsquo;s Privacy Policy</a>.</p>
+                </div>
+
+                <!-- 9. Your Rights -->
+                <div class="glass-panel policy-section" id="sec9">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="user-check" style="width:18px;height:18px;"></i></div>
+                        <h2>9. Your Rights Under the DPDP Act, 2023</h2>
+                    </div>
+                    <p>As a Data Principal under the Digital Personal Data Protection Act, 2023, you have the following rights:</p>
+                    <ul>
+                        <li><strong>Right to Access (§11):</strong> Request a summary of personal data we hold about you and how it has been processed.</li>
+                        <li><strong>Right to Correction and Erasure (§12):</strong> Request correction of inaccurate data. Erasure requests will be honoured where there is no statutory reason to retain data (e.g., active investigation or court order).</li>
+                        <li><strong>Right to Grievance Redressal (§13):</strong> Have your grievances addressed by our Grievance Officer within the prescribed timelines. See Section 14.</li>
+                        <li><strong>Right to Nominate (§14):</strong> Nominate another individual to exercise your rights in the event of your death or incapacity.</li>
+                        <li><strong>Right to Withdraw Consent (§6):</strong> Where processing is based on consent (e.g., OTP verification), you may withdraw consent. This may affect the Portal&rsquo;s ability to process your complaint.</li>
+                    </ul>
+                    <div class="warn-box">
+                        <strong>&#x26A0;&#xFE0F; Limitations:</strong> Pursuant to Schedule II of the DPDP Act, 2023, your rights may be limited where processing is for: prevention or detection of crime; prosecution of an offence; national security; or judicial/quasi-judicial proceedings.
+                    </div>
+                    <p>Requests will be acknowledged within <strong>3 working days</strong> and resolved within <strong>30 days</strong>. Contact the Grievance Officer at Section 14.</p>
+                </div>
+
+                <!-- 10. Retention -->
+                <div class="glass-panel policy-section" id="sec10">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="archive" style="width:18px;height:18px;"></i></div>
+                        <h2>10. Data Retention Policy</h2>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Data Category</th><th>Retention Period</th><th>Basis</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Active complaint + evidence (pending / investigating)</td><td>Duration of investigation + 6 months post-resolution</td><td>CrPC §173; operational necessity</td></tr>
+                            <tr><td>Resolved complaints (no FIR)</td><td>3 years from resolution date</td><td>Standard police record-keeping</td></tr>
+                            <tr><td>Cases where FIR filed / court proceedings active</td><td>Duration of proceedings + 5 years after final judgment</td><td>Court records obligations</td></tr>
+                            <tr><td>Audit / chain-of-custody logs</td><td>Permanent (judicial admissibility)</td><td>Indian Evidence Act §65B</td></tr>
+                            <tr><td>Employee credentials</td><td>Duration of employment + 2 years</td><td>Service rules; DPDP Act §8</td></tr>
+                            <tr><td>OTP session data</td><td>10 minutes / single use</td><td>Security — minimisation</td></tr>
+                            <tr><td>System access logs (IP, user-agent)</td><td>90 days</td><td>Security monitoring; CERT-In guidelines</td></tr>
+                        </tbody>
+                    </table>
+                    <p>Upon expiry, data is either <strong>securely deleted</strong> (NIST SP 800-88 compliant methods) or <strong>anonymised</strong> for statistical archival such that no individual can be identified.</p>
+                </div>
+
+                <!-- 11. Children -->
+                <div class="glass-panel policy-section" id="sec11">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="baby" style="width:18px;height:18px;"></i></div>
+                        <h2>11. Children&rsquo;s Privacy &amp; Protection</h2>
+                    </div>
+                    <p>This Portal acknowledges its special obligations regarding children (persons below 18 years) under the <strong>DPDP Act, 2023 (§9)</strong>, <strong>POCSO Act, 2012</strong>, and <strong>Juvenile Justice Act, 2015</strong>.</p>
+                    <ul>
+                        <li>Complaints involving cyber crimes against children (CSAM, online grooming, cyberbullying) are automatically routed to the <strong>Women &amp; Child Cyber Cases Desk</strong> with elevated priority.</li>
+                        <li>All data relating to child victims is treated as <strong>strictly confidential</strong> and access is restricted to designated specialist investigators only.</li>
+                        <li>The identity of child victims is <strong>never disclosed</strong> in any public-facing communication, analytics report, or to parties not legally authorised under POCSO.</li>
+                        <li>Where a child (or guardian on their behalf) submits a complaint, processing is deemed to be with <strong>verifiable parental/guardian consent</strong> per §9(1) of the DPDP Act.</li>
+                        <li>This Portal does not profile, target, or collect data from children for any purpose other than investigating crimes committed against or by them.</li>
+                    </ul>
+                </div>
+
+                <!-- 12. Third Party -->
+                <div class="glass-panel policy-section" id="sec12">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="link" style="width:18px;height:18px;"></i></div>
+                        <h2>12. Third-Party Services</h2>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Service</th><th>Provider</th><th>Purpose</th><th>Data Shared</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Google Translate Widget</td><td>Google LLC (USA)</td><td>Multilingual accessibility (22 Indian languages)</td><td>Page URL, language preference cookie</td></tr>
+                            <tr><td>Lucide Icons (CDN)</td><td>jsDelivr / unpkg CDN</td><td>UI iconography (purely visual)</td><td>IP address (CDN request log)</td></tr>
+                            <tr><td>Chart.js (CDN)</td><td>jsDelivr CDN</td><td>Crime analytics charts (employee-facing only)</td><td>IP address (CDN request log)</td></tr>
+                            <tr><td>SMTP Email Provider</td><td>Government-approved email relay</td><td>OTP delivery to complainant email</td><td>Recipient email address only</td></tr>
+                        </tbody>
+                    </table>
+                    <p>We are not responsible for the data practices of third-party services. Data shared with third parties is limited to the absolute minimum required for the stated purpose.</p>
+                </div>
+
+                <!-- 13. Changes -->
+                <div class="glass-panel policy-section" id="sec13">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="refresh-cw" style="width:18px;height:18px;"></i></div>
+                        <h2>13. Changes to This Privacy Policy</h2>
+                    </div>
+                    <p>This Privacy Policy may be updated periodically to reflect changes in applicable law or portal features:</p>
+                    <ul>
+                        <li>The <strong>version number</strong> and <strong>last revised date</strong> at the top of this policy will be updated.</li>
+                        <li>For <strong>material changes</strong>, a notice will be displayed on the Portal homepage for a minimum of <strong>30 days</strong> prior to the change taking effect.</li>
+                        <li>For <strong>minor changes</strong> (clarifications, contact details), the policy will be updated with immediate effect.</li>
+                        <li>Continued use of the Portal after the effective date of a revised policy constitutes acceptance of the revised terms.</li>
+                    </ul>
+                    <p>This policy is maintained in English and Gujarati. In case of conflict between language versions, the English version shall prevail.</p>
+                </div>
+
+                <!-- 14. Grievance -->
+                <div class="glass-panel policy-section" id="sec14">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="message-circle" style="width:18px;height:18px;"></i></div>
+                        <h2>14. Grievance Redressal Mechanism</h2>
+                    </div>
+                    <p>In accordance with Rule 5(9) of the IT (Intermediaries Guidelines) Rules, 2021, and Section 13 of the DPDP Act, 2023, a Grievance Officer has been appointed:</p>
+                    <div class="info-box" style="margin-top:16px;">
+                        <strong>&#x1F4CB; Grievance Resolution Process:</strong><br><br>
+                        1. Submit your grievance in writing (email or post) to the Grievance Officer (see Section 15).<br>
+                        2. Acknowledgement within <strong>3 working days</strong>.<br>
+                        3. Resolution communicated within <strong>30 calendar days</strong>.<br>
+                        4. If unsatisfied, you may escalate to the <strong>Appellate Authority</strong> designated under the DPDP Act, 2023, or approach a court of competent jurisdiction.
+                    </div>
+                    <p>For complaints regarding cyber crimes (not portal privacy), please use the <a href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer" style="color:#18548e;">National Cyber Crime Reporting Portal (cybercrime.gov.in)</a> or call the National Helpline <strong>1930</strong>.</p>
+                </div>
+
+                <!-- 15. Contact -->
+                <div class="glass-panel policy-section" id="sec15">
+                    <div class="policy-section-header">
+                        <div class="policy-section-icon"><i data-lucide="phone" style="width:18px;height:18px;"></i></div>
+                        <h2>15. Contact Us &amp; Data Protection Officer (DPO)</h2>
+                    </div>
+                    <p>For all privacy-related queries, data access requests, or grievances, please contact:</p>
+                    <div class="contact-card">
+                        <div class="contact-item">
+                            <div class="contact-item-icon"><i data-lucide="user" style="width:16px;height:16px;"></i></div>
+                            <div>
+                                <div class="contact-item-label">Grievance / DPO Officer</div>
+                                <div class="contact-item-val">Deputy Commissioner of Police<br><em>Cyber Crime Branch</em></div>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-item-icon"><i data-lucide="building-2" style="width:16px;height:16px;"></i></div>
+                            <div>
+                                <div class="contact-item-label">Office Address</div>
+                                <div class="contact-item-val">Ahmedabad Cyber Crime Branch,<br>Shahibaug, Ahmedabad &mdash; 380 004, Gujarat, India</div>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-item-icon"><i data-lucide="mail" style="width:16px;height:16px;"></i></div>
+                            <div>
+                                <div class="contact-item-label">Email (Privacy Queries)</div>
+                                <div class="contact-item-val"><a href="mailto:cybercrime.dpo@ahmedabadpolice.gov.in">cybercrime.dpo@ahmedabadpolice.gov.in</a></div>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-item-icon"><i data-lucide="phone-call" style="width:16px;height:16px;"></i></div>
+                            <div>
+                                <div class="contact-item-label">Cyber Helpline</div>
+                                <div class="contact-item-val"><strong>1930</strong> (National Cyber Helpline)<br><a href="/contact">Portal Contact Page</a></div>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-item-icon"><i data-lucide="globe" style="width:16px;height:16px;"></i></div>
+                            <div>
+                                <div class="contact-item-label">National Portal</div>
+                                <div class="contact-item-val"><a href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer">cybercrime.gov.in</a><br><a href="https://cert-in.org.in" target="_blank" rel="noopener noreferrer">cert-in.org.in</a></div>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-item-icon"><i data-lucide="clock" style="width:16px;height:16px;"></i></div>
+                            <div>
+                                <div class="contact-item-label">Office Hours</div>
+                                <div class="contact-item-val">Monday &ndash; Friday<br>10:00 AM &ndash; 5:00 PM IST</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warn-box" style="margin-top: 28px;">
+                        <strong>&#x1F4E2; Official Disclaimer:</strong> This Privacy Policy is issued by and on behalf of the <strong>Ahmedabad City Police &mdash; Cyber Crime Branch</strong> in its capacity as a law-enforcement agency of the Government of Gujarat. The ForenSync portal is deployed for operational demonstration. All deployments must comply with applicable government IT security policies, CERT-In guidelines, and MeitY directions in force.
+                    </div>
+                </div>
+
+            </div>
+        </div><!-- end policy-layout -->
+
+        <!-- FOOTER -->
+        <footer class="app-footer">
+            <a href="/contact">Contact Us</a>
+            <a href="/privacy-policy" style="color: var(--neon-cyan); font-weight: 600;">Privacy Policy</a>
+            <span>&copy; Ahmedabad City Police &mdash; Cyber Crime Branch. All rights reserved.</span>
+        </footer>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Highlight active TOC link on scroll
+        const sections = document.querySelectorAll('.policy-section');
+        const tocLinks = document.querySelectorAll('.policy-toc a');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    tocLinks.forEach(l => l.classList.remove('active'));
+                    const activeLink = document.querySelector('.policy-toc a[href="#' + entry.target.id + '"]');
+                    if (activeLink) activeLink.classList.add('active');
+                }
+            });
+        }, { threshold: 0.35 });
+
+        sections.forEach(s => observer.observe(s));
+    </script>
+</body>
+</html>

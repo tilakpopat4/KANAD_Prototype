@@ -846,6 +846,11 @@ if os.path.exists(frontend_dir):
         """Public contact page."""
         return FileResponse(os.path.join(frontend_dir, "contact.html"))
 
+    @app.get("/privacy-policy")
+    def privacy_policy_portal():
+        """Government Privacy Policy for the Cyber Portal."""
+        return FileResponse(os.path.join(frontend_dir, "privacy-policy.html"))
+
     @app.get("/sitemanager")
     def sitemanager_portal():
         """Password-protected slideshow manager (admin-only via /api/sitemanager-login)."""

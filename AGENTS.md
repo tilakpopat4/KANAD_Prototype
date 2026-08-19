@@ -1,4 +1,4 @@
-﻿# ForenSync - UI Consistency Rules
+# ForenSync - UI Consistency Rules
 
 ## Header and Footer - MUST REMAIN CONSISTENT ACROSS ALL PAGES
 
@@ -14,7 +14,7 @@ All pages use this exact footer HTML. Do not alter it per-page:
     <footer class="app-footer">
         <a href="/contact">Contact Us</a>
         <a href="/privacy-policy">Privacy Policy</a>
-        <span>&copy; Ahmedabad City Police &mdash; Cyber Crime Branch. All rights reserved.</span>
+        <span>&copy; National Cyber Crime Reporting Portal. All rights reserved.</span>
     </footer>
 
 The .app-footer CSS class lives ONLY in frontend/style.css.
@@ -29,7 +29,7 @@ NEVER add inline styles to .app-footer elements.
             <img src="/frontend/assets/logo.png" alt="CCI Logo" class="logo-img">
             <div>
                 <div class="logo-text">ForenSync</div>
-                <div class="logo-sub">Cyber Shield Ahmedabad</div>
+                <div class="logo-sub">National Cyber Crime Reporting Portal</div>
             </div>
         </div>
     </header>

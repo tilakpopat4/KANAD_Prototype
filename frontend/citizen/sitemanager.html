@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site Manager - Slideshow</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Site Manager - ForenSync Slideshow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/frontend/style.css">
     <!-- Firebase -->
@@ -12,38 +12,54 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="/frontend/firebase-config.js"></script>
     <style>
-        body {
-            padding: 40px;
+        .page-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
         }
-        .header {
+        .manager-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .manager-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        @media (max-width: 860px) {
+            .manager-grid {
+                grid-template-columns: 1fr;
+            }
         }
         .slide-list {
             display: grid;
-            gap: 20px;
-            margin-top: 20px;
+            gap: 15px;
+            margin-top: 15px;
         }
         .slide-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
             gap: 16px;
+            border-radius: 8px;
         }
         .slide-item-thumb {
-            width: 80px;
-            height: 55px;
+            width: 70px;
+            height: 50px;
             border-radius: 6px;
             object-fit: cover;
             border: 1px solid var(--border-color);
             flex-shrink: 0;
         }
         .slide-item-thumb-placeholder {
-            width: 80px;
-            height: 55px;
+            width: 70px;
+            height: 50px;
             border-radius: 6px;
             background: rgba(40,158,231,0.08);
             border: 1px solid var(--border-color);
@@ -51,41 +67,61 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            font-size: 22px;
+            font-size: 20px;
             color: var(--neon-cyan);
         }
         .slide-item-info {
             flex: 1;
+            min-width: 0;
+        }
+        .slide-item-info h4 {
+            margin: 0 0 4px 0;
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+        .slide-item-info p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .slide-item-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
         }
         .form-group {
             margin-bottom: 15px;
         }
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             color: var(--text-secondary);
             font-weight: 500;
             font-size: 13px;
         }
         .form-group input, .form-group textarea, .form-group select {
             width: 100%;
-            padding: 10px;
+            padding: 10px 12px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             background: var(--input-bg, #fff);
             color: var(--text-primary);
-            font-family: var(--font-body, Inter, sans-serif);
+            font-family: var(--font-body, 'Oswald', sans-serif);
+            box-sizing: border-box;
         }
-
-        /* Image upload area */
         .img-upload-zone {
             border: 2px dashed var(--border-color);
             border-radius: 8px;
-            padding: 20px;
+            padding: 18px;
             text-align: center;
             cursor: pointer;
             transition: border-color 0.2s, background 0.2s;
-            background: #fff;
+            background: rgba(255,255,255,0.02);
             position: relative;
         }
         .img-upload-zone:hover {
@@ -97,7 +133,7 @@
         }
         #img-preview {
             max-width: 100%;
-            max-height: 160px;
+            max-height: 140px;
             border-radius: 6px;
             margin-top: 10px;
             object-fit: contain;
@@ -108,84 +144,144 @@
             color: var(--neon-cyan);
             margin-top: 6px;
         }
+        .toast-msg {
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .toast-success {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid #10b981;
+            color: #10b981;
+        }
+        .toast-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
     </style>
 </head>
 <body class="dark-theme">
     
-    <div class="header">
-        <h1 style="color: var(--neon-cyan);">Site Manager — Slideshow</h1>
-        <a href="/" class="btn btn-secondary" style="text-decoration:none; padding:10px 20px; border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-family:var(--font-heading);">← Back to Site</a>
-    </div>
+    <!-- CANONICAL HEADER -->
+    <header class="notranslate">
+        <div class="logo-area" onclick="window.location.href='/'" style="cursor:pointer;">
+            <img src="/frontend/assets/logo.png" alt="CCI Logo" class="logo-img">
+            <div>
+                <div class="logo-text">ForenSync</div>
+                <div class="logo-sub">National Cyber Crime Reporting Portal</div>
+            </div>
+        </div>
+    </header>
 
-    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;">
-        
-        <!-- ADD SLIDE FORM -->
-        <div class="glass-panel" style="padding: 25px;">
-            <h3 style="margin-bottom: 20px;">Add New Slide</h3>
-            <form id="add-slide-form">
-                <div class="form-group">
-                    <label>Title</label>
-                    <input type="text" id="slide-title" required>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="slide-desc" rows="3" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Icon (Lucide name, e.g., shield-check)</label>
-                    <input type="text" id="slide-icon" value="info" required>
-                </div>
-                <div class="form-group">
-                    <label>Color Scheme</label>
-                    <select id="slide-color">
-                        <option value="info">Info (Blue)</option>
-                        <option value="success">Success (Green)</option>
-                        <option value="warning">Warning (Orange)</option>
-                        <option value="danger">Danger (Red)</option>
-                    </select>
-                </div>
-
-                <!-- Image Upload -->
-                <div class="form-group">
-                    <label>Background Image <span style="font-weight:400; color:var(--text-secondary);">(optional)</span></label>
-                    <div class="img-upload-zone" onclick="document.getElementById('slide-img-file').click()">
-                        <i data-lucide="image" style="width:32px;height:32px;color:var(--neon-cyan);margin-bottom:6px;"></i>
-                        <p style="font-size:13px;color:var(--text-secondary); margin:0;">Click to browse &amp; upload image</p>
-                        <p style="font-size:11px;color:var(--text-secondary); margin:4px 0 0 0;">JPEG, PNG, WebP, GIF · Max 8MB</p>
-                        <input type="file" id="slide-img-file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleImageSelect(this)">
-                        <img id="img-preview" src="" alt="Preview">
-                    </div>
-                    <div id="img-upload-status" class="img-uploading-badge"></div>
-                </div>
-
-                <button type="submit" id="add-slide-btn" class="btn-primary" style="width: 100%; margin-top:5px;">Add Slide</button>
-            </form>
+    <div class="page-wrapper">
+        <div class="manager-header">
+            <div>
+                <h1 style="color: var(--neon-cyan); font-size: 24px; margin-bottom: 4px;">Site Manager &mdash; Slideshow Control</h1>
+                <p style="color: var(--text-secondary); font-size: 13px; margin: 0;">Create, edit, and manage public bulletin slides visible on the Citizen Portal.</p>
+            </div>
+            <a href="/" class="btn btn-secondary" style="text-decoration:none; padding:8px 16px; border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-size: 13px;">&larr; Back to Citizen Portal</a>
         </div>
 
-        <!-- ACTIVE SLIDES LIST -->
-        <div class="glass-panel" style="padding: 25px;">
-            <h3 style="margin-bottom: 5px;">Active Slides</h3>
-            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 15px;">Slides shown in order newest-first on the citizen portal.</p>
-            <div id="slide-list" class="slide-list">
-                <p>Loading slides...</p>
+        <div id="status-toast" class="toast-msg"></div>
+
+        <div class="manager-grid">
+            <!-- SLIDE FORM -->
+            <div class="glass-panel" style="padding: 24px;">
+                <h3 id="form-heading" style="margin-bottom: 18px; color: var(--text-primary);">Add New Slide</h3>
+                <form id="slide-form">
+                    <input type="hidden" id="edit-slide-id" value="">
+                    
+                    <div class="form-group">
+                        <label for="slide-title">Title *</label>
+                        <input type="text" id="slide-title" placeholder="e.g. Report Financial &amp; Cyber Frauds" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="slide-desc">Description *</label>
+                        <textarea id="slide-desc" rows="3" placeholder="Brief informative summary for citizens..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="slide-icon">Icon (Lucide name, e.g. shield-alert, lock, phone-call, info)</label>
+                        <input type="text" id="slide-icon" value="info" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="slide-color">Color Scheme</label>
+                        <select id="slide-color">
+                            <option value="info">Info (Blue)</option>
+                            <option value="success">Success (Green)</option>
+                            <option value="warning">Warning (Orange)</option>
+                            <option value="danger">Danger (Red)</option>
+                        </select>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="form-group">
+                        <label>Background Image <span style="font-weight:400; color:var(--text-secondary);">(optional)</span></label>
+                        <div class="img-upload-zone" onclick="document.getElementById('slide-img-file').click()">
+                            <i data-lucide="image" style="width:28px;height:28px;color:var(--neon-cyan);margin-bottom:4px;"></i>
+                            <p style="font-size:13px;color:var(--text-secondary); margin:0;">Click to browse &amp; upload image</p>
+                            <p style="font-size:11px;color:var(--text-secondary); margin:4px 0 0 0;">JPEG, PNG, WebP, GIF &middot; Max 8MB</p>
+                            <input type="file" id="slide-img-file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleImageSelect(this)">
+                            <img id="img-preview" src="" alt="Preview">
+                        </div>
+                        <div id="img-upload-status" class="img-uploading-badge"></div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button type="submit" id="save-slide-btn" class="btn-primary" style="flex: 1; padding: 10px;">Save Slide</button>
+                        <button type="button" id="cancel-edit-btn" class="btn-secondary" style="display: none; padding: 10px;" onclick="cancelEdit()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ACTIVE SLIDES LIST -->
+            <div class="glass-panel" style="padding: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h3 style="margin: 0; color: var(--text-primary);">Active Slides</h3>
+                    <button class="btn-secondary" onclick="loadSlides()" style="padding: 4px 10px; font-size: 12px;">&#x21bb; Refresh</button>
+                </div>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 15px;">Slides shown in carousel order on the citizen portal.</p>
+                <div id="slide-list" class="slide-list">
+                    <p style="color: var(--text-secondary);">Loading slides...</p>
+                </div>
             </div>
         </div>
 
-        <!-- FOOTER -->
+        <!-- CANONICAL FOOTER -->
         <footer class="app-footer">
             <a href="/contact">Contact Us</a>
             <a href="/privacy-policy">Privacy Policy</a>
-            <span>&copy; Ahmedabad City Police &mdash; Cyber Crime Branch. All rights reserved.</span>
+            <span>&copy; National Cyber Crime Reporting Portal. All rights reserved.</span>
         </footer>
     </div>
 
     <script>
         // ── Firebase init ──────────────────────────────────────
-        firebase.initializeApp(FIREBASE_CONFIG);
-        const db = firebase.firestore();
-        lucide.createIcons();
+        let db = null;
+        try {
+            if (typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.projectId) {
+                const fsApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
+                db = firebase.firestore();
+            }
+        } catch (e) {
+            console.warn("Firestore client not initialized, using local REST API:", e);
+        }
 
-        // ── Image preview (client-side only, no upload required) ──
+        lucide.createIcons();
+        let cachedSlides = [];
+        let currentUploadedImageUrl = null;
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('status-toast');
+            toast.className = 'toast-msg ' + (type === 'success' ? 'toast-success' : 'toast-error');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 4000);
+        }
+
+        // ── Image preview ──
         function handleImageSelect(input) {
             const file = input.files[0];
             if (!file) return;
@@ -198,110 +294,228 @@
             reader.readAsDataURL(file);
         }
 
-        // Upload image to backend (only called if user picked a file)
+        // Upload image to backend
         async function uploadImageIfSelected() {
             const fileInput = document.getElementById('slide-img-file');
             const file = fileInput.files[0];
-            if (!file) return null;   // ← text-only slides skip this entirely
+            if (!file) return currentUploadedImageUrl || null;
 
             const statusEl = document.getElementById('img-upload-status');
-            statusEl.textContent = '⏳ Uploading image…';
+            statusEl.textContent = 'Uploading image...';
             const formData = new FormData();
             formData.append('file', file);
             try {
                 const res = await fetch('/api/slides/upload-image', { method: 'POST', body: formData });
                 if (!res.ok) {
                     const err = await res.json();
-                    statusEl.textContent = '❌ ' + (err.detail || 'Upload failed');
+                    statusEl.textContent = 'Upload failed: ' + (err.detail || 'Error');
                     return null;
                 }
                 const data = await res.json();
-                statusEl.textContent = '✅ Image uploaded!';
+                statusEl.textContent = 'Image uploaded successfully!';
+                currentUploadedImageUrl = data.url;
                 return data.url;
             } catch(e) {
-                statusEl.textContent = '❌ Network error during upload';
+                statusEl.textContent = 'Upload error: ' + e.message;
                 return null;
             }
         }
 
-        // ── Load slides from Firestore ─────────────────────────
+        // ── Load slides ────────────────────────────────────────
         async function loadSlides() {
             const list = document.getElementById('slide-list');
-            list.innerHTML = '<p style="color:var(--text-secondary);">Loading…</p>';
-            try {
-                const snap = await db.collection('slides')
-                    .where('is_active', '==', true)
-                    .orderBy('created_at', 'desc')
-                    .get();
+            list.innerHTML = '<p style="color:var(--text-secondary);">Loading...</p>';
+            let slides = [];
 
-                if (snap.empty) {
-                    list.innerHTML = '<p style="color:var(--text-secondary);">No active slides. Add one!</p>';
-                    return;
+            // 1. Try local API first (fastest, consistent)
+            try {
+                const res = await fetch('/api/slides');
+                if (res.ok) {
+                    slides = await res.json();
+                }
+            } catch (err) {
+                console.warn("Local API fetch slides failed:", err);
+            }
+
+            // 2. If local API was empty and Firestore is available, query Firestore
+            if (slides.length === 0 && db) {
+                try {
+                    const snap = await db.collection('slides').where('is_active', '==', true).get();
+                    slides = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                } catch (fsErr) {
+                    console.warn("Firestore query failed:", fsErr.message);
+                }
+            }
+
+            slides.sort((a, b) => {
+                const timeA = a.created_at?.toMillis ? a.created_at.toMillis() : (new Date(a.created_at || 0).getTime());
+                const timeB = b.created_at?.toMillis ? b.created_at.toMillis() : (new Date(b.created_at || 0).getTime());
+                return timeB - timeA;
+            });
+
+            cachedSlides = slides;
+
+            if (slides.length === 0) {
+                list.innerHTML = '<p style="color:var(--text-secondary);">No active slides found. Add one on the left!</p>';
+                return;
+            }
+
+            list.innerHTML = slides.map(s => {
+                const escTitle = (s.title || '').replace(/"/g, '&quot;');
+                const escDesc = (s.description || '').replace(/"/g, '&quot;');
+                return `
+                    <div class="glass-panel slide-item">
+                        ${s.image_url
+                            ? `<img class="slide-item-thumb" src="${s.image_url}" alt="Slide">`
+                            : `<div class="slide-item-thumb-placeholder">📢</div>`
+                        }
+                        <div class="slide-item-info">
+                            <h4>${s.title}</h4>
+                            <p>${s.description}</p>
+                            <small style="color:var(--text-secondary);">Icon: ${s.icon || 'info'} &nbsp;|&nbsp; Color: ${s.color_scheme || 'info'}</small>
+                        </div>
+                        <div class="slide-item-actions">
+                            <button onclick="startEditSlide('${s.id}')" class="btn-secondary"
+                                style="padding:6px 12px; font-size:12px;">Edit</button>
+                            <button onclick="deleteSlide('${s.id}')" class="btn-secondary"
+                                style="padding:6px 12px; font-size:12px; color:var(--danger); border-color:var(--danger);">Delete</button>
+                        </div>
+                    </div>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        // ── Start Editing a Slide ──────────────────────────────
+        function startEditSlide(id) {
+            const slide = cachedSlides.find(s => String(s.id) === String(id));
+            if (!slide) return;
+
+            document.getElementById('edit-slide-id').value = slide.id;
+            document.getElementById('slide-title').value = slide.title || '';
+            document.getElementById('slide-desc').value = slide.description || '';
+            document.getElementById('slide-icon').value = slide.icon || 'info';
+            document.getElementById('slide-color').value = slide.color_scheme || 'info';
+            
+            currentUploadedImageUrl = slide.image_url || null;
+            const preview = document.getElementById('img-preview');
+            if (slide.image_url) {
+                preview.src = slide.image_url;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+
+            document.getElementById('form-heading').textContent = 'Edit Slide';
+            document.getElementById('save-slide-btn').textContent = 'Update Slide';
+            document.getElementById('cancel-edit-btn').style.display = 'inline-block';
+            
+            document.getElementById('slide-title').focus();
+        }
+
+        function cancelEdit() {
+            document.getElementById('slide-form').reset();
+            document.getElementById('edit-slide-id').value = '';
+            document.getElementById('form-heading').textContent = 'Add New Slide';
+            document.getElementById('save-slide-btn').textContent = 'Save Slide';
+            document.getElementById('cancel-edit-btn').style.display = 'none';
+            document.getElementById('img-preview').style.display = 'none';
+            document.getElementById('img-upload-status').textContent = '';
+            currentUploadedImageUrl = null;
+        }
+
+        // ── Delete slide ───────────────────────────────────────
+        async function deleteSlide(id) {
+            if (!confirm('Are you sure you want to remove this slide?')) return;
+            try {
+                // Delete from local API
+                await fetch(`/api/slides/${id}`, { method: 'DELETE' });
+
+                // Delete from Firestore if exists
+                if (db) {
+                    try {
+                        await db.collection('slides').doc(String(id)).delete();
+                    } catch(e) {}
                 }
 
-                list.innerHTML = snap.docs.map(doc => {
-                    const s = { id: doc.id, ...doc.data() };
-                    return `
-                        <div class="glass-panel slide-item">
-                            ${s.image_url
-                                ? `<img class="slide-item-thumb" src="${s.image_url}" alt="Slide">`
-                                : `<div class="slide-item-thumb-placeholder">📢</div>`
-                            }
-                            <div class="slide-item-info">
-                                <h4 style="margin:0 0 4px 0;">${s.title}</h4>
-                                <p style="margin:0; font-size:13px; color:var(--text-secondary);">${s.description}</p>
-                                <small style="color:var(--text-secondary);">Icon: ${s.icon} &nbsp;|&nbsp; Colour: ${s.color_scheme}</small>
-                            </div>
-                            <button onclick="deleteSlide('${s.id}')" class="btn-secondary"
-                                style="flex-shrink:0; padding:8px 14px; font-size:13px; color:var(--danger); border-color:var(--danger);">Remove</button>
-                        </div>`;
-                }).join('');
-            } catch(e) {
-                console.error(e);
-                list.innerHTML = '<p style="color:var(--danger);">Error loading slides: ' + e.message + '</p>';
-            }
-        }
-
-        // ── Delete slide from Firestore (permanent) ────────────
-        async function deleteSlide(id) {
-            if (!confirm('Remove this slide permanently?')) return;
-            try {
-                await db.collection('slides').doc(id).delete();
+                showToast('Slide removed successfully.');
                 loadSlides();
             } catch(e) {
-                alert('Error removing slide: ' + e.message);
+                showToast('Error removing slide: ' + e.message, 'error');
             }
         }
 
-        // ── Add slide to Firestore ─────────────────────────────
-        document.getElementById('add-slide-form').addEventListener('submit', async (e) => {
+        // ── Save or Update Slide ───────────────────────────────
+        document.getElementById('slide-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('add-slide-btn');
+            const btn = document.getElementById('save-slide-btn');
             btn.disabled = true;
-            btn.textContent = 'Saving…';
+            btn.textContent = 'Saving...';
 
-            // Image upload is optional — text-only slides are fully supported
+            const editId = document.getElementById('edit-slide-id').value;
             const imageUrl = await uploadImageIfSelected();
 
+            const slidePayload = {
+                title:        document.getElementById('slide-title').value.trim(),
+                description:  document.getElementById('slide-desc').value.trim(),
+                icon:         document.getElementById('slide-icon').value.trim() || 'info',
+                color_scheme: document.getElementById('slide-color').value,
+                image_url:    imageUrl || null,
+                is_active:    1
+            };
+
             try {
-                await db.collection('slides').add({
-                    title:        document.getElementById('slide-title').value.trim(),
-                    description:  document.getElementById('slide-desc').value.trim(),
-                    icon:         document.getElementById('slide-icon').value.trim() || 'info',
-                    color_scheme: document.getElementById('slide-color').value,
-                    image_url:    imageUrl || null,
-                    is_active:    true,
-                    created_at:   firebase.firestore.FieldValue.serverTimestamp()
-                });
-                e.target.reset();
-                document.getElementById('img-preview').style.display = 'none';
-                document.getElementById('img-upload-status').textContent = '';
+                if (editId) {
+                    // Update slide
+                    const res = await fetch(`/api/slides/${editId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(slidePayload)
+                    });
+                    if (!res.ok) throw new Error('Failed to update slide on server');
+
+                    if (db) {
+                        try {
+                            await db.collection('slides').doc(String(editId)).set({
+                                ...slidePayload,
+                                is_active: true,
+                                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                            }, { merge: true });
+                        } catch (fsErr) {
+                            console.warn("Firestore sync notice:", fsErr.message);
+                        }
+                    }
+                    showToast('Slide updated successfully!');
+                } else {
+                    // Create new slide
+                    const res = await fetch('/api/slides', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(slidePayload)
+                    });
+                    if (!res.ok) throw new Error('Failed to save slide on server');
+                    const savedData = await res.json();
+
+                    if (db) {
+                        try {
+                            await db.collection('slides').add({
+                                ...slidePayload,
+                                is_active: true,
+                                created_at: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        } catch (fsErr) {
+                            console.warn("Firestore sync notice:", fsErr.message);
+                        }
+                    }
+                    showToast('New slide created successfully!');
+                }
+
+                cancelEdit();
                 loadSlides();
             } catch(err) {
-                alert('Error adding slide: ' + err.message);
+                showToast('Error saving slide: ' + err.message, 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Add Slide';
+                btn.textContent = editId ? 'Update Slide' : 'Save Slide';
             }
         });
 
@@ -309,4 +523,3 @@
     </script>
 </body>
 </html>
-

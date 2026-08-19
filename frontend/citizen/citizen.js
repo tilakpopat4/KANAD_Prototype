@@ -120,24 +120,45 @@ let slideTimeout;
 
 async function initSlideshow() {
     try {
-        // Load slides from Firestore for permanent persistence
-        // (SQLite on Vercel resets on cold start; Firestore is always available)
-        const fsApp = firebase.apps.length
-            ? firebase.app()
-            : firebase.initializeApp(FIREBASE_CONFIG);
-        const fsDb = firebase.firestore();
+        // Load slides from Firestore, with fallback to local API
+        let slides = [];
+        try {
+            const fsApp = firebase.apps.length
+                ? firebase.app()
+                : firebase.initializeApp(FIREBASE_CONFIG);
+            const fsDb = firebase.firestore();
 
-        const snap = await fsDb.collection('slides')
-            .where('is_active', '==', true)
-            .orderBy('created_at', 'desc')
-            .get();
+            const snap = await fsDb.collection('slides')
+                .where('is_active', '==', true)
+                .get();
 
-        const slides = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            slides = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            slides.sort((a, b) => {
+                const timeA = a.created_at?.toMillis ? a.created_at.toMillis() : (new Date(a.created_at || 0).getTime());
+                const timeB = b.created_at?.toMillis ? b.created_at.toMillis() : (new Date(b.created_at || 0).getTime());
+                return timeB - timeA;
+            });
+        } catch (fsErr) {
+            console.warn("Firestore slides query fallback:", fsErr.message);
+        }
+
+        // If no slides from Firestore or if Firestore failed, fetch from local backend API
+        if (slides.length === 0) {
+            try {
+                const res = await fetch(`${API_BASE}/api/slides`);
+                if (res.ok) {
+                    slides = await res.json();
+                }
+            } catch (apiErr) {
+                console.warn("API slides fallback error:", apiErr);
+            }
+        }
+
         const container = document.getElementById('slideshow-container');
         const dotsContainer = document.getElementById('slideshow-dots');
 
         if (slides.length === 0) {
-            container.style.display = 'none';
+            if (container) container.style.display = 'none';
             return;
         }
 
@@ -167,9 +188,9 @@ async function initSlideshow() {
             const iconColor = s.color_scheme === 'info' ? 'var(--neon-cyan)' : `var(--${s.color_scheme})`;
             slideDiv.innerHTML = `
                 <div class="slide-content-wrapper">
-                    <i data-lucide="${s.icon}" style="width: 56px; height: 56px; color: ${s.image_url ? '#ffffff' : iconColor}; margin-bottom: 18px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15));"></i>
-                    <h3 style="color: ${s.image_url ? '#ffffff' : iconColor}; font-size: 26px; margin-bottom: 12px; font-weight: 700;">${s.title}</h3>
-                    <p style="color: ${s.image_url ? 'rgba(255,255,255,0.88)' : 'var(--text-secondary)'}; font-size: 15px; max-width: 640px; line-height: 1.7;">${s.description}</p>
+                    <i data-lucide="${s.icon}" style="width: 64px; height: 64px; color: ${s.image_url ? '#ffffff' : iconColor}; margin-bottom: 18px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15));"></i>
+                    <h3 style="color: ${s.image_url ? '#ffffff' : iconColor}; font-size: 38px; margin-bottom: 14px; font-weight: 700; letter-spacing: 0.5px; line-height: 1.25;">${s.title}</h3>
+                    <p style="color: ${s.image_url ? 'rgba(255,255,255,0.92)' : 'var(--text-secondary)'}; font-size: 20px; max-width: 780px; line-height: 1.6; font-weight: 400;">${s.description}</p>
                 </div>
             `;
 
@@ -355,7 +376,7 @@ function showMockEmailNotification(email, otp) {
         background: #1c2630; border: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.2);
         border-radius: 16px; padding: 14px 16px; color: #fff; z-index: 10000;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-family: 'Oswald', sans-serif;
         animation: slideInRight 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
     `;
 

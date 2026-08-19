@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ahmedabad Cyber Crime Portal — KANAD</title>
-    <meta name="description" content="File cyber complaints, track case status, and upload digital evidence with the Ahmedabad Cyber Crime Branch portal.">
+    <title>National Cyber Crime Reporting Portal — ForenSync</title>
+    <meta name="description" content="File cyber complaints, track case status, and upload digital evidence with the National Cyber Crime Reporting Portal.">
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap">
     <!-- CSS Stylesheet -->
     <link rel="stylesheet" href="/frontend/style.css">
     <!-- Firebase (for permanent slideshow storage) -->
@@ -26,7 +28,7 @@
                 <div class="logo-icon" style="display:none; align-items:center; justify-content:center; width:40px; height:40px; background: linear-gradient(135deg, #18548e, #289ee7); border-radius:8px; font-size:20px;">🛡️</div>
                 <div>
                     <div class="logo-text">ForenSync</div>
-                    <div class="logo-sub">Cyber Shield Ahmedabad</div>
+                    <div class="logo-sub">National Cyber Crime Reporting Portal</div>
                 </div>
             </div>
             
@@ -68,10 +70,10 @@
         <!-- LANDING VIEW -->
         <div id="view-landing" class="app-view active">
             <h1 style="text-align: center; margin-top: 40px; margin-bottom: 10px; color: var(--neon-cyan); font-size: 32px; font-weight: 700;">
-                Ahmedabad Cyber Crime Portal
+                National Cyber Crime Reporting Portal
             </h1>
             <p style="text-align: center; color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px auto; font-size: 15px;">
-                Welcome to Ahmedabad Cyber Shield. Select an option below to report an incident or track status.
+                Welcome to the National Cyber Crime Reporting Portal. Select an option below to report an incident or track status.
             </p>
             
             <!-- Announcements Slideshow (Full Screen) -->
@@ -89,36 +91,36 @@
 
             
             <!-- Grid of 4 cards -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; max-width: 100%; margin: 0 auto;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 100%; margin: 0 auto;">
                 <div class="glass-panel hover-card" onclick="selectLandingOption('financial_fraud')">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
-                        <i data-lucide="banknote" style="width: 48px; height: 48px; color: var(--neon-cyan);"></i>
-                        <h3 style="color: var(--neon-cyan); margin-top: 10px;">Financial Frauds</h3>
-                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Report UPI, SMS, Bank, or Credit Card frauds</p>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 22px; text-align: center;">
+                        <i data-lucide="banknote" style="width: 52px; height: 52px; color: var(--neon-cyan);"></i>
+                        <h3 style="color: var(--neon-cyan); margin-top: 10px; font-size: 22px; font-weight: 600; letter-spacing: 0.5px;">Financial Frauds</h3>
+                        <p style="font-size: 16px; color: var(--text-secondary); line-height: 1.5; margin-top: 6px; font-weight: 400;">Report UPI, SMS, Bank, or Credit Card frauds</p>
                     </div>
                 </div>
                 
                 <div class="glass-panel hover-card" onclick="selectLandingOption('women_child')">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
-                        <i data-lucide="heart" style="width: 48px; height: 48px; color: #ff6b6b;"></i>
-                        <h3 style="color: #ff6b6b; margin-top: 10px;">Women/Child Cyber Cases</h3>
-                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Report cyber harassment, abuse, or stalking against women/children</p>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 22px; text-align: center;">
+                        <i data-lucide="heart" style="width: 52px; height: 52px; color: #ff6b6b;"></i>
+                        <h3 style="color: #ff6b6b; margin-top: 10px; font-size: 22px; font-weight: 600; letter-spacing: 0.5px;">Women/Child Cyber Cases</h3>
+                        <p style="font-size: 16px; color: var(--text-secondary); line-height: 1.5; margin-top: 6px; font-weight: 400;">Report cyber harassment, abuse, or stalking against women/children</p>
                     </div>
                 </div>
                 
                 <div class="glass-panel hover-card" onclick="selectLandingOption('other')">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
-                        <i data-lucide="shield-alert" style="width: 48px; height: 48px; color: var(--neon-purple);"></i>
-                        <h3 style="color: var(--neon-purple); margin-top: 10px;">Other Cyber Crime</h3>
-                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Report hacking, ransomware, or other digital crimes</p>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 22px; text-align: center;">
+                        <i data-lucide="shield-alert" style="width: 52px; height: 52px; color: var(--neon-purple);"></i>
+                        <h3 style="color: var(--neon-purple); margin-top: 10px; font-size: 22px; font-weight: 600; letter-spacing: 0.5px;">Other Cyber Crime</h3>
+                        <p style="font-size: 16px; color: var(--text-secondary); line-height: 1.5; margin-top: 6px; font-weight: 400;">Report hacking, ransomware, or other digital crimes</p>
                     </div>
                 </div>
                 
                 <div class="glass-panel hover-card" onclick="selectLandingOption('track')">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
-                        <i data-lucide="search" style="width: 48px; height: 48px; color: var(--success);"></i>
-                        <h3 style="color: var(--success); margin-top: 10px;">Track Your Complaint</h3>
-                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Check case status, details, or upload evidence</p>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 22px; text-align: center;">
+                        <i data-lucide="search" style="width: 52px; height: 52px; color: var(--success);"></i>
+                        <h3 style="color: var(--success); margin-top: 10px; font-size: 22px; font-weight: 600; letter-spacing: 0.5px;">Track Your Complaint</h3>
+                        <p style="font-size: 16px; color: var(--text-secondary); line-height: 1.5; margin-top: 6px; font-weight: 400;">Check case status, details, or upload evidence</p>
                     </div>
                 </div>
             </div>
@@ -205,7 +207,7 @@
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
                             <label>Enter City / Town</label>
-                            <input type="text" id="complaint-city" class="form-control" placeholder="e.g. Ahmedabad, Surat" required>
+                            <input type="text" id="complaint-city" class="form-control" placeholder="e.g. New Delhi, Mumbai, Bengaluru" required>
                         </div>
                     </div>
 
@@ -250,7 +252,7 @@
                         <i data-lucide="info"></i> Public Awareness Advisory
                     </h4>
                     <p style="font-size: 12px; color: var(--text-secondary);">
-                        The Ahmedabad Cyber Crime Branch will never call asking for money, passwords, or OTPs. File reports safely here. Maintain evidence integrity for legal compliance.
+                        The National Cyber Crime Reporting Portal will never call asking for money, passwords, or OTPs. File reports safely here. Maintain evidence integrity for legal compliance.
                     </p>
                 </div>
             </div>
@@ -328,7 +330,7 @@
         <footer class="app-footer">
             <a href="/contact">Contact Us</a>
             <a href="/privacy-policy">Privacy Policy</a>
-            <span>&copy; Ahmedabad City Police &mdash; Cyber Crime Branch. All rights reserved.</span>
+            <span>&copy; National Cyber Crime Reporting Portal. All rights reserved.</span>
         </footer>
     </div>
 

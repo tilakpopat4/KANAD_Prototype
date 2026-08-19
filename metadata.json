@@ -1,0 +1,8 @@
+{
+  "name": "ForenSync",
+  "description": "National Cyber Crime Reporting Portal for reporting incidents, managing digital evidence, and tracking cases with automated triage and audit logging.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -19,13 +19,13 @@ const FIREBASE_CONFIG = {
   measurementId: "G-MXH1TP3JF9"
 };
 
-// ── 30 Gujarat Cyber Cell Branches ──────────────────────────
+// ── 30 Cyber Cell Branches ──────────────────────────
 const CYBER_BRANCHES = [
-  { id:'br_ahm_central',   name:'Ahmedabad Cyber Cell \u2013 Central Zone',   district:'Ahmedabad',    zone:'Central', location:'Shahibaug, Ahmedabad \u2013 380 004' },
-  { id:'br_ahm_east',      name:'Ahmedabad Cyber Cell \u2013 East Zone',      district:'Ahmedabad',    zone:'East',    location:'Naroda, Ahmedabad' },
-  { id:'br_ahm_west',      name:'Ahmedabad Cyber Cell \u2013 West Zone',      district:'Ahmedabad',    zone:'West',    location:'Satellite, Ahmedabad' },
-  { id:'br_ahm_north',     name:'Ahmedabad Cyber Cell \u2013 North Zone',     district:'Ahmedabad',    zone:'North',   location:'Chandkheda, Ahmedabad' },
-  { id:'br_ahm_south',     name:'Ahmedabad Cyber Cell \u2013 South Zone',     district:'Ahmedabad',    zone:'South',   location:'Maninagar, Ahmedabad' },
+  { id:'br_ahm_central',   name:'National Cyber Crime Cell \u2013 Central Zone', district:'Central Zone', zone:'Central', location:'Central Zone, New Delhi \u2013 110 001' },
+  { id:'br_ahm_east',      name:'National Cyber Crime Cell \u2013 East Zone',    district:'East Zone',    zone:'East',    location:'East Zone Branch' },
+  { id:'br_ahm_west',      name:'National Cyber Crime Cell \u2013 West Zone',    district:'West Zone',    zone:'West',    location:'West Zone Branch' },
+  { id:'br_ahm_north',     name:'National Cyber Crime Cell \u2013 North Zone',   district:'North Zone',   zone:'North',   location:'North Zone Branch' },
+  { id:'br_ahm_south',     name:'National Cyber Crime Cell \u2013 South Zone',   district:'South Zone',   zone:'South',   location:'South Zone Branch' },
   { id:'br_gandhinagar',   name:'Gandhinagar Cyber Cell',                     district:'Gandhinagar',  zone:'Central', location:'Sector 11, Gandhinagar' },
   { id:'br_surat_central', name:'Surat Cyber Cell \u2013 Central',            district:'Surat',        zone:'Central', location:'Athwa, Surat' },
   { id:'br_surat_east',    name:'Surat Cyber Cell \u2013 East',               district:'Surat',        zone:'East',    location:'Udhna, Surat' },

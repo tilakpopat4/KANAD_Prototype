@@ -1,7 +1,7 @@
-# ForenSync (KANAD Prototype) - Project History & Context
+# ForenSync - Project History & Context
 
 ## Project Overview
-**ForenSync** (also known as Cyber Shield Ahmedabad) is a full-stack web application designed for a cyber crime branch to efficiently handle public complaint registration, evidence collection, and internal case investigation. 
+**ForenSync** (National Cyber Crime Reporting Portal) is a full-stack web application designed for a cyber crime branch to efficiently handle public complaint registration, evidence collection, and internal case investigation. 
 
 The application streamlines the incident reporting process and equips law enforcement officers with an automated dashboard for case tracking, digital evidence hashing, and FIR generation.
 

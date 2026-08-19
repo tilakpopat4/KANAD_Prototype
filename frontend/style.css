@@ -1,5 +1,5 @@
-/* Inter Google Font Import */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+/* Oswald Google Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
 
 :root {
     --bg-dark: #f8fafc; /* near white base surface */
@@ -16,14 +16,16 @@
     --warning: #9d705a; /* warm brown exclusively for warnings / FIR reviews */
     --danger: #ef4444;
     
-    --font-heading: 'Space Grotesk', sans-serif;
-    --font-body: 'Outfit', sans-serif;
+    --font-heading: 'Oswald', sans-serif;
+    --font-body: 'Oswald', sans-serif;
+    --font-head: 'Oswald', sans-serif;
 }
 
-* {
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: 'Oswald', sans-serif;
 }
 
 body {
@@ -32,16 +34,14 @@ body {
         radial-gradient(at 0% 0%, rgba(40, 158, 231, 0.04) 0px, transparent 50%),
         radial-gradient(at 100% 100%, rgba(157, 112, 90, 0.04) 0px, transparent 50%);
     color: var(--text-primary);
-    font-family: var(--font-body);
+    font-family: 'Oswald', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
     line-height: 1.6;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading);
-    letter-spacing: -0.02em;
-    color: #18548e; /* deep blue title branding */
+h1, h2, h3, h4, h5, h6, input, select, textarea, button, p, span, a, label, table, th, td, div {
+    font-family: 'Oswald', sans-serif;
 }
 
 /* Glassmorphism Containers (Light themed sleek panels) */
@@ -617,6 +617,19 @@ body > iframe.goog-te-banner-frame {
     padding: 40px 80px;
     text-align: center;
 }
+.slide-content-wrapper h3 {
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    line-height: 1.25;
+    margin-bottom: 14px;
+}
+.slide-content-wrapper p {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 780px;
+}
 
 /* Override text colour when over an image */
 .has-image .slide-content-wrapper h3,
@@ -683,10 +696,17 @@ body > iframe.goog-te-banner-frame {
 /* Responsive: reduce height on small screens */
 @media (max-width: 768px) {
     .slideshow-container {
-        height: 300px;
+        height: 320px;
     }
     .slide-content-wrapper {
-        padding: 25px 60px;
+        padding: 25px 40px;
+    }
+    .slide-content-wrapper h3 {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+    .slide-content-wrapper p {
+        font-size: 15px;
     }
     .slide-arrow {
         width: 36px;

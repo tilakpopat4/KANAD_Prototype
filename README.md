@@ -1,7 +1,7 @@
-# KANAD Prototype — ForenSync
-## Cyber Crime Case Timeline & Custody Integrity Tracker
+# ForenSync
+## National Cyber Crime Reporting Portal — Case Timeline & Custody Integrity Tracker
 
-A full-stack, local-first cyber forensics prototype built for the **KANAD S.H.I.E.L.D. Hackathon** (Cyber Crime Branch, Ahmedabad). ForenSync automates digital evidence parsing, reconstructs chronological event timelines, maintains an immutable chain-of-custody log, auto-routes complaints, and provides status tracking portals for both citizens and cyber crime investigators.
+A full-stack, local-first cyber forensics platform for the **National Cyber Crime Reporting Portal**. ForenSync automates digital evidence parsing, reconstructs chronological event timelines, maintains an immutable chain-of-custody log, auto-routes complaints, and provides status tracking portals for both citizens and cyber crime investigators.
 
 ---
 

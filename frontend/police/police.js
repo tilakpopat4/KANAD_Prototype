@@ -537,7 +537,7 @@ async function fileOfficialFir() {
             headers: { 'Authorization': `Bearer ${currentToken}` }
         });
         if (!response.ok) throw new Error('Failed to file official FIR');
-        showAlert('FIR Filed officially with Ahmedabad Cyber Branch! Status updated.');
+        showAlert('FIR Filed officially with National Cyber Crime Reporting Portal! Status updated.');
         closeFirModal();
         fetchCases();
     } catch (err) {
@@ -726,7 +726,7 @@ function renderCharts(data) {
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { position: 'bottom', labels: { color: '#a3bece', font: { family: 'Outfit' } } }
+                    legend: { position: 'bottom', labels: { color: '#a3bece', font: { family: 'Oswald' } } }
                 }
             }
         });

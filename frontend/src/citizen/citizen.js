@@ -1007,21 +1007,32 @@ async function handleOtpSubmit(event) {
 
     // Auto-register citizen account (silent)
     try {
-        const regFormData = new FormData();
-        regFormData.append('name', name);
-        regFormData.append('email', email);
-        regFormData.append('password', password);
-        regFormData.append('role', 'citizen');
-        await fetch(`${API_BASE}/register`, { method: 'POST', body: regFormData });
+        await fetch(`${API_BASE}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password, role: 'citizen' })
+        });
     } catch (err) { /* silent */ }
 
     // Login to get JWT
     try {
-        const loginFormData = new FormData();
-        loginFormData.append('username', email);
-        loginFormData.append('password', password);
+        let response = await fetch(`${API_BASE}/token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: email, email: email, password: password })
+        });
 
-        const response = await fetch(`${API_BASE}/token`, { method: 'POST', body: loginFormData });
+        if (!response.ok) {
+            const params = new URLSearchParams();
+            params.append('username', email);
+            params.append('password', password);
+            response = await fetch(`${API_BASE}/token`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            });
+        }
+
         if (!response.ok) throw new Error('Authentication failed after verification');
 
         const data   = await response.json();

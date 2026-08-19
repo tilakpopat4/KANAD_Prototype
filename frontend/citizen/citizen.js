@@ -123,28 +123,21 @@ async function initSlideshow() {
         // Load slides from Firestore, with fallback to local API
         let slides = [];
         try {
-            if (typeof firebase !== 'undefined' && typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.projectId) {
-                const fsApp = firebase.apps.length
-                    ? firebase.app()
-                    : firebase.initializeApp(FIREBASE_CONFIG);
-                const fsDb = firebase.firestore();
-                try {
-                    fsDb.settings({ experimentalForceLongPolling: true, merge: true });
-                } catch(e) {}
+            const fsApp = firebase.apps.length
+                ? firebase.app()
+                : firebase.initializeApp(FIREBASE_CONFIG);
+            const fsDb = firebase.firestore();
 
-                const queryPromise = fsDb.collection('slides')
-                    .where('is_active', '==', true)
-                    .get();
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore timeout")), 2500));
+            const snap = await fsDb.collection('slides')
+                .where('is_active', '==', true)
+                .get();
 
-                const snap = await Promise.race([queryPromise, timeoutPromise]);
-                slides = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                slides.sort((a, b) => {
-                    const timeA = a.created_at?.toMillis ? a.created_at.toMillis() : (new Date(a.created_at || 0).getTime());
-                    const timeB = b.created_at?.toMillis ? b.created_at.toMillis() : (new Date(b.created_at || 0).getTime());
-                    return timeB - timeA;
-                });
-            }
+            slides = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            slides.sort((a, b) => {
+                const timeA = a.created_at?.toMillis ? a.created_at.toMillis() : (new Date(a.created_at || 0).getTime());
+                const timeB = b.created_at?.toMillis ? b.created_at.toMillis() : (new Date(b.created_at || 0).getTime());
+                return timeB - timeA;
+            });
         } catch (fsErr) {
             console.warn("Firestore slides query fallback:", fsErr.message);
         }
@@ -340,11 +333,10 @@ async function sendEmailOtp() {
             const errData = await response.json();
             throw new Error(errData.detail || 'Failed to send OTP');
         }
-        showAlert(`OTP generated: ${otp}. Please enter the code below to verify.`, 'success');
-        showMockEmailNotification(email, otp);
+        showAlert('OTP has been successfully sent to your email.');
     } catch (err) {
         console.warn("Mail OTP failed, using fallback:", err);
-        showAlert(`OTP generated: ${otp}. (Simulation Mode)`, 'info');
+        showAlert(`SMTP not configured or failed: ${err.message}. Showing mock notification.`, 'warning');
         showMockEmailNotification(email, otp);
     }
 
@@ -406,10 +398,7 @@ function showMockEmailNotification(email, otp) {
         </div>
         <div style="font-size: 13px; line-height: 1.4; color: #d4d4d8;">
             <strong style="color: #fff; display: block; font-size: 13px; margin-bottom: 2px;">To: ${email}</strong>
-            Your OTP for citizen verification on ForenSync Cyber Portal is <strong style="color: #38bdf8; font-size: 15px; letter-spacing: 2px;">${otp}</strong>.
-            <div style="margin-top: 10px; display: flex; gap: 8px;">
-                <button onclick="if(document.getElementById('auth-otp-input')){document.getElementById('auth-otp-input').value='${otp}';} if(document.getElementById('register-otp-input')){document.getElementById('register-otp-input').value='${otp}';} this.parentElement.parentElement.parentElement.remove();" style="background: #0284c7; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">Auto-Fill OTP</button>
-            </div>
+            Your OTP for citizen verification on ForenSync Cyber Portal is <strong style="color: var(--neon-cyan); font-size: 14px;">${otp}</strong>. Valid for 5 mins. Please do not share it.
         </div>
     `;
 
@@ -433,33 +422,21 @@ async function handleOtpSubmit(event) {
 
     // Auto-register citizen account (silent)
     try {
-        await fetch(`${API_BASE}/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password, role: 'citizen' })
-        });
+        const regFormData = new FormData();
+        regFormData.append('name', name);
+        regFormData.append('email', email);
+        regFormData.append('password', password);
+        regFormData.append('role', 'citizen');
+        await fetch(`${API_BASE}/register`, { method: 'POST', body: regFormData });
     } catch (err) { /* silent */ }
 
     // Login to get JWT
     try {
-        let response = await fetch(`${API_BASE}/token`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: email, email: email, password: password })
-        });
+        const loginFormData = new FormData();
+        loginFormData.append('username', email);
+        loginFormData.append('password', password);
 
-        if (!response.ok) {
-            // Fallback to urlencoded
-            const params = new URLSearchParams();
-            params.append('username', email);
-            params.append('password', password);
-            response = await fetch(`${API_BASE}/token`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params.toString()
-            });
-        }
-
+        const response = await fetch(`${API_BASE}/token`, { method: 'POST', body: loginFormData });
         if (!response.ok) throw new Error('Authentication failed after verification');
 
         const data   = await response.json();

@@ -1,0 +1,5 @@
+fastapi
+uvicorn[standard]
+argon2-cffi
+python-jose[cryptography]
+pydantic[email]

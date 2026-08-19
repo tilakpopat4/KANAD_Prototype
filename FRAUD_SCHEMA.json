@@ -1,0 +1,443 @@
+{
+  "steps": {
+    "step_1_who_is_filing": {
+      "fields": [
+        {
+          "name": "filer_is_complainant",
+          "type": "boolean",
+          "required": true,
+          "description": "true=myself, false=someone else"
+        },
+        {
+          "name": "filer_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "filer_phone",
+          "type": "string",
+          "required": true,
+          "format": "10-digit"
+        },
+        {
+          "name": "filer_email",
+          "type": "string",
+          "required": true,
+          "format": "email"
+        },
+        {
+          "name": "filer_business_name",
+          "type": "string",
+          "required": false
+        }
+      ]
+    },
+    "step_2_complainant_details": {
+      "personal_fields": [
+        {
+          "name": "complainant_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "complainant_age",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "is_minor",
+          "type": "boolean",
+          "required": false,
+          "description": "Under 17?"
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "address_2",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "suite_apt",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "city",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "county",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "country",
+          "type": "string",
+          "required": true,
+          "options": [
+            "India",
+            "United States",
+            "United Kingdom",
+            "UAE",
+            "Canada",
+            "Australia",
+            "Other"
+          ]
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": "conditional",
+          "condition": "country in [India, United States]"
+        },
+        {
+          "name": "zip_code",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "complainant_phone",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "complainant_email",
+          "type": "string",
+          "required": true,
+          "format": "email"
+        }
+      ],
+      "business_fields_conditional": [
+        {
+          "name": "on_behalf_of_business",
+          "type": "boolean",
+          "required": false,
+          "description": "true=for a business"
+        },
+        {
+          "name": "business_name",
+          "type": "string",
+          "required": "conditional"
+        },
+        {
+          "name": "business_ops_impacted",
+          "type": "boolean",
+          "required": "conditional"
+        },
+        {
+          "name": "business_it_poc",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "business_other_poc",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "critical_infra_sector",
+          "type": "string",
+          "required": false,
+          "options": [
+            "None/Unsure",
+            "Energy",
+            "Financial Services",
+            "Healthcare",
+            "Transportation",
+            "IT",
+            "Communications",
+            "Government"
+          ]
+        },
+        {
+          "name": "critical_infra_subsector",
+          "type": "string",
+          "required": false,
+          "dependsOn": "critical_infra_sector"
+        }
+      ]
+    },
+    "step_3_financial_details": {
+      "summary_fields": [
+        {
+          "name": "money_lost",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "total_loss_amount",
+          "type": "number",
+          "required": "conditional",
+          "condition": "money_lost=true"
+        }
+      ],
+      "transactions_array": [
+        {
+          "name": "transaction_type",
+          "type": "string",
+          "required": false,
+          "options": [
+            "UPI (Google Pay / PhonePe / Paytm / BHIM / other)",
+            "Bank Transfer (IMPS / NEFT / RTGS)",
+            "Debit Card/Credit Card",
+            "Mobile Wallet (Paytm/Amazon Pay/Mobikwik)",
+            "Cash",
+            "Cryptocurrency/Crypto Exchange",
+            "Cheque/Demand Draft",
+            "International Wire Transfer (SWIFT)",
+            "Other"
+          ]
+        },
+        {
+          "name": "money_sent",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "amount",
+          "type": "number",
+          "required": "conditional"
+        },
+        {
+          "name": "transaction_date",
+          "type": "string",
+          "required": "conditional",
+          "format": "DD-MM-YYYY"
+        },
+        {
+          "name": "contacted_bank",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "upi_app",
+          "type": "string",
+          "required": false,
+          "options": [
+            "Google Pay",
+            "PhonePe",
+            "Paytm",
+            "BHIM",
+            "Amazon Pay",
+            "WhatsApp Pay",
+            "Other"
+          ]
+        },
+        {
+          "name": "utr_number",
+          "type": "string",
+          "required": false,
+          "format": "12-digit"
+        },
+        {
+          "name": "payer_vpa",
+          "type": "string",
+          "required": false,
+          "example": "9876543210@upi"
+        },
+        {
+          "name": "payee_vpa",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "payer_bank_upi",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "payee_bank_upi",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "orig_ifsc",
+          "type": "string",
+          "required": false,
+          "format": "ABCD0EFGHIJ"
+        },
+        {
+          "name": "recip_ifsc",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "recip_card_last4",
+          "type": "string",
+          "required": false,
+          "maxLength": 4
+        }
+      ]
+    },
+    "step_4_subjects": {
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "business_name",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "address_2",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "suite_apt",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "city",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "country",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "zip_code",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "website_social",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "ip_address",
+          "type": "string",
+          "required": false
+        }
+      ]
+    },
+    "step_5_incident": {
+      "fields": [
+        {
+          "name": "incident_description",
+          "type": "string",
+          "required": true,
+          "maxLength": 3500
+        }
+      ]
+    },
+    "step_6_additional": {
+      "fields": [
+        {
+          "name": "technical_details",
+          "type": "string",
+          "required": false,
+          "maxLength": 5000
+        },
+        {
+          "name": "other_witnesses",
+          "type": "string",
+          "required": false,
+          "maxLength": 1000
+        },
+        {
+          "name": "reported_elsewhere",
+          "type": "string",
+          "required": false,
+          "maxLength": 1000
+        },
+        {
+          "name": "is_update",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "previous_complaint_number",
+          "type": "string",
+          "required": "conditional"
+        }
+      ]
+    },
+    "step_7_digilocker": {
+      "fields": [
+        {
+          "name": "digilocker_verify_token",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "digilocker_verified",
+          "type": "boolean",
+          "required": true
+        }
+      ]
+    }
+  },
+  "sample_complete": {
+    "filer_is_complainant": true,
+    "filer_name": "Rahul Sharma",
+    "filer_phone": "9876543210",
+    "filer_email": "rahul@example.com",
+    "complainant_name": "Rahul Sharma",
+    "address": "42 Sunrise Apartments",
+    "city": "Mumbai",
+    "country": "India",
+    "state": "Maharashtra",
+    "zip_code": "400076",
+    "complainant_phone": "9876543210",
+    "complainant_email": "rahul@example.com",
+    "money_lost": true,
+    "total_loss_amount": 75000,
+    "transactions": [
+      {
+        "transaction_type": "UPI",
+        "money_sent": true,
+        "amount": 50000,
+        "transaction_date": "18-08-2026",
+        "contacted_bank": true,
+        "upi_app": "Google Pay",
+        "utr_number": "123456789012",
+        "payer_vpa": "rahul@axisbank",
+        "payee_vpa": "fraudster@paytm"
+      }
+    ],
+    "subjects": [
+      {
+        "name": "Unknown Fraudster",
+        "city": "New Delhi",
+        "phone": "9876543210"
+      }
+    ],
+    "incident_description": "Received fake bank fraud call",
+    "is_update": false,
+    "digilocker_verify_token": "TOKEN_HERE",
+    "digilocker_verified": true
+  }
+}

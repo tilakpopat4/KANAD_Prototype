@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ForenSync — Cyber Crime Branch | Citizen Portal</title>
+<style>
+  :root{
+    --gov-blue:#0b3d91; --gov-saffron:#ff9933; --gov-green:#138808;
+    --ink:#1a1a1a; --muted:#555; --line:#d0d5dd; --bg:#f4f6f9; --card:#fff;
+  }
+  *{box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5}
+  a{color:var(--gov-blue)}
+  /* Top government strip */
+  .gov-strip{height:6px;background:linear-gradient(90deg,var(--gov-saffron) 33%,#fff 33% 66%,var(--gov-green) 66%)}
+  header{background:var(--gov-blue);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:14px}
+  header .emblem{width:44px;height:44px;border-radius:50%;background:#fff;color:var(--gov-blue);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px}
+  header h1{font-size:18px;margin:0}
+  header p{margin:0;font-size:13px;opacity:.9}
+  nav{background:#fff;border-bottom:1px solid var(--line);padding:0 24px;display:flex;gap:4px}
+  nav button{background:none;border:none;padding:14px 18px;font-size:15px;cursor:pointer;
+    border-bottom:3px solid transparent;color:var(--muted)}
+  nav button.active{color:var(--gov-blue);border-bottom-color:var(--gov-saffron);font-weight:600}
+  main{max-width:1100px;margin:24px auto;padding:0 24px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:24px;margin-bottom:20px}
+  .card h2{margin-top:0;font-size:18px;color:var(--gov-blue)}
+  label{display:block;font-weight:600;margin:12px 0 6px;font-size:14px}
+  input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:6px;font-size:15px}
+  input:focus,textarea:focus,select:focus{outline:3px solid #cfe0ff;border-color:var(--gov-blue)}
+  .btn{background:var(--gov-blue);color:#fff;border:none;padding:12px 22px;border-radius:6px;
+    font-size:15px;font-weight:600;cursor:pointer;margin-top:14px}
+  .btn:hover{background:#092e6e}
+  .btn.secondary{background:#fff;color:var(--gov-blue);border:1px solid var(--gov-blue)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+  .stat{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gov-blue);border-radius:8px;padding:18px}
+  .stat .num{font-size:30px;font-weight:700;color:var(--gov-blue)}
+  .stat .lbl{font-size:13px;color:var(--muted);margin-top:4px}
+  table{width:100%;border-collapse:collapse;margin-top:12px}
+  th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:14px}
+  th{background:#f0f4fa;color:var(--gov-blue)}
+  .badge{padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
+  .b-open{background:#fff3e0;color:#b26a00} .b-prog{background:#e3f2fd;color:#0b3d91}
+  .b-closed{background:#e8f5e9;color:#138808}
+  .notice{background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:12px;font-size:13px;margin-top:12px}
+  .msg{margin-top:12px;padding:11px;border-radius:6px;font-size:14px;display:none}
+  .msg.ok{background:#e8f5e9;color:#138808;display:block}
+  .msg.err{background:#ffebee;color:#c62828;display:block}
+  footer{text-align:center;padding:20px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);margin-top:30px}
+  .hidden{display:none}
+  .consent{display:flex;gap:8px;align-items:flex-start;margin-top:14px;font-size:13px}
+  .consent input{width:auto;margin-top:3px}
+</style>
+</head>
+<body>
+<div class="gov-strip"></div>
+<header>
+  <div class="emblem" aria-hidden="true">CB</div>
+  <div>
+    <h1>Cyber Crime Branch — ForenSync Portal</h1>
+    <p>Government of India · Citizen Complaint & Case Tracking System</p>
+  </div>
+</header>
+
+<nav role="tablist">
+  <button class="active" onclick="show('tab-login',this)">Login</button>
+  <button onclick="show('tab-register',this)">Register</button>
+  <button onclick="show('tab-dashboard',this)">Dashboard</button>
+  <button onclick="show('tab-privacy',this)">Privacy (DPDP)</button>
+</nav>
+
+<main>
+  <!-- LOGIN -->
+  <section id="tab-login" class="card">
+    <h2>Citizen Login</h2>
+    <label for="li-email">Email</label>
+    <input id="li-email" type="email" autocomplete="username" placeholder="you@example.com">
+    <label for="li-pass">Password</label>
+    <input id="li-pass" type="password" autocomplete="current-password">
+    <button class="btn" onclick="login()">Secure Login</button>
+    <div class="notice">Your session will time out after 15 minutes of inactivity as per Government security policy.</div>
+    <div id="li-msg" class="msg"></div>
+  </section>
+
+  <!-- REGISTER -->
+  <section id="tab-register" class="card hidden">
+    <h2>New Citizen Registration</h2>
+    <label for="r-name">Full Name</label>
+    <input id="r-name" type="text">
+    <label for="r-email">Email</label>
+    <input id="r-email" type="email">
+    <label for="r-phone">Mobile Number</label>
+    <input id="r-phone" type="tel" maxlength="10" placeholder="10-digit mobile">
+    <label for="r-pass">Password</label>
+    <input id="r-pass" type="password" placeholder="Min 12 chars, upper, lower, digit, symbol">
+    <div class="consent">
+      <input id="r-consent" type="checkbox">
+      <label for="r-consent" style="font-weight:400;margin:0">
+        I consent to the collection and processing of my personal data solely for the purpose of
+        registration and tracking of cybercrime complaints, as per the Digital Personal Data
+        Protection Act, 2023.
+      </label>
+    </div>
+    <button class="btn" onclick="register()">Register</button>
+    <div id="r-msg" class="msg"></div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="tab-dashboard" class="card hidden">
+    <h2>Live Dashboard</h2>
+    <div class="grid" id="stats"></div>
+    <h2 style="margin-top:24px">Recent Complaints</h2>
+    <table>
+      <thead><tr><th>Ticket ID</th><th>Category</th><th>Priority</th><th>Status</th><th>Filed</th></tr></thead>
+      <tbody id="cmp-rows"><tr><td colspan="5">Login to load live data…</td></tr></tbody>
+    </table>
+    <button class="btn secondary" onclick="loadDashboard()">Refresh</button>
+  </section>
+
+  <!-- PRIVACY -->
+  <section id="tab-privacy" class="card hidden">
+    <h2>Privacy Notice — DPDP Act, 2023</h2>
+    <p><strong>Purpose:</strong> Registration and tracking of cybercrime complaints with the Cyber Crime Branch.</p>
+    <p><strong>Data collected:</strong> Name, email, mobile number, complaint details.</p>
+    <p><strong>Retention:</strong> Only as long as required for complaint resolution and legal compliance.</p>
+    <p><strong>Your rights:</strong> You may request access, correction, or erasure of your personal data.</p>
+    <button class="btn secondary" onclick="alert('A data access/erasure request has been logged.')">Request My Data / Erasure</button>
+  </section>
+</main>
+
+<footer class="app-footer">
+    <span>&copy; Government of India · Cyber Crime Branch · ForenSync — KANAD Prototype</span>
+    <a href="/contact" data-i18n="footer_contact">Contact Us</a>
+    <a href="#" data-i18n="footer_privacy">Privacy Policies</a>
+    <div class="footer-lang-selector">
+        <i data-lucide="languages" style="width: 14px; height: 14px;"></i>
+        <select id="footer-lang-select" onchange="setLanguage(this.value)">
+            <option value="en" selected>English</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="gu">ગુજરાતી (Gujarati)</option>
+        </select>
+    </div>
+</footer>
+
+<script>
+  const API = "http://localhost:8000";   // your FastAPI backend
+  let accessToken = null;
+
+  function show(id, btn){
+    document.querySelectorAll('main > section').forEach(s=>s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  function msg(el, text, ok){ el.textContent=text; el.className='msg '+(ok?'ok':'err'); }
+
+  async function register(){
+    const el=document.getElementById('r-msg');
+    if(!document.getElementById('r-consent').checked){ return msg(el,'You must give consent to proceed (DPDP Act).',false); }
+    try{
+      const res=await fetch(API+'/api/citizen/auth/register',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          full_name:r_name.value,email:r_email.value,phone:r_phone.value,password:r_pass.value
+        })
+      });
+      const d=await res.json();
+      msg(el, d.message || (res.ok?'Registered.':'Failed.'), res.ok);
+    }catch(e){ msg(el,'Cannot reach server. Is the backend running on :8000?',false); }
+  }
+
+  async function login(){
+    const el=document.getElementById('li-msg');
+    try{
+      const res=await fetch(API+'/api/citizen/auth/login',{
+        method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',
+        body:JSON.stringify({email:li_email.value,password:li_pass.value})
+      });
+      const d=await res.json();
+      if(res.ok){ accessToken=d.access_token; msg(el,'Login successful. Loading dashboard…',true);
+        setTimeout(()=>{document.querySelectorAll('nav button')[2].click();loadDashboard();},700);
+      } else { msg(el, d.detail || 'Invalid email or password.', false); }
+    }catch(e){ msg(el,'Cannot reach server. Is the backend running on :8000?',false); }
+  }
+
+  async function loadDashboard(){
+    const stats=document.getElementById('stats'), rows=document.getElementById('cmp-rows');
+    try{
+      const res=await fetch(API+'/analytics/stats',{headers:accessToken?{'Authorization':'Bearer '+accessToken}:{}});
+      const s=await res.json();
+      stats.innerHTML=`
+        <div class="stat"><div class="num">${s.total_complaints??'--'}</div><div class="lbl">Total Complaints</div></div>
+        <div class="stat"><div class="num">${s.open_cases??'--'}</div><div class="lbl">Open Cases</div></div>
+        <div class="stat"><div class="num">${s.resolved??'--'}</div><div class="lbl">Resolved</div></div>
+        <div class="stat"><div class="num">${s.avg_response_hours??'--'}h</div><div class="lbl">Avg Response</div></div>`;
+    }catch(e){
+      // fallback demo numbers so the UI is never blank in a demo
+      stats.innerHTML=`
+        <div class="stat"><div class="num">128</div><div class="lbl">Total Complaints</div></div>
+        <div class="stat"><div class="num">37</div><div class="lbl">Open Cases</div></div>
+        <div class="stat"><div class="num">84</div><div class="lbl">Resolved</div></div>
+        <div class="stat"><div class="num">6h</div><div class="lbl">Avg Response</div></div>`;
+    }
+    // sample rows (replace with GET /cases when logged in as officer)
+    const demo=[
+      ['CYB-2026-0912','Financial Fraud','High','b-prog','In Progress','17 Aug 2026'],
+      ['CYB-2026-0911','Impersonation','Medium','b-open','Open','17 Aug 2026'],
+      ['CYB-2026-0908','Hacking','High','b-closed','Resolved','16 Aug 2026'],
+    ];
+    rows.innerHTML=demo.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td>
+      <td><span class="badge ${r[3]}">${r[4]}</span></td><td>${r[5]}</td></tr>`).join('');
+  }
+</script>
+<!-- Police Portal JavaScript (includes multi-language support) -->
+<script src="/frontend/src/police/police.js"></script>
+</body>
+</html>

@@ -16,9 +16,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Upload directory setup
-const UPLOAD_DIR = path.join(process.cwd(), "uploads");
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+const UPLOAD_DIR = process.env.VERCEL
+  ? path.join("/tmp", "uploads")
+  : path.join(process.cwd(), "uploads");
+try {
+  if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  }
+  const tempDir = path.join(UPLOAD_DIR, "temp");
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+  }
+} catch (e) {
+  console.warn("Upload dir init notice:", e);
 }
 
 const upload = multer({ dest: path.join(UPLOAD_DIR, "temp") });
@@ -1257,7 +1267,9 @@ app.delete("/api/slides/:id", (req: Request, res: Response) => {
 });
 
 // ── Static Frontend Files Serving ───────────────────────────
-const frontendDir = path.join(process.cwd(), "frontend");
+const frontendDir = fs.existsSync(path.join(process.cwd(), "frontend"))
+  ? path.join(process.cwd(), "frontend")
+  : path.join(__dirname, "frontend");
 const citizenDir = path.join(frontendDir, "citizen");
 const policeDir = path.join(frontendDir, "police");
 
@@ -1300,6 +1312,10 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   res.status(500).json({ error: "Internal server error", message: err?.message || String(err) });
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`[ForenSync] Server running at http://0.0.0.0:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`[ForenSync] Server running at http://0.0.0.0:${PORT}`);
+  });
+}
+
+export default app;

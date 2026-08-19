@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CitizenFinancialFraudReportSchema",
+  "description": "Schema for structured cyber financial fraud complaints filed via ForenSync Citizen Portal",
+  "type": "object",
+  "required": ["filer", "complainant", "financial_details", "incident"],
+  "properties": {
+    "step_1_filer": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "relation_to_victim": { "type": "string", "enum": ["Self", "Parent", "Spouse", "Relative", "Friend", "Legal Representative"] }
+      }
+    },
+    "step_2_complainant": {
+      "type": "object",
+      "properties": {
+        "full_name": { "type": "string" },
+        "gender": { "type": "string" },
+        "dob": { "type": "string", "format": "date" },
+        "address": { "type": "string" },
+        "state": { "type": "string" },
+        "district": { "type": "string" },
+        "pincode": { "type": "string" }
+      }
+    },
+    "step_3_financial_details": {
+      "type": "object",
+      "required": ["amount_lost", "bank_name", "transaction_type"],
+      "properties": {
+        "amount_lost": { "type": "number", "minimum": 0 },
+        "bank_name": { "type": "string" },
+        "account_number_last4": { "type": "string" },
+        "transaction_type": { "type": "string", "enum": ["UPI", "IMPS", "NEFT", "RTGS", "Credit Card", "Debit Card", "Net Banking", "Wallet", "Crypto"] },
+        "transaction_id_utr": { "type": "string" },
+        "transaction_date_time": { "type": "string", "format": "date-time" },
+        "fraudulent_upi_id": { "type": "string" },
+        "fraudulent_account_number": { "type": "string" }
+      }
+    },
+    "step_4_subjects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "phone": { "type": "string" },
+          "email": { "type": "string" },
+          "website_url": { "type": "string" },
+          "social_handle": { "type": "string" }
+        }
+      }
+    },
+    "step_5_incident": {
+      "type": "object",
+      "required": ["category", "description"],
+      "properties": {
+        "category": { "type": "string", "default": "financial_fraud" },
+        "sub_category": { "type": "string", "enum": ["UPI Fraud", "Investment Scheme", "KYC Update Phishing", "Job Fraud", "Lottery/Gift Scam", "Loan App Extortion", "SIM Swap", "Impersonation Scam"] },
+        "description": { "type": "string", "minLength": 10 },
+        "incident_datetime": { "type": "string", "format": "date-time" }
+      }
+    },
+    "step_6_additional": {
+      "type": "object",
+      "properties": {
+        "evidence_files": { "type": "array", "items": { "type": "string" } },
+        "helpline_1930_called": { "type": "boolean" },
+        "bank_notified": { "type": "boolean" }
+      }
+    },
+    "step_7_digilocker": {
+      "type": "object",
+      "properties": {
+        "is_verified": { "type": "boolean" },
+        "verification_timestamp": { "type": "string" }
+      }
+    }
+  }
+}

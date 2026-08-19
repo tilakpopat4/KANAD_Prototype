@@ -287,6 +287,17 @@ function seedDatabase() {
     is_active: 1
   };
 
+  const abhay: User = {
+    id: userIdCounter++,
+    name: "Inspector Abhay Shukla",
+    email: "abhay@forensync.gov",
+    role: "employee",
+    password_hash: hashPassword("abhay123"),
+    desk: "General Investigation Desk",
+    branch_id: "br_ahm_central",
+    is_active: 1
+  };
+
   const admin: User = {
     id: userIdCounter++,
     name: "ACP - National Cyber Crime Reporting Portal",
@@ -297,7 +308,7 @@ function seedDatabase() {
     is_active: 1
   };
 
-  users.push(citizen, employee, admin);
+  users.push(citizen, employee, abhay, admin);
 
   // Complaints
   const c1: Complaint = {

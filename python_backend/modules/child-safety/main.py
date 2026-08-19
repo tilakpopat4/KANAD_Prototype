@@ -1,0 +1,2 @@
+from child_safety.routes import router as child_safety_router
+app.include_router(child_safety_router)

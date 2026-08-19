@@ -6,7 +6,7 @@
 //
 // After updating, also:
 //   1. In Firestore → Rules: paste the rules from implementation_plan.md
-//   2. Run backend/scripts/setup_admin.py once to create super_admin
+//   2. Run api/core/security.py setup once to create super_admin (see api/main.py)
 // ============================================================
 
 const FIREBASE_CONFIG = {

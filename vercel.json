@@ -2,17 +2,17 @@
   "version": 2,
   "builds": [
     {
-      "src": "server.ts",
+      "src": "api/index.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["frontend/**"]
+        "includeFiles": ["frontend/**", "sample_data/**", "package.json"]
       }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "server.ts"
+      "dest": "api/index.ts"
     }
   ]
 }

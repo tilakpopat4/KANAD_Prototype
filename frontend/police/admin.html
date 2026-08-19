@@ -24,11 +24,15 @@
   
   <style>
     :root {
+      /* Dual Colour Palette: Primary Executive Blue/Navy + Secondary Cerulean Accent */
       --brand-navy: #0f1f38;
-      --brand-navy-dark: #091322;
+      --brand-navy-dark: #0a1526;
       --brand-primary: #18548e;
       --brand-primary-hover: #123e6b;
+      --brand-primary-light: #eff6ff;
       --brand-accent: #0284c7;
+      --brand-accent-hover: #0369a1;
+      --brand-accent-light: #f0f9ff;
       
       --success: #059669;
       --success-bg: #ecfdf5;
@@ -44,15 +48,17 @@
       
       --bg-body: #f8fafc;
       --bg-card: #ffffff;
-      --bg-sidebar: #0b1320;
-      --bg-sidebar-hover: #132238;
+      --bg-sidebar: #ffffff;
+      --bg-sidebar-head: #f8fafc;
+      --bg-sidebar-hover: #f1f5f9;
+      --bg-sidebar-selected: #eff6ff;
       
       --border: #e2e8f0;
-      --border-subtle: #edf2f7;
+      --border-subtle: #f1f5f9;
       --border-strong: #cbd5e1;
       
       --text-main: #0f172a;
-      --text-muted: #475569;
+      --text-muted: #64748b;
       --text-tertiary: #94a3b8;
       
       --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -87,7 +93,7 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
-      background: #0b1320 radial-gradient(circle at 50% 20%, rgba(24, 84, 142, 0.25) 0%, rgba(11, 19, 32, 0.95) 75%);
+      background: #0f1f38 radial-gradient(circle at 50% 20%, rgba(24, 84, 142, 0.35) 0%, #0a1526 80%);
       position: relative;
     }
     
@@ -109,7 +115,7 @@
       width: 440px;
       max-width: calc(100vw - 32px);
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
     }
     
     .login-logo {
@@ -153,7 +159,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(24, 84, 142, 0.08);
+      background: var(--brand-primary-light);
       color: var(--brand-primary);
       padding: 4px 10px;
       border-radius: 6px;
@@ -290,27 +296,6 @@
       text-transform: uppercase;
     }
     
-    .topbar-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #f1f5f9;
-      border: 1px solid var(--border);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-    
-    .topbar-badge-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
-    }
-    
     .topbar-right {
       display: flex;
       align-items: center;
@@ -327,8 +312,8 @@
       width: 36px;
       height: 36px;
       border-radius: 8px;
-      background: #0f1f38;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--brand-navy);
+      border: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -365,62 +350,67 @@
       color: var(--danger);
     }
 
-    /* Sidebar */
+    /* ── Light Sidebar (Dual Colour Theme) ─────────────────────────── */
     .sidebar {
       background: var(--bg-sidebar);
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      border-right: 1px solid var(--border);
     }
     
     .sidebar-head {
       padding: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--bg-sidebar-head);
+      border-bottom: 1px solid var(--border);
     }
     
     .sidebar-search {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #ffffff;
+      border: 1px solid var(--border-strong);
       border-radius: 8px;
       padding: 8px 12px;
       margin-bottom: 12px;
-      transition: border-color 0.15s ease;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     
     .sidebar-search:focus-within {
-      border-color: rgba(255, 255, 255, 0.3);
-      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 3px rgba(24, 84, 142, 0.1);
     }
     
     .sidebar-search input {
       background: transparent;
       border: none;
       outline: none;
-      color: #ffffff;
+      color: var(--text-main);
       font-size: 13px;
       flex: 1;
     }
     
     .sidebar-search input::placeholder {
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-tertiary);
     }
     
     .filter-tabs {
       display: flex;
-      gap: 6px;
+      gap: 4px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
     }
     
     .filter-tab {
       flex: 1;
       padding: 6px 8px;
       border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: none;
       background: transparent;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--text-muted);
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
@@ -429,23 +419,27 @@
     }
     
     .filter-tab:hover {
-      background: rgba(255, 255, 255, 0.06);
-      color: #ffffff;
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--text-main);
     }
     
     .filter-tab.active {
-      background: rgba(2, 132, 199, 0.25);
-      border-color: var(--brand-accent);
-      color: #38bdf8;
+      background: #ffffff;
+      color: var(--brand-primary);
+      font-weight: 700;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
     }
     
     .sidebar-section-label {
       font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
       padding: 14px 16px 6px;
+      background: #fafbfc;
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
     }
     
     .branch-item {
@@ -456,6 +450,8 @@
       cursor: pointer;
       transition: background 0.12s ease;
       border-left: 3px solid transparent;
+      border-bottom: 1px solid var(--border-subtle);
+      background: #ffffff;
     }
     
     .branch-item:hover {
@@ -463,8 +459,8 @@
     }
     
     .branch-item.selected {
-      background: rgba(24, 84, 142, 0.35);
-      border-left-color: var(--brand-accent);
+      background: var(--bg-sidebar-selected);
+      border-left-color: var(--brand-primary);
     }
     
     .branch-dot {
@@ -490,15 +486,20 @@
     .branch-item-name {
       font-size: 13px;
       font-weight: 600;
-      color: #f1f5f9;
+      color: var(--text-main);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     
+    .branch-item.selected .branch-item-name {
+      color: var(--brand-primary);
+      font-weight: 700;
+    }
+    
     .branch-item-district {
       font-size: 11px;
-      color: rgba(255, 255, 255, 0.45);
+      color: var(--text-muted);
       margin-top: 1px;
     }
     
@@ -507,25 +508,26 @@
       font-weight: 600;
       padding: 2px 8px;
       border-radius: 12px;
-      background: rgba(255, 255, 255, 0.08);
-      color: rgba(255, 255, 255, 0.7);
+      background: #f1f5f9;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
       flex-shrink: 0;
       font-family: var(--font-mono);
     }
     
     .branch-emp-badge.full {
-      background: rgba(5, 150, 105, 0.2);
-      color: #34d399;
-      border: 1px solid rgba(5, 150, 105, 0.3);
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid var(--success-border);
     }
     
     .sidebar-add-btn {
       margin: 14px 16px 20px;
       padding: 10px;
-      background: rgba(24, 84, 142, 0.2);
-      border: 1px dashed rgba(2, 132, 199, 0.4);
+      background: var(--brand-primary-light);
+      border: 1px dashed #93c5fd;
       border-radius: 8px;
-      color: #38bdf8;
+      color: var(--brand-primary);
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
@@ -537,7 +539,8 @@
     }
     
     .sidebar-add-btn:hover {
-      background: rgba(24, 84, 142, 0.4);
+      background: #dbeafe;
+      border-color: var(--brand-primary);
       border-style: solid;
     }
 
@@ -653,13 +656,13 @@
     .status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 4px 12px;
-      border-radius: 20px;
+      padding: 3px 8px;
+      border-radius: 4px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      line-height: 1;
     }
     
     .status-badge.active {
@@ -1348,7 +1351,7 @@
     /* Scrollbars */
     .sidebar::-webkit-scrollbar { width: 4px; }
     .sidebar::-webkit-scrollbar-track { background: transparent; }
-    .sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 2px; }
+    .sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
     
     .main-panel::-webkit-scrollbar { width: 6px; }
     .main-panel::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -1371,16 +1374,12 @@
       </div>
     </div>
     
-    <div class="login-badge">
-      <i data-lucide="shield-check" style="width:13px;height:13px;"></i> Super Admin Clearance
-    </div>
-    
-    <h2>Command Center Login</h2>
-    <p>Restricted access for Gujarat Cyber Cell Super Administrators.</p>
+    <h2>Admin Sign In</h2>
+    <p>Administrative console for Gujarat Cyber Crime Division.</p>
     
     <form id="login-form" onsubmit="handleLogin(event)">
       <div class="lf-group">
-        <label>Super Admin Email</label>
+        <label>Admin Email</label>
         <input type="email" id="login-email" placeholder="superadmin@forensync.gov.in" required>
       </div>
       <div class="lf-group">
@@ -1388,7 +1387,7 @@
         <input type="password" id="login-password" placeholder="••••••••••••" required>
       </div>
       <button type="submit" class="btn-login" id="login-btn">
-        <span>Authenticate Session</span> &nbsp;<i data-lucide="arrow-right" style="width:15px;height:15px;"></i>
+        <span>Sign In</span> &nbsp;<i data-lucide="log-in" style="width:15px;height:15px;"></i>
       </button>
     </form>
     
@@ -1420,11 +1419,6 @@
     </div>
     
     <div class="topbar-right">
-      <div class="topbar-badge">
-        <div class="topbar-badge-dot"></div>
-        <span>Central Grid Active</span>
-      </div>
-      
       <div class="topbar-admin">
         <div class="topbar-avatar" id="admin-avatar">SA</div>
         <div>
@@ -1443,7 +1437,7 @@
   <aside class="sidebar" id="branch-sidebar">
     <div class="sidebar-head">
       <div class="sidebar-search">
-        <i data-lucide="search" style="width: 14px; height: 14px; color: rgba(255,255,255,0.4);"></i>
+        <i data-lucide="search" style="width: 14px; height: 14px; color: var(--text-muted);"></i>
         <input type="text" id="branch-search" placeholder="Search 30 branches..." oninput="filterBranches()">
       </div>
       <div class="filter-tabs">
@@ -1455,8 +1449,8 @@
 
     <!-- Dynamic Branch List -->
     <div id="branch-list-container" style="flex: 1; overflow-y: auto;">
-      <div style="padding: 24px 16px; text-align: center; color: rgba(255,255,255,0.4); font-size: 12px;">
-        <span class="spinner" style="margin-bottom: 8px;"></span><br>Loading Cyber Branches...
+      <div style="padding: 24px 16px; text-align: center; color: var(--text-muted); font-size: 12px;">
+        <span class="spinner" style="margin-bottom: 8px; border-color: #cbd5e1; border-top-color: var(--brand-primary);"></span><br>Loading Cyber Branches...
       </div>
     </div>
 
@@ -1764,7 +1758,7 @@ function renderBranchSidebar(){
     });
   });
 
-  if (!html) html = '<div style="padding:20px 16px;text-align:center;color:rgba(255,255,255,.3);font-size:12px;">No branches found</div>';
+  if (!html) html = '<div style="padding:20px 16px;text-align:center;color:var(--text-muted);font-size:12px;">No branches found</div>';
   document.getElementById('branch-list-container').innerHTML = html;
 }
 
@@ -1790,52 +1784,52 @@ function renderOverview(){
   document.getElementById('main-panel').innerHTML = `
     <div class="overview-head">
       <h2>Welcome, ${userProfile.name || 'Super Admin'}</h2>
-      <p>Gujarat Police &mdash; Cyber Crime Branch &mdash; Admin Control Center</p>
+      <p>Gujarat Cyber Crime Division &mdash; Central Administration Console</p>
     </div>
     ${FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY' ? `
     <div class="setup-banner" style="margin-bottom:24px;">
       <div>
-        <h3>&#x26A0; Firebase Config Not Set</h3>
-        <p>Update <code>frontend/firebase-config.js</code> with your Firebase project credentials to activate all features.</p>
+        <h3>Database Configuration Pending</h3>
+        <p>Update <code>frontend/firebase-config.js</code> with your project credentials to activate all features.</p>
       </div>
     </div>` : ''}
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-label">Total Branches</div>
         <div class="stat-val">${totalBranches}</div>
-        <div class="stat-sub">Across Gujarat</div>
+        <div class="stat-sub">Across 33 Districts</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Active Branches</div>
-        <div class="stat-val" style="color:#10b981;">${activeBranches}</div>
-        <div class="stat-sub">${totalBranches - activeBranches} suspended</div>
+        <div class="stat-val" style="color:var(--success);">${activeBranches}</div>
+        <div class="stat-sub">${totalBranches - activeBranches} Suspended</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Total Employees</div>
+        <div class="stat-label">Total Personnel</div>
         <div class="stat-val">${totalEmployees}</div>
-        <div class="stat-sub">Max capacity: ${totalBranches * 3}</div>
+        <div class="stat-sub">Assigned Officers</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Zones Covered</div>
+        <div class="stat-label">Administrative Zones</div>
         <div class="stat-val">5</div>
-        <div class="stat-sub">N · S · E · W · Central</div>
+        <div class="stat-sub">Statewide Jurisdiction</div>
       </div>
     </div>
 
     ${suspendedBranches.length > 0 ? `
-    <div class="section-panel" style="border-left:4px solid #ef4444;">
+    <div class="section-panel" style="border-left:4px solid var(--danger);">
       <div class="section-head">
-        <div class="section-title"><i data-lucide="alert-triangle" style="width:16px;height:16px;color:#ef4444;"></i> Suspended Branches</div>
+        <div class="section-title"><i data-lucide="alert-triangle" style="width:16px;height:16px;color:var(--danger);"></i> Suspended Branches</div>
         <span class="count-chip warn">${suspendedBranches.length}</span>
       </div>
       <table class="branch-list-table">
-        <thead><tr><th>Branch</th><th>District</th><th>Employees</th><th>Action</th></tr></thead>
+        <thead><tr><th>Branch</th><th>District</th><th>Assigned Personnel</th><th>Status</th></tr></thead>
         <tbody>${suspendedBranches.map(b=>`
           <tr onclick="selectBranch('${b.id}')">
             <td><strong>${b.name}</strong></td>
             <td>${b.district}</td>
-            <td>${b.employeeCount||0}/3</td>
-            <td><span class="status-badge suspended">&#x23F8; Suspended</span></td>
+            <td>${b.employeeCount||0} / 3 Officers</td>
+            <td><span class="status-badge suspended">Suspended</span></td>
           </tr>`).join('')}
         </tbody>
       </table>
@@ -1843,23 +1837,23 @@ function renderOverview(){
 
     <div class="section-panel">
       <div class="section-head">
-        <div class="section-title"><i data-lucide="git-branch" style="width:16px;height:16px;"></i> All Branches</div>
+        <div class="section-title"><i data-lucide="git-branch" style="width:16px;height:16px;"></i> All Cyber Branches</div>
         <button class="btn-action btn-primary" style="font-size:12px;padding:7px 14px;" onclick="openAddBranchModal()">
-          <i data-lucide="plus" style="width:13px;height:13px;"></i> New Branch
+          <i data-lucide="plus" style="width:13px;height:13px;"></i> Add Branch
         </button>
       </div>
       <table class="branch-list-table">
         <thead>
-          <tr><th>Branch Name</th><th>District</th><th>Zone</th><th>Employees</th><th>Status</th></tr>
+          <tr><th>Branch Name</th><th>District</th><th>Zone</th><th>Assigned Personnel</th><th>Status</th></tr>
         </thead>
         <tbody>
           ${recentlyAdded.map(b=>`
             <tr onclick="selectBranch('${b.id}')">
               <td><strong>${b.name}</strong></td>
               <td>${b.district}</td>
-              <td>${b.zone}</td>
-              <td>${b.employeeCount||0} / 3</td>
-              <td><span class="status-badge ${b.status}">&#x25CF; ${b.status.charAt(0).toUpperCase()+b.status.slice(1)}</span></td>
+              <td>${b.zone} Zone</td>
+              <td>${b.employeeCount||0} / 3 Officers</td>
+              <td><span class="status-badge ${b.status}">${b.status.toUpperCase()}</span></td>
             </tr>`).join('')}
         </tbody>
       </table>
@@ -1905,7 +1899,9 @@ function renderBranchDetail(){
   const empCount    = branchEmployees.length;
   const canAddEmp   = empCount < 3 && !isSuspended;
 
-  const empCardsHtml = branchEmployees.map(emp => {
+  const empCardsHtml = branchEmployees.length === 0
+    ? `<div class="empty-state" style="grid-column:1/-1;padding:24px;text-align:center;"><p>No officers currently assigned to this branch.</p></div>`
+    : branchEmployees.map(emp => {
     const initials = (emp.name||'').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
     const isSusp = emp.status === 'suspended';
     return `
@@ -1919,15 +1915,15 @@ function renderBranchDetail(){
           </div>
         </div>
         <div class="emp-status-row">
-          <span class="status-badge ${emp.status||'active'}">&#x25CF; ${(emp.status||'active').charAt(0).toUpperCase()+(emp.status||'active').slice(1)}</span>
+          <span class="status-badge ${emp.status||'active'}">${(emp.status||'active').toUpperCase()}</span>
         </div>
         <div class="emp-actions">
           <button class="btn-sm btn-sm-view" onclick="viewEmployee('${emp.uid}')">
             <i data-lucide="eye" style="width:11px;height:11px;"></i> View
           </button>
           ${isSusp
-            ? `<button class="btn-sm btn-sm-activate" onclick="setEmpStatus('${emp.uid}',false)"><i data-lucide="play" style="width:11px;height:11px;"></i> Activate</button>`
-            : `<button class="btn-sm btn-sm-suspend" onclick="setEmpStatus('${emp.uid}',true)"><i data-lucide="pause" style="width:11px;height:11px;"></i> Suspend</button>`}
+            ? `<button class="btn-sm btn-sm-activate" onclick="setEmpStatus('${emp.uid}',false)"><i data-lucide="check-circle" style="width:11px;height:11px;"></i> Activate</button>`
+            : `<button class="btn-sm btn-sm-suspend" onclick="setEmpStatus('${emp.uid}',true)"><i data-lucide="pause-circle" style="width:11px;height:11px;"></i> Suspend</button>`}
           <button class="btn-sm btn-sm-remove" onclick="confirmRemoveEmp('${emp.uid}','${(emp.name||'').replace(/'/g,"\\'")}')">
             <i data-lucide="trash-2" style="width:11px;height:11px;"></i> Remove
           </button>
@@ -1936,7 +1932,7 @@ function renderBranchDetail(){
   }).join('');
 
   const casesHtml = branchCases.length === 0
-    ? `<div class="empty-state"><i data-lucide="folder-open" style="width:32px;height:32px;display:block;margin:0 auto;"></i><p>No cases assigned to this branch yet.</p></div>`
+    ? `<div class="empty-state"><i data-lucide="folder-open" style="width:32px;height:32px;display:block;margin:0 auto 8px auto;"></i><p>No cases assigned to this branch yet.</p></div>`
     : `<div style="overflow-x:auto;">
         <table class="cases-table">
           <thead><tr><th>Ticket</th><th>Category</th><th>Complainant</th><th>Priority</th><th>Status</th><th>Filed</th></tr></thead>
@@ -1966,13 +1962,13 @@ function renderBranchDetail(){
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px;flex-shrink:0;">
-          <span class="status-badge ${b.status}">&#x25CF; ${isSuspended?'Suspended':'Active'}</span>
+          <span class="status-badge ${b.status}">${b.status.toUpperCase()}</span>
         </div>
       </div>
       <div class="branch-actions">
         ${isSuspended
-          ? `<button class="btn-action btn-activate" onclick="setBranchStatus('active')"><i data-lucide="play" style="width:13px;height:13px;"></i> Open Branch</button>`
-          : `<button class="btn-action btn-suspend" onclick="setBranchStatus('suspended')"><i data-lucide="pause" style="width:13px;height:13px;"></i> Suspend Branch</button>`}
+          ? `<button class="btn-action btn-activate" onclick="setBranchStatus('active')"><i data-lucide="check-circle" style="width:13px;height:13px;"></i> Reactivate Branch</button>`
+          : `<button class="btn-action btn-suspend" onclick="setBranchStatus('suspended')"><i data-lucide="pause-circle" style="width:13px;height:13px;"></i> Suspend Branch</button>`}
         <button class="btn-action btn-danger" onclick="confirmDeleteBranch()">
           <i data-lucide="trash-2" style="width:13px;height:13px;"></i> Delete Branch
         </button>
@@ -1982,25 +1978,23 @@ function renderBranchDetail(){
     <div class="section-panel">
       <div class="section-head">
         <div class="section-title">
-          <i data-lucide="users" style="width:16px;height:16px;"></i> Employees
+          <i data-lucide="users" style="width:16px;height:16px;"></i> Assigned Officers
           <span class="count-chip${empCount>=3?' full':''}">${empCount} / 3</span>
         </div>
-        ${isSuspended ? `<span style="font-size:12px;color:#ef4444;">Branch suspended — employee management disabled</span>` : ''}
+        <div>
+          ${canAddEmp ? `<button class="btn-action btn-primary" onclick="openAddEmpModal()"><i data-lucide="user-plus" style="width:13px;height:13px;"></i> Add Officer</button>` : ''}
+          ${isSuspended ? `<span style="font-size:12px;color:var(--danger);font-weight:600;">Branch Suspended</span>` : ''}
+        </div>
       </div>
       <div class="emp-grid">
         ${empCardsHtml}
-        <div class="emp-add-card${canAddEmp?'':' disabled'}" onclick="${canAddEmp?'openAddEmpModal()':'void(0)'}">
-          <i data-lucide="user-plus" style="width:28px;height:28px;"></i>
-          <span>${empCount>=3?'Branch Full (Max 3 Employees)':isSuspended?'Branch Suspended':'Add Employee'}</span>
-          ${empCount<3 && !isSuspended ? `<span style="font-size:11px;color:#9bb5c8;">${3-empCount} slot(s) available</span>` : ''}
-        </div>
       </div>
     </div>
 
     <div class="section-panel">
       <div class="section-head">
         <div class="section-title">
-          <i data-lucide="folder" style="width:16px;height:16px;"></i> Cases Assigned to This Branch
+          <i data-lucide="folder" style="width:16px;height:16px;"></i> Assigned Cases
           <span class="count-chip">${branchCases.length}</span>
         </div>
       </div>

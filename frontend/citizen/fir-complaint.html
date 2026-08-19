@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>Report Crime - FIR | ForenSync</title>
+<link href='https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap' rel='stylesheet'>
+<link rel='stylesheet' href='../shared/style.css'>
+<script src='https://unpkg.com/lucide@latest'></script>
+<style>
+/* FIR Page Specific Styles */
+.fir-header{text-align:center;margin-bottom:30px}
+.fir-header h1{color:#18548e;font-size:28px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:12px}
+.fir-header p{color:#5f7a99;font-size:14px}
+.fir-badge{background:#ef4444;color:white;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;text-transform:uppercase}
+
+/* Step Indicator */
+.step{display:flex;justify-content:center;gap:8px;margin-bottom:30px;flex-wrap:wrap}
+.s{display:flex;flex-direction:column;align-items:center;cursor:pointer;opacity:.5;transition:all .3s ease;padding:8px 12px;border-radius:8px}
+.s.active{opacity:1;background:rgba(24,84,142,.05)}
+.s.completed{opacity:.8}
+.sn{width:32px;height:32px;border-radius:50%;background:#fff;border:2px solid #a3bece;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:#5f7a99;margin-bottom:6px}
+.s.active .sn{border-color:#18548e;background:#18548e;color:#fff}
+.s.completed .sn{border-color:#10b981;background:#10b981;color:#fff}
+.sl{font-size:11px;color:#5f7a99;font-weight:500;white-space:nowrap}
+
+/* Form Steps */
+.form-step{display:none;animation:fadeIn .4s ease}
+.form-step.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Section Title */
+.sec-title{color:#18548e;font-size:16px;font-weight:600;margin-bottom:20px;display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif}
+.sec-title i{color:#289ee7}
+
+/* Form Grid */
+.form-row{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:20px}
+@media(max-width:768px){.form-row{grid-template-columns:1fr}.step{gap:4px;padding:6px}}
+
+/* Required Label */
+.req::after{content:' *';color:#ef4444}
+
+/* Repeatable Items */
+.r-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:20px;margin-bottom:15px;position:relative}
+.btn-rm{position:absolute;top:10px;right:10px;background:rgba(239,68,68,.1);border:1px solid #ef4444;color:#ef4444;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:500}
+.btn-rm:hover{background:rgba(239,68,68,.2)}
+
+/* Add Button */
+.btn-add{background:rgba(16,185,129,.1);border:2px dashed #10b981;color:#10b981;padding:12px 24px;border-radius:6px;cursor:pointer;width:100%;font-weight:500;font-family:'Space Grotesk',sans-serif;transition:all .3s ease;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-add:hover{background:rgba(16,185,129,.2)}
+
+/* Navigation */
+.nb{display:flex;justify-content:space-between;align-items:center;margin-top:30px;padding-top:20px;border-top:1px solid #e2e8f0}
+.ng{display:flex;gap:12px}
+
+/* Success Card */
+.sc{text-align:center;padding:40px}
+.rf-box{font-size:28px;font-weight:700;color:#10b981;letter-spacing:2px;margin:20px 0;background:rgba(16,185,129,.1);padding:20px 40px;border-radius:8px;font-family:'Space Grotesk',monospace;display:inline-block}
+.checkbox-wrap{display:flex;align-items:center;gap:8px;margin:10px 0}
+.checkbox-wrap input[type=checkbox]{width:auto;margin:0}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<!-- Header matching dashboard -->
+<header style='padding:20px 50px;border-bottom:2px solid rgba(163,190,206,.4)' class='notranslate'>
+<div class='logo-area' onclick="location.href='index.html'" style='cursor:pointer'>
+<img src='/frontend/assets/logo.png' alt='CCI Logo' style='height:50px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.15))' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+<div style='display:none;align-items:center;gap:12px'>
+<div class='logo-icon'><i data-lucide='shield' style='color:white;width:24px;height:24px'></i></div>
+<div>
+<div class='logo-text'>ForenSync</div>
+<div class='logo-sub'>Cyber Shield Ahmedabad</div>
+</div>
+</div>
+</div>
+<div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+<a href="/frontend/src/citizen/index.html" class="btn-secondary" style="display: flex; align-items: center; gap: 8px;">
+<i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+<span data-i18n="back_to_portal">Back to Portal</span>
+</a>
+<div style="display: flex; align-items: center; gap: 8px;">
+<i data-lucide="languages" style="width: 16px; height: 16px; color: var(--neon-cyan);"></i>
+<select id="header-lang-select" onchange="setLanguage(this.value)" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 12px; font-size: 14px; color: var(--text-primary); cursor: pointer;">
+<option value="en" selected>English</option>
+<option value="hi">हिन्दी (Hindi)</option>
+<option value="gu">ગુજરાતી (Gujarati)</option>
+</select>
+</div>
+</div>
+</header>
+
+<main class='container'>
+<!-- FIR Header -->
+<div class='fir-header'>
+<h1><i data-lucide='file-text'></i> <span data-i18n="report_crime_title">Report Crime</span><span class='fir-badge' data-i18n="fir_badge">FIR</span></h1>
+<p data-i18n="fir_subtitle">First Information Report under Section 154 Cr.P.C.</p>
+</div>
+
+<!-- Step Indicator -->
+<div id='si' class='step'></div>
+
+<!-- Form Container -->
+<div class='glass-panel' style='max-width:900px;margin:0 auto'>
+<form id='fir-form'>
+<div id='fc'></div>
+
+<!-- Navigation Buttons -->
+<div class='nb'>
+<button type='button' class='btn-secondary' id='btn-prev' onclick='prevStep()' style='visibility:hidden'><i data-lucide='arrow-left'></i> Previous</button>
+<div class='ng'>
+<button type='button' class='btn-secondary' onclick='saveDraft()'><i data-lucide='save'></i> Save Draft</button>
+<button type='button' class='btn-primary' id='btn-next' onclick='nextStep()'>Next <i data-lucide='arrow-right'></i></button>
+</div>
+</div>
+</form>
+</div>
+</main>
+
+<!-- FOOTER -->
+<footer class="app-footer" style="margin-top: 40px;">
+    <a href="/contact" data-i18n="footer_contact">Contact Us</a>
+    <a href="#" data-i18n="footer_privacy">Privacy Policies</a>
+    <span data-i18n="footer_rights">&copy; All rights reserved</span>
+    <div class="footer-lang-selector">
+        <i data-lucide="languages" style="width: 14px; height: 14px;"></i>
+        <select id="footer-lang-select" onchange="setLanguage(this.value)">
+            <option value="en" selected>English</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="gu">ગુજરાતી (Gujarati)</option>
+        </select>
+    </div>
+</footer>
+
+<!-- Citizen JS for i18n support -->
+<script src="/frontend/src/citizen/citizen.js"></script>
+<script src='fir-complaint.js'></script>
+</body>
+</html>

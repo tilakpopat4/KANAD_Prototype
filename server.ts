@@ -1636,6 +1636,343 @@ app.delete("/api/slides/:id", (req: Request, res: Response) => {
   return res.json({ message: "Slide deleted successfully" });
 });
 
+// ── 18. FIR (First Information Report) Module ───────────────
+const DISTRICTS_DATA = [
+  { code: "AHM", name: "Ahmedabad City", stations: ["Cyber Crime Police Station", "Navrangpura", "Satellite", "Vastrapur", "Ellisbridge", "Naranpura", "Ghatlodia", "Sabarmati", "Sola", "Chandkheda"] },
+  { code: "GNR", name: "Gandhinagar", stations: ["Cyber Crime PS Gandhinagar", "Sector 7", "Sector 21", "Infocity", "Adalaj", "Pethapur"] },
+  { code: "SRT", name: "Surat City", stations: ["Cyber Crime PS Surat", "Athwa", "Khatodara", "Umra", "Rander", "Varachha"] },
+  { code: "VDR", name: "Vadodara City", stations: ["Cyber Crime PS Vadodara", "Sayajigunj", "Raopura", "Gotri", "Manjalpur"] },
+  { code: "RJK", name: "Rajkot City", stations: ["Cyber Crime PS Rajkot", "Pradhyuman Nagar", "Malaviya Nagar", "Bhaktinagar", "Gandhigram"] },
+  { code: "TVM", name: "Thiruvananthapuram", stations: ["Cantonment", "Fort", "Medical College", "Museum", "Nemom", "Peroorkada", "Pettah", "Shanghumugham", "Thampanoor", "Thiruvananthapuram City", "Vattiyoorkavu", "Vizhinjam"] },
+  { code: "KLM", name: "Kollam", stations: ["Chavara", "Karunagappally", "Kollam East", "Kollam West", "Kottarakkara", "Punalur", "Paravur", "Sakthikulangara", "Chathannoor"] },
+  { code: "EKM", name: "Ernakulam", stations: ["Aluva", "Angamaly", "Edappally", "Ernakulam Central", "Ernakulam North", "Ernakulam South", "Kadavanthra", "Kalamassery", "Kochi", "Nedumbassery"] },
+  { code: "KZD", name: "Kozhikode", stations: ["Beypore", "Feroke", "Koyilandi", "Kozhikode City", "Kozhikode Rural", "Nadakkavu", "Vadakara"] }
+];
+
+const INCIDENT_CATEGORIES = [
+  "Theft", "Robbery/Dacoity", "Burglary", "Assault/Hurt", "Cheating/Fraud",
+  "Criminal Intimidation/Threat", "Property Damage", "Missing Person",
+  "Snatching", "Vehicle Theft", "Murder/Attempt to Murder", "Kidnapping/Abduction",
+  "Rape/Sexual Harassment", "Dowry Harassment", "Riots/Affray", "Arson",
+  "Counterfeiting/Forgery", "Drug-related", "Other"
+];
+
+const SEX_OPTIONS = ["Male", "Female", "Other", "Unknown"];
+const BUILD_OPTIONS = ["Thin", "Medium", "Heavy", "Muscular", "Lean"];
+const SKIN_COLORS = ["Fair", "Wheatish", "Dark", "Very Fair", "Dark Complexioned"];
+const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const INJURY_TYPES = ["None", "Simple", "Grievous"];
+
+const firComplaints: any[] = [];
+
+app.get("/api/fir/config", (req: Request, res: Response) => {
+  return res.json({
+    districts: DISTRICTS_DATA.map(d => ({ code: d.code, name: d.name })),
+    police_stations: DISTRICTS_DATA.flatMap(d => d.stations.map(s => ({ district_code: d.code, name: s }))),
+    incident_categories: INCIDENT_CATEGORIES,
+    sex_options: SEX_OPTIONS,
+    build_options: BUILD_OPTIONS,
+    skin_colors: SKIN_COLORS,
+    days_of_week: DAYS_OF_WEEK,
+    injury_types: INJURY_TYPES
+  });
+});
+
+app.post(["/api/fir", "/api/fir/"], (req: Request, res: Response) => {
+  const data = req.body || {};
+  if (!data.declaration_true_to_knowledge) {
+    return res.status(400).json({ detail: "Declaration required" });
+  }
+
+  const refId = `FIR-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+  const firRecord = {
+    id: firComplaints.length + 1,
+    reference_id: refId,
+    status: "submitted",
+    priority: "medium",
+    created_at: new Date().toISOString(),
+    ...data
+  };
+
+  firComplaints.push(firRecord);
+
+  // Add to unified reports queue
+  unifiedReports.push({
+    id: `fir_${firRecord.id}`,
+    reference_id: refId,
+    report_type: "general_crime",
+    priority: "medium",
+    severity: "MODERATE",
+    status: "submitted",
+    filer_name: data.complainant_name || data.informant_name || "Citizen Informant",
+    filer_phone: data.complainant_phone || data.informant_phone || "N/A",
+    incident_date: data.incident_date || new Date().toISOString().split("T")[0],
+    assigned_branch: data.police_station || "Cyber Crime Branch",
+    created_at: firRecord.created_at,
+    summary: `${data.incident_category_hint || 'Crime Incident'}: ${data.incident_brief_summary || data.incident_description || 'First Information Report filed.'}`,
+    loss_amount: data.property_total_value || undefined,
+    threat_level: "NORMAL",
+    evidence_count: (data.properties?.length || 0) + (data.victims?.length || 0),
+    original_payload: firRecord
+  });
+
+  return res.status(201).json(firRecord);
+});
+
+app.get("/api/fir/:reference_id", (req: Request, res: Response) => {
+  const ref = req.params.reference_id;
+  const comp = firComplaints.find(c => c.reference_id === ref);
+  if (!comp) {
+    return res.status(404).json({ detail: "FIR not found" });
+  }
+  return res.json(comp);
+});
+
+// ── 19. Fraud Complaints & DigiLocker Module ────────────────
+const TRANSACTION_TYPES = [
+  "UPI (Google Pay / PhonePe / Paytm / BHIM / other)",
+  "Bank Transfer (IMPS / NEFT / RTGS)",
+  "Debit Card/Credit Card",
+  "Mobile Wallet (Paytm/Amazon Pay/Mobikwik)",
+  "Cash", "Cryptocurrency/Crypto Exchange",
+  "Cheque/Demand Draft", "International Wire Transfer (SWIFT)", "Other"
+];
+const UPI_APPS = ["Google Pay", "PhonePe", "Paytm", "BHIM", "Amazon Pay", "WhatsApp Pay", "Other"];
+const COUNTRIES = ["India", "United States", "United Kingdom", "UAE", "Canada", "Australia", "Other"];
+const COUNTRIES_WITH_STATES = ["India", "United States"];
+const CRITICAL_INFRA = {
+  "None/Unsure": [],
+  "Energy": ["Power Grid", "Oil & Gas", "Renewables"],
+  "Financial Services": ["Banking", "Payment Systems", "Insurance", "Capital Markets"],
+  "Healthcare": ["Hospitals", "Pharma", "Medical Devices"],
+  "Water": ["Water Supply", "Wastewater"],
+  "Transportation": ["Railways", "Aviation", "Ports", "Roadways"],
+  "IT": ["Data Centres", "Cloud Services", "Software"],
+  "Communications": ["Telecom", "Internet Services", "Broadcasting"],
+  "Government": ["Defence", "Public Administration", "Emergency Services"]
+};
+
+const fraudComplaints: any[] = [];
+const digilockerSessions = new Map<string, any>();
+
+app.get("/api/fraud-complaints/config", (req: Request, res: Response) => {
+  return res.json({
+    transaction_types: TRANSACTION_TYPES,
+    upi_apps: UPI_APPS,
+    countries: COUNTRIES,
+    countries_with_states: COUNTRIES_WITH_STATES,
+    critical_infrastructure: CRITICAL_INFRA
+  });
+});
+
+app.post("/api/digilocker/start", (req: Request, res: Response) => {
+  const token = `dl_tok_${crypto.randomBytes(12).toString("hex")}`;
+  const sessionId = `DL_SES_${Date.now()}`;
+  const session = {
+    verify_token: token,
+    session_id: sessionId,
+    status: "initiated",
+    verified_name: "Aadhaar Cardholder (Citizen)",
+    aadhaar_masked: "XXXXXXXX8921",
+    is_simulated: true,
+    created_at: new Date().toISOString()
+  };
+  digilockerSessions.set(token, session);
+
+  return res.json({
+    verify_token: token,
+    session_id: sessionId,
+    authorization_url: `https://digilocker.meripehchan.gov.in/public/oauth2/1/authorize?token=${token}`,
+    status: "initiated",
+    is_simulated: true,
+    expires_in: 900
+  });
+});
+
+app.get("/api/digilocker/status/:token", (req: Request, res: Response) => {
+  const token = req.params.token;
+  const session = digilockerSessions.get(token);
+  if (!session) {
+    return res.status(404).json({ detail: "Unknown verification token" });
+  }
+  return res.json({
+    verify_token: session.verify_token,
+    status: session.status,
+    verified_name: session.verified_name,
+    aadhaar_masked: session.aadhaar_masked,
+    simulated: session.is_simulated
+  });
+});
+
+app.post("/api/digilocker/simulate-complete", (req: Request, res: Response) => {
+  const { verify_token, otp } = req.body || {};
+  let session = digilockerSessions.get(verify_token);
+  if (!session) {
+    session = {
+      verify_token: verify_token || `dl_tok_${Date.now()}`,
+      session_id: `DL_SES_${Date.now()}`,
+      status: "initiated",
+      verified_name: "Verified Citizen (Aadhaar KYC)",
+      aadhaar_masked: "XXXXXXXX5412",
+      is_simulated: true
+    };
+    digilockerSessions.set(session.verify_token, session);
+  }
+
+  session.status = "verified";
+  return res.json({
+    status: "verified",
+    verified_name: session.verified_name,
+    aadhaar_masked: session.aadhaar_masked,
+    note: "Identity Verified via DigiLocker (Simulated for Demo)"
+  });
+});
+
+app.post("/api/fraud-complaints", (req: Request, res: Response) => {
+  const payload = req.body || {};
+  const loss = Number(payload.total_loss_amount) || 0;
+  const priority = loss >= 500000 ? "high" : loss >= 50000 ? "medium" : "low";
+  const refId = `FR-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+
+  const complaint = {
+    id: fraudComplaints.length + 1,
+    reference_id: refId,
+    status: "submitted",
+    priority: priority,
+    submitted_at: new Date().toISOString(),
+    total_loss_amount: loss,
+    digilocker_verified: true,
+    ...payload
+  };
+  fraudComplaints.push(complaint);
+
+  // Add to unified queue
+  unifiedReports.push({
+    id: `fraud_${complaint.id}`,
+    reference_id: refId,
+    report_type: "fraud",
+    priority: priority,
+    severity: loss > 100000 ? "HIGH" : "MODERATE",
+    status: "submitted",
+    filer_name: payload.filer_name || payload.complainant_name || "Financial Fraud Victim",
+    filer_phone: payload.filer_phone || payload.complainant_phone || "N/A",
+    incident_date: payload.incident_datetime || new Date().toISOString().split("T")[0],
+    assigned_branch: "Cyber Crime Cell - Financial Fraud Desk",
+    created_at: complaint.submitted_at,
+    summary: `Financial Cyber Fraud: Loss ₹${loss}. ${payload.additional_info || 'Online payment fraud reported.'}`,
+    loss_amount: loss,
+    threat_level: loss > 500000 ? "CRITICAL" : "NORMAL",
+    evidence_count: (payload.transactions?.length || 0) + (payload.subjects?.length || 0),
+    original_payload: complaint
+  });
+
+  return res.status(201).json({
+    reference_id: refId,
+    status: "submitted",
+    priority: priority,
+    total_loss_amount: loss,
+    transaction_count: payload.transactions?.length || 0,
+    subject_count: payload.subjects?.length || 0,
+    message: "Fraud complaint submitted. Save your reference ID to track status. For UPI fraud, also call 1930 immediately.",
+    verified_identity: "Verified Citizen (DigiLocker)",
+    digilocker_verified: true
+  });
+});
+
+app.get("/api/fraud-complaints/:reference_id", (req: Request, res: Response) => {
+  const ref = req.params.reference_id;
+  const c = fraudComplaints.find(fc => fc.reference_id === ref);
+  if (!c) {
+    return res.status(404).json({ detail: "No complaint found for this reference ID." });
+  }
+  return res.json({
+    reference_id: c.reference_id,
+    status: c.status,
+    priority: c.priority,
+    total_loss_amount: c.total_loss_amount,
+    submitted_at: c.submitted_at,
+    transaction_count: c.transactions?.length || 0,
+    subject_count: c.subjects?.length || 0
+  });
+});
+
+// ── 20. Child Safety & Women Safety Endpoints ──────────────
+app.post(["/api/child-safety", "/api/child-safety/complaint"], (req: Request, res: Response) => {
+  const payload = req.body || {};
+  const refId = `CS-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+  const record = {
+    id: `cs_${Date.now()}`,
+    reference_id: refId,
+    status: "submitted",
+    severity: payload.threat_level || "CRITICAL",
+    created_at: new Date().toISOString(),
+    ...payload
+  };
+
+  unifiedReports.push({
+    id: record.id,
+    reference_id: refId,
+    report_type: "child_safety",
+    priority: "critical",
+    severity: "CRITICAL",
+    status: "submitted",
+    filer_name: payload.reporter_name || payload.filer_name || "Confidential Reporter",
+    filer_phone: payload.reporter_phone || payload.filer_phone || "N/A",
+    incident_date: payload.incident_date || new Date().toISOString().split("T")[0],
+    assigned_branch: "Special Juvenile Police Unit (POCSO)",
+    created_at: record.created_at,
+    summary: `Child Safety Incident: ${payload.incident_type || 'POCSO/Exploitation Alert'}. ${payload.details || payload.description || ''}`,
+    threat_level: "CRITICAL",
+    evidence_count: payload.evidence_files?.length || 1,
+    original_payload: record
+  });
+
+  return res.status(201).json({
+    reference_id: refId,
+    status: "submitted",
+    priority: "critical",
+    message: "Child Safety incident securely logged and escalated to Special Juvenile Police Unit."
+  });
+});
+
+app.post(["/api/women-safety", "/api/women-safety/complaint"], (req: Request, res: Response) => {
+  const payload = req.body || {};
+  const refId = `WS-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+  const record = {
+    id: `ws_${Date.now()}`,
+    reference_id: refId,
+    status: "submitted",
+    severity: payload.is_emergency ? "CRITICAL" : "HIGH",
+    created_at: new Date().toISOString(),
+    ...payload
+  };
+
+  unifiedReports.push({
+    id: record.id,
+    reference_id: refId,
+    report_type: "women_safety",
+    priority: payload.is_emergency ? "critical" : "high",
+    severity: payload.is_emergency ? "CRITICAL" : "HIGH",
+    status: "submitted",
+    filer_name: payload.victim_name || payload.filer_name || "Citizen (Confidential)",
+    filer_phone: payload.contact_phone || payload.filer_phone || "N/A",
+    incident_date: payload.incident_date || new Date().toISOString().split("T")[0],
+    assigned_branch: "Women Safety Cyber Desk",
+    created_at: record.created_at,
+    summary: `Women Safety Alert: ${payload.incident_type || 'Harassment/Stalking/Cyber Threat'}. ${payload.details || payload.description || ''}`,
+    threat_level: payload.is_emergency ? "CRITICAL" : "HIGH",
+    evidence_count: 1,
+    original_payload: record
+  });
+
+  return res.status(201).json({
+    reference_id: refId,
+    status: "submitted",
+    priority: payload.is_emergency ? "critical" : "high",
+    message: "Women safety report received. Confidential support and tracking initiated."
+  });
+});
+
 // ── Static Frontend Files Serving ───────────────────────────
 const frontendDir = fs.existsSync(path.join(process.cwd(), "frontend"))
   ? path.join(process.cwd(), "frontend")
@@ -1645,6 +1982,11 @@ const policeDir = path.join(frontendDir, "police");
 
 app.use("/frontend", express.static(frontendDir));
 app.use("/uploads", express.static(UPLOAD_DIR));
+
+// Favicon routes
+app.get(["/favicon.ico", "/favicon.png"], (req: Request, res: Response) => {
+  res.sendFile(path.join(frontendDir, "assets", "logo.png"));
+});
 
 // Static Routes matching user specifications
 app.get("/", (req: Request, res: Response) => {
@@ -1661,6 +2003,27 @@ app.get("/privacy-policy", (req: Request, res: Response) => {
 
 app.get("/sitemanager", (req: Request, res: Response) => {
   res.sendFile(path.join(citizenDir, "sitemanager.html"));
+});
+
+app.get(["/fir-complaint", "/fir-complaint.html"], (req: Request, res: Response) => {
+  const firFile = fs.existsSync(path.join(citizenDir, "fir-complaint.html"))
+    ? path.join(citizenDir, "fir-complaint.html")
+    : path.join(frontendDir, "src", "citizen", "fir-complaint.html");
+  res.sendFile(firFile);
+});
+
+app.get(["/fraud-complaint", "/fraud-complaint.html"], (req: Request, res: Response) => {
+  const fraudFile = fs.existsSync(path.join(citizenDir, "fraud-complaint.html"))
+    ? path.join(citizenDir, "fraud-complaint.html")
+    : path.join(frontendDir, "src", "citizen", "fraud-complaint.html");
+  res.sendFile(fraudFile);
+});
+
+app.get(["/test-complaint", "/test-complaint.html"], (req: Request, res: Response) => {
+  const testFile = fs.existsSync(path.join(citizenDir, "test-complaint.html"))
+    ? path.join(citizenDir, "test-complaint.html")
+    : path.join(frontendDir, "src", "citizen", "test-complaint.html");
+  res.sendFile(testFile);
 });
 
 app.get("/employee", (req: Request, res: Response) => {

@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Fraud Complaint — ForenSync</title>
+    <link rel="stylesheet" href="/frontend/src/shared/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .fraud-complaint-shell {
+            background: linear-gradient(180deg, #fffdf9 0%, #f7f1e8 100%);
+            border: 1px solid rgba(24,84,142,0.12);
+            box-shadow: 0 12px 30px rgba(24,84,142,0.08);
+        }
+        .fraud-complaint-hero {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 28px;
+            align-items: center;
+            padding: 10px 10px 18px;
+        }
+        .fraud-complaint-badge {
+            display: inline-block;
+            padding: 7px 12px;
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.12);
+            border-radius: 999px;
+            color: #ef4444;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+        .fraud-complaint-hero-copy h1 {
+            font-size: clamp(2.1rem, 5vw, 4rem);
+            line-height: 1.03;
+            margin-bottom: 16px;
+            color: #3d4d66;
+            font-weight: 700;
+        }
+        .fraud-complaint-hero-copy h1 strong {
+            color: #ef4444;
+        }
+        .fraud-complaint-hero-copy p {
+            color: var(--text-secondary);
+            font-size: 1.03rem;
+            max-width: 620px;
+        }
+        .fraud-complaint-cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+            align-items: center;
+        }
+        .fraud-complaint-hero-image {
+            min-height: 260px;
+            border-radius: 22px;
+            border: 1px solid rgba(24,84,142,0.12);
+            background:
+                linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(24,84,142,0.08)),
+                url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+            position: relative;
+            overflow: hidden;
+        }
+        .fraud-complaint-alert-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(260px, 1fr));
+            gap: 18px;
+            margin: 10px 0 24px;
+        }
+        .fraud-complaint-alert-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(24,84,142,0.12);
+            background: rgba(255,255,255,0.42);
+        }
+        .fraud-complaint-alert-box.danger {
+            background: rgba(239,68,68,0.08);
+            border-color: rgba(239,68,68,0.25);
+        }
+        .fraud-complaint-alert-box.support {
+            background: rgba(16,185,129,0.08);
+            border-color: rgba(16,185,129,0.2);
+        }
+        .fraud-complaint-alert-icon {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        .danger .fraud-complaint-alert-icon { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .support .fraud-complaint-alert-icon { background: linear-gradient(135deg, #10b981, #0f766e); }
+        .fraud-complaint-alert-box strong {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--text-primary);
+        }
+        .fraud-complaint-alert-box p {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+        .fraud-complaint-form-wrap {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(220px, 0.8fr);
+            gap: 24px;
+            margin-top: 10px;
+        }
+        .fraud-complaint-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .fraud-complaint-side-card {
+            background: rgba(255,255,255,0.64);
+            border: 1px solid rgba(24,84,142,0.12);
+            border-radius: 16px;
+            padding: 18px;
+        }
+        .fraud-complaint-side-card h4 {
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+        }
+        .fraud-complaint-side-card p, .fraud-complaint-side-card li {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+        }
+        .fraud-complaint-side-card ul {
+            padding-left: 18px;
+            margin: 8px 0 12px;
+        }
+        .fraud-complaint-side-card .btn-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+        .step-indicator {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .step-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            background: rgba(24,84,142,0.08);
+            color: var(--text-secondary);
+            border: 1px solid rgba(24,84,142,0.12);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .step-badge:hover {
+            background: rgba(24,84,142,0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(24,84,142,0.15);
+        }
+        .step-badge.active {
+            background: rgba(24,84,142,0.15);
+            color: var(--neon-cyan);
+            border-color: var(--neon-cyan);
+            cursor: default;
+        }
+        .step-badge.active:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        .step-badge.completed {
+            background: rgba(16,185,129,0.15);
+            color: #10b981;
+            border-color: #10b981;
+        }
+        .step-badge.completed:hover {
+            background: rgba(16,185,129,0.25);
+        }
+        .form-step {
+            display: none;
+        }
+        .form-step.active {
+            display: block;
+        }
+        .transaction-block, .subject-block {
+            background: rgba(24,84,142,0.04);
+            border: 1px solid rgba(24,84,142,0.12);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .transaction-block h4, .subject-block h4 {
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        .btn-remove {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #ef4444;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .btn-remove:hover {
+            background: rgba(239,68,68,0.2);
+        }
+        .btn-add {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.3);
+            color: #10b981;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-add:hover {
+            background: rgba(16,185,129,0.2);
+        }
+        .form-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(24,84,142,0.12);
+        }
+        .conditional-field {
+            display: none;
+        }
+        .conditional-field.visible {
+            display: block;
+        }
+        @media (max-width: 860px) {
+            .fraud-complaint-hero,
+            .fraud-complaint-form-wrap,
+            .fraud-complaint-alert-row {
+                grid-template-columns: 1fr;
+            }
+            .fraud-complaint-shell {
+                padding: 18px 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="notranslate">
+            <div class="logo-area" onclick="window.location.href='/'" style="cursor: pointer;">
+                <img src="/frontend/assets/logo.png" alt="CCI Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="logo-icon" style="display:none; align-items:center; justify-content:center; width:40px; height:40px; background: linear-gradient(135deg, #18548e, #289ee7); border-radius:8px; font-size:20px;">🛡️</div>
+                <div>
+                    <div class="logo-text">ForenSync</div>
+                    <div class="logo-sub">Cyber Shield Ahmedabad</div>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                <button class="btn-secondary" onclick="window.location.href='/frontend/src/citizen/index.html'" style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i> <span data-i18n="back_to_portal">Back to Portal</span>
+                </button>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="languages" style="width: 16px; height: 16px; color: var(--neon-cyan);"></i>
+                    <select id="header-lang-select" onchange="setLanguage(this.value)" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 12px; font-size: 14px; color: var(--text-primary); cursor: pointer;">
+                        <option value="en" selected>English</option>
+                        <option value="hi">हिन्दी (Hindi)</option>
+                        <option value="gu">ગુજરાતી (Gujarati)</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <!-- FEEDBACK ALERT -->
+        <div id="alert-banner" class="alert-feedback"></div>
+
+        <div id="view-fraud-complaint" class="app-view active">
+            <div class="glass-panel fraud-complaint-shell">
+                <div class="fraud-complaint-hero">
+                    <div class="fraud-complaint-hero-copy">
+                        <div class="fraud-complaint-badge">Financial Fraud Reporting</div>
+                        <h1>Report <strong>Financial Fraud</strong></h1>
+                        <p>File complaints for UPI fraud, bank transfer scams, credit card fraud, and other financial cybercrimes. Your report helps us track patterns and protect others.</p>
+                        <div class="fraud-complaint-cta-row">
+                            <button type="button" class="btn-primary" onclick="document.getElementById('fraud-complaint-form').scrollIntoView({behavior:'smooth', block:'start'});">
+                                Start Complaint
+                            </button>
+                            <button type="button" class="btn-secondary" onclick="trackFraudComplaint()">
+                                Track Existing Complaint
+                            </button>
+                        </div>
+                    </div>
+                    <div class="fraud-complaint-hero-image" aria-label="Financial fraud protection illustration"></div>
+                </div>
+
+                <div class="fraud-complaint-alert-row">
+                    <div class="fraud-complaint-alert-box danger">
+                        <div class="fraud-complaint-alert-icon">!</div>
+                        <div>
+                            <strong>UPI Fraud Emergency</strong>
+                            <p>If you lost money via UPI, call <strong>1930</strong> immediately. Banks/NPCI may freeze funds if reported quickly.</p>
+                        </div>
+                    </div>
+                    <div class="fraud-complaint-alert-box support">
+                        <div class="fraud-complaint-alert-icon">☎</div>
+                        <div>
+                            <strong>Cyber Crime Helpline</strong>
+                            <p>National Cyber Crime Reporting Portal: <strong>1930</strong> or visit <a href="https://cybercrime.gov.in" target="_blank">cybercrime.gov.in</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step Indicator -->
+                <div class="step-indicator" id="step-indicator">
+                    <div class="step-badge active" data-step="1">1. Who is filing</div>
+                    <div class="step-badge" data-step="2">2. Complainant</div>
+                    <div class="step-badge" data-step="3">3. Transactions</div>
+                    <div class="step-badge" data-step="4">4. Subjects</div>
+                    <div class="step-badge" data-step="5">5. Incident</div>
+                    <div class="step-badge" data-step="6">6. Other Info</div>
+                    <div class="step-badge" data-step="7">7. Verify Identity</div>
+                </div>
+
+                <div class="fraud-complaint-form-wrap">
+                    <form id="fraud-complaint-form">
+                        <!-- Step 1: Who is filing -->
+                        <div class="form-step active" data-step="1">
+                            <h3 style="margin-bottom: 20px; color: var(--text-primary);">Step 1: Who is filing this complaint?</h3>
+                            
+                            <div class="form-group">
+                                <label>Are you the one who was affected by this incident? <span style="color: #ef4444;">*</span></label>
+                                <select id="filer-is-complainant" class="form-control" required onchange="toggleFilerFields()">
+                                    <option value="">Select</option>
+                                    <option value="true">Yes, I am the complainant</option>
+                                    <option value="false">No, I am filing on behalf of someone else</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Filer Name <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="filer-name" class="form-control" placeholder="Your full name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Filer Phone <span style="color: #ef4444;">*</span></label>
+                                <input type="tel" id="filer-phone" class="form-control" placeholder="10-digit mobile number" pattern="[6-9]\d{9}" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Filer Email <span style="color: #ef4444;">*</span></label>
+                                <input type="email" id="filer-email" class="form-control" placeholder="Your email address" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Business Name (if filing on behalf of a business)</label>
+                                <input type="text" id="filer-business-name" class="form-control" placeholder="Business name (optional)">
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Complainant Details -->
+                        <div class="form-step" data-step="2">
+                            <h3 style="margin-bottom: 20px; color: var(--text-primary);">Step 2: Complainant Details</h3>
+                            
+                            <div class="form-group">
+                                <label>Complainant Name <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="complainant-name" class="form-control" placeholder="Full name of the person affected" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Age Range</label>
+                                <select id="complainant-age" class="form-control">
+                                    <option value="">Select age range</option>
+                                    <option value="under_18">Under 18</option>
+                                    <option value="18_25">18-25</option>
+                                    <option value="26_35">26-35</option>
+                                    <option value="36_50">36-50</option>
+                                    <option value="51_65">51-65</option>
+                                    <option value="over_65">Over 65</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Is the complainant a minor (17 or younger)?</label>
+                                <select id="is-minor" class="form-control">
+                                    <option value="">Select</option>
+                                    <option value="true">Yes</option>
+                                    <option value="false">No</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Address <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="address" class="form-control" placeholder="Street address" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Address Line 2</label>
+                                <input type="text" id="address-2" class="form-control" placeholder="Apartment, suite, unit, etc.">
+                            </div>
+
+                            <div class="form-group">
+                                <label>City <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="city" class="form-control" placeholder="City" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Country <span style="color: #ef4444;">*</span></label>
+                                <select id="country" class="form-control" required onchange="toggleStateField()">
+                                    <option value="">Select country</option>
+                                    <option value="India">India</option>
+                                    <option value="United States">United States</option>
+                                    <option value="United Kingdom">United Kingdom</option>
+                                    <option value="Canada">Canada</option>
+                                    <option value="Australia">Australia</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group conditional-field" id="state-field">
+                                <label>State <span style="color: #ef4444;">*</span></label>
+                                <select id="state" class="form-control">
+                                    <option value="">Select state</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>ZIP / Postal Code <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="zip-code" class="form-control" placeholder="ZIP/Postal code" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Complainant Phone <span style="color: #ef4444;">*</span></label>
+                                <input type="tel" id="complainant-phone" class="form-control" placeholder="10-digit mobile number" pattern="[6-9]\d{9}" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Complainant Email <span style="color: #ef4444;">*</span></label>
+                                <input type="email" id="complainant-email" class="form-control" placeholder="Email address" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Are you filing on behalf of a business?</label>
+                                <select id="on-behalf-of-business" class="form-control" onchange="toggleBusinessFields()">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </div>
+
+                            <div id="business-fields" class="conditional-field">
+                                <div class="form-group">
+                                    <label>Business Name <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="business-name" class="form-control" placeholder="Business name">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Are business operations impacted? <span style="color: #ef4444;">*</span></label>
+                                    <select id="business-ops-impacted" class="form-control">
+                                        <option value="">Select</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Critical Infrastructure Sector</label>
+                                    <select id="critical-infra-sector" class="form-control" onchange="updateSubsectors()">
+                                        <option value="">Select sector</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" id="subsector-field" style="display: none;">
+                                    <label>Subsector</label>
+                                    <select id="critical-infra-subsector" class="form-control">
+                                        <option value="">Select subsector</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Transaction Details -->
+                        <div class="form-step" data-step="3">
+                            <h3 style="margin-bottom: 20px; color: var(--text-primary);">Step 3: Transaction Details</h3>
+                            
+                            <div class="form-group">
+                                <label>Did you lose money in this incident?</label>
+                                <select id="money-lost" class="form-control" onchange="toggleMoneyFields()">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </div>
+
+                            <div id="money-fields" class="conditional-field">
+                                <div class="form-group">
+                                    <label>Total Loss Amount (INR) <span style="color: #ef4444;">*</span></label>
+                                    <input type="number" id="total-loss-amount" class="form-control" placeholder="Amount in INR" min="0" step="0.01">
+                                </div>
+                            </div>
+
+                            <h4 style="margin: 24px 0 16px; color: var(--text-primary);">Transaction Details</h4>
+                            <div id="transactions-container">
+                                <!-- Transactions will be added here -->
+                            </div>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <button type="button" class="btn-add" onclick="addTransaction()">
+                                    <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Add Transaction
+                                </button>
+                                <button type="button" class="btn-secondary" onclick="window.open('/frontend/src/police/dashboard.html', '_blank')" style="background: rgba(24,84,142,0.1); border-color: rgba(24,84,142,0.3); color: var(--neon-cyan);">
+                                    <i data-lucide="shield" style="width: 16px; height: 16px;"></i> Backend Portal
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Subject Information -->
+                        <div class="form-step" data-step="4">
+                            <h3 style="margin-bottom: 20px; color: var(--text-primary);">Step 4: Subject Information (Optional)</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 20px;">Add information about suspects or subjects involved in the fraud. This is optional but helps investigations.</p>
+                            
+                            <div id="subjects-container">
+                                <!-- Subjects will be added here -->
+                            </div>
+                            <button type="button" class="btn-add" onclick="addSubject()">
+                                <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Add Subject
+                            </button>
+                        </div>
+
+                        <!-- Step 5: Incident Description -->
+                        <div class="form-step" data-step="5">
+                            <h3 style="margin-bottom: 20px; color: var(--text-primary);">Step 5: Incident Description</h3>
+                            
+                            <div class="form-group">
+                                <label>Describe the incident <span style="color: #ef4444;">*</span> <span style="font-size: 12px; color: var(--text-secondary);">(Max 3500 characters)</span></label>
+                                <textarea id="incident-description" class="form-control" rows="8" placeholder="Describe what happened in detail. Include dates, how you were contacted, what was promised or threatened, and any other relevant details." maxlength="3500" required></textarea>
+                                <div style="text-align: right; font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
+                                    <span id="description-count">0</span>/3500
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 6: Other Information -->
+                        <div class="form-step" data-step="6">
+                            <h3 style="margin-bottom: 20px; color: var(--text-primary);">Step 6: Other Information</h3>
+                            
+                            <div class="form-group">
+                                <label>Technical Details <span style="font-size: 12px; color: var(--text-secondary);">(Max 5000 characters)</span></label>
+                                <textarea id="technical-details" class="form-control" rows="5" placeholder="Any technical information: IP addresses, device details, browser information, etc." maxlength="5000"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Other Witnesses <span style="font-size: 12px; color: var(--text-secondary);">(Max 1000 characters)</span></label>
+                                <textarea id="other-witnesses" class="form-control" rows="3" placeholder="Names or contact information of other witnesses" maxlength="1000"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Reported Elsewhere? <span style="font-size: 12px; color: var(--text-secondary);">(Max 1000 characters)</span></label>
+                                <textarea id="reported-elsewhere" class="form-control" rows="3" placeholder="Have you reported this to police, banks, or other agencies? Provide details." maxlength="1000"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Is this an update to a previous complaint?</label>
+                                <select id="is-update" class="form-control" onchange="togglePreviousComplaint()">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </div>
+
+                            <div id="previous-complaint-field" class="conditional-field">
+                                <div class="form-group">
+                                    <label>Previous Complaint Number <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="previous-complaint-number" class="form-control" placeholder="Enter previous complaint reference number">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 7: Identity Verification (DigiLocker) -->
+                        <div class="form-step" data-step="7">
+                            <h3 style="margin-bottom: 20px; color: var(--text-primary);">Step 7: Identity Verification</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 20px;">Verify your identity using DigiLocker to prevent false filings. This is required before submitting your complaint.</p>
+                            
+                            <div id="digilocker-verification-section">
+                                <div class="form-group">
+                                    <label>Aadhaar Number <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="aadhaar-number" class="form-control" placeholder="Enter your 12-digit Aadhaar number" maxlength="12" pattern="\d{12}">
+                                    <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Your Aadhaar is used only for verification and is not stored.</p>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Mobile Number (linked to Aadhaar) <span style="color: #ef4444;">*</span></label>
+                                    <input type="tel" id="digilocker-mobile" class="form-control" placeholder="Enter mobile number linked to your Aadhaar" maxlength="10" pattern="[6-9]\d{9}">
+                                </div>
+
+                                <button type="button" class="btn-primary" id="start-digilocker-btn" onclick="startDigiLockerVerification()">
+                                    <i data-lucide="shield-check" style="width: 16px; height: 16px;"></i> Start DigiLocker Verification
+                                </button>
+
+                                <!-- OTP Section (hidden initially) -->
+                                <div id="digilocker-otp-section" style="display: none; margin-top: 20px; padding: 20px; background: rgba(24,84,142,0.05); border-radius: 12px; border: 1px solid rgba(24,84,142,0.1);">
+                                    <div class="form-group">
+                                        <label>Enter OTP <span style="color: #ef4444;">*</span></label>
+                                        <input type="text" id="digilocker-otp" class="form-control" placeholder="Enter 6-digit OTP" maxlength="6" pattern="\d{6}">
+                                        <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">OTP sent to your registered mobile number.</p>
+                                    </div>
+                                    <button type="button" class="btn-primary" onclick="completeDigiLockerVerification()">
+                                        <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i> Verify & Continue
+                                    </button>
+                                </div>
+
+                                <!-- Verification Success (hidden initially) -->
+                                <div id="digilocker-success-section" style="display: none; margin-top: 20px; padding: 20px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                        <i data-lucide="check-circle" style="width: 24px; height: 24px; color: #10b981;"></i>
+                                        <span style="color: #10b981; font-weight: 600;">Identity Verified Successfully</span>
+                                    </div>
+                                    <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">Name: <strong id="verified-name" style="color: var(--text-primary);"></strong></p>
+                                    <input type="hidden" id="digilocker-verify-token">
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 24px; padding: 16px; background: rgba(239, 68, 68, 0.05); border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.15);">
+                                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                    <i data-lucide="alert-triangle" style="width: 20px; height: 20px; color: #ef4444; flex-shrink: 0; margin-top: 2px;"></i>
+                                    <div>
+                                        <p style="color: var(--text-primary); font-weight: 500; margin: 0 0 4px 0;">Anti-False-Filing Protection</p>
+                                        <p style="color: var(--text-secondary); font-size: 13px; margin: 0;">DigiLocker verification helps prevent fraudulent complaints. Your verified identity will be recorded with the complaint. False filings may attract legal consequences under IT Act and IPC.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Navigation -->
+                        <div class="form-navigation">
+                            <button type="button" class="btn-secondary" id="prev-btn" onclick="prevStep()" style="display: none;">
+                                <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i> Previous
+                            </button>
+                            <div></div>
+                            <button type="button" class="btn-primary" id="next-btn" onclick="nextStep()">
+                                Next <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+                            </button>
+                            <button type="submit" class="btn-primary" id="submit-btn" style="display: none;">
+                                Submit Complaint <i data-lucide="send" style="width: 16px; height: 16px;"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Success Message -->
+                    <div id="fraud-success-message" style="display: none; margin-top: 20px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 24px; text-align: center;">
+                        <i data-lucide="check-circle" style="width: 48px; height: 48px; color: #10b981; margin-bottom: 16px;"></i>
+                        <h3 style="color: #10b981; margin-bottom: 12px;">Complaint Submitted Successfully!</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 16px;">Your complaint has been received and will be reviewed.</p>
+                        <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                            <p style="margin: 0; font-size: 14px; color: var(--text-secondary);">Reference ID:</p>
+                            <p id="fraud-reference-id" style="margin: 8px 0 0; font-size: 24px; font-weight: 700; color: var(--neon-cyan); font-family: monospace;"></p>
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+                            <strong>Important:</strong> Save this reference ID to track your complaint status. For UPI fraud, also call <strong>1930</strong> immediately.
+                        </p>
+                        <button type="button" class="btn-primary" onclick="window.location.reload()">
+                            File Another Complaint
+                        </button>
+                    </div>
+
+                    <aside class="fraud-complaint-sidebar">
+                        <div class="fraud-complaint-side-card">
+                            <h4>Emergency Contacts</h4>
+                            <ul>
+                                <li><strong>1930</strong> - Cyber Crime Helpline</li>
+                                <li><strong>112</strong> - Emergency Services</li>
+                                <li><strong>100</strong> - Police</li>
+                            </ul>
+                        </div>
+                        <div class="fraud-complaint-side-card">
+                            <h4>What happens next?</h4>
+                            <p>Your complaint will be:</p>
+                            <ul>
+                                <li>Reviewed by trained analysts</li>
+                                <li>Assigned a priority level</li>
+                                <li>Routed to appropriate authorities</li>
+                                <li>Updated with investigation progress</li>
+                            </ul>
+                        </div>
+                        <div class="fraud-complaint-side-card">
+                            <h4>Track your complaint</h4>
+                            <p>Use your reference ID to check status anytime.</p>
+                            <button type="button" class="btn-secondary" onclick="trackFraudComplaint()">
+                                Track Complaint
+                            </button>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </div>
+
+        <!-- Track Complaint Modal -->
+        <div id="track-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 32px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h3 style="margin: 0; color: var(--text-primary);">Track Fraud Complaint</h3>
+                    <button type="button" onclick="closeTrackModal()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 24px;">&times;</button>
+                </div>
+                
+                <div class="form-group">
+                    <label>Reference ID</label>
+                    <input type="text" id="track-reference-id" class="form-control" placeholder="Enter your reference ID (e.g., FRAUD-2025-XXXX)">
+                </div>
+                
+                <button type="button" class="btn-primary" style="width: 100%; margin-top: 16px;" onclick="searchFraudComplaint()">
+                    Search
+                </button>
+                
+                <div id="track-result" style="display: none; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
+                    <!-- Results will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="app-footer">
+            <a href="/contact" data-i18n="footer_contact">Contact Us</a>
+            <a href="#" data-i18n="footer_privacy">Privacy Policies</a>
+            <span data-i18n="footer_rights">&copy; All rights reserved</span>
+            <div class="footer-lang-selector">
+                <i data-lucide="languages" style="width: 14px; height: 14px;"></i>
+                <select id="footer-lang-select" onchange="setLanguage(this.value)">
+                    <option value="en" selected>English</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                    <option value="gu">ગુજરાતી (Gujarati)</option>
+                </select>
+            </div>
+        </footer>
+    </div>
+
+    <script src="/frontend/src/citizen/citizen.js"></script>
+    <script src="/frontend/src/citizen/fraud-complaint.js"></script>
+</body>
+</html>

@@ -121,17 +121,27 @@ interface Complaint {
 export interface UnifiedReport {
   id: string | number;
   reference_id: string; // TXN-90210, WSR-2026-XXXX, CSR-2026-XXXX, FR-XXXX
-  report_type: "complaint" | "fraud" | "women_safety" | "child_safety";
-  reporter_name: string;
+  report_type: "complaint" | "fraud" | "women_safety" | "child_safety" | "general_crime" | string;
+  reporter_name?: string;
   reporter_email?: string;
   reporter_phone?: string;
-  category: string;
-  description: string;
-  status: "pending" | "converted" | "investigating" | "resolved";
-  priority_score: number; // 1 to 5
+  category?: string;
+  description?: string;
+  status: "pending" | "converted" | "investigating" | "resolved" | "submitted" | string;
+  priority_score?: number; // 1 to 5
+  priority?: string;
+  severity?: string;
+  filer_name?: string;
+  filer_phone?: string;
+  incident_date?: string;
+  assigned_branch?: string;
   created_at: string; // ISO 8601
-  evidence_count: number;
-  raw_payload: any;
+  summary?: string;
+  loss_amount?: number;
+  threat_level?: string;
+  evidence_count?: number;
+  raw_payload?: any;
+  original_payload?: any;
   branch_id?: string;
 }
 

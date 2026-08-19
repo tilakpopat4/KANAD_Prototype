@@ -173,3 +173,137 @@ def logout(request: Request, response: Response, db: Session = Depends(database.
             db.commit()
     response.delete_cookie("refresh_token", path="/api/citizen/auth")
     return {"message": "Logged out successfully."}
+
+
+# ============================================================================
+# MOBILE OTP AUTHENTICATION (Financial Fraud Portal)
+# ============================================================================
+# In-memory OTP storage (for demo - use Redis in production)
+_mobile_otp_cache = {}
+
+
+@router.post("/mobile/send-otp", response_model=schemas.MobileOtpResponse)
+def send_mobile_otp(payload: schemas.MobileOtpRequest, request: Request, db: Session = Depends(database.get_db)):
+    """Send OTP to mobile number for Financial Fraud portal login.
+    
+    This replaces email-based authentication with mobile OTP for Financial Fraud complaints.
+    """
+    phone = payload.phone
+    ip = request.client.host
+    
+    # Check if user exists with this phone, or create a placeholder user
+    user = db.query(database.User).filter(database.User.phone == phone).first()
+    
+    # Generate 6-digit OTP
+    import random
+    otp = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    
+    # Store OTP with expiration (5 minutes)
+    _mobile_otp_cache[phone] = {
+        "otp": otp,
+        "expires_at": datetime.datetime.utcnow() + datetime.timedelta(minutes=5),
+        "attempts": 0,
+        "ip": ip
+    }
+    
+    # In production: integrate with SMS gateway (Twilio, Exotel, etc.)
+    # For demo: print to console
+    print(f"\n{'='*50}")
+    print(f"MOBILE OTP for {phone}")
+    print(f"OTP: {otp}")
+    print(f"Expires in 5 minutes")
+    print(f"{'='*50}\n")
+    
+    _audit(db, user.id if user else None, "MOBILE_OTP_SENT", ip, f"phone={phone}")
+    
+    return schemas.MobileOtpResponse(
+        message=f"OTP sent to +91-{phone}. Valid for 5 minutes.",
+        expires_in=300
+    )
+
+
+@router.post("/mobile/verify-otp", response_model=schemas.MobileOtpVerifyResponse)
+def verify_mobile_otp(payload: schemas.MobileOtpVerify, request: Request, response: Response,
+                      db: Session = Depends(database.get_db)):
+    """Verify mobile OTP and return JWT tokens for Financial Fraud portal.
+    
+    Creates a citizen account automatically if phone number is not registered.
+    """
+    phone = payload.phone
+    ip = request.client.host
+    
+    # Get stored OTP
+    otp_data = _mobile_otp_cache.get(phone)
+    
+    if not otp_data:
+        _audit(db, None, "MOBILE_OTP_VERIFY_FAILED", ip, f"phone={phone}, reason=no_otp_sent")
+        raise HTTPException(status_code=400, detail="No OTP request found. Please request a new OTP.")
+    
+    if datetime.datetime.utcnow() > otp_data["expires_at"]:
+        del _mobile_otp_cache[phone]
+        _audit(db, None, "MOBILE_OTP_VERIFY_FAILED", ip, f"phone={phone}, reason=expired")
+        raise HTTPException(status_code=400, detail="OTP expired. Please request a new OTP.")
+    
+    if otp_data["otp"] != payload.otp:
+        otp_data["attempts"] += 1
+        if otp_data["attempts"] >= 3:
+            del _mobile_otp_cache[phone]
+            _audit(db, None, "MOBILE_OTP_VERIFY_FAILED", ip, f"phone={phone}, reason=max_attempts")
+            raise HTTPException(status_code=400, detail="Too many failed attempts. Please request a new OTP.")
+        _audit(db, None, "MOBILE_OTP_VERIFY_FAILED", ip, f"phone={phone}, reason=invalid_otp")
+        raise HTTPException(status_code=400, detail="Invalid OTP. Please try again.")
+    
+    # OTP verified - find or create user
+    user = db.query(database.User).filter(database.User.phone == phone).first()
+    
+    if not user:
+        # Auto-create citizen account for Financial Fraud portal
+        user = database.User(
+            email=f"citizen_{phone}@mobile.forensync",
+            full_name=f"Citizen ({phone})",
+            phone=phone,
+            role="citizen",
+            hashed_password=security.get_password_hash(f"mobile_{phone}_auto_generated_password"),
+            is_active=True,
+            email_verified=True,  # Mobile verified acts as email verified
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        _audit(db, user.id, "AUTO_REGISTER", ip, f"phone={phone}")
+    
+    # Clear OTP data
+    if phone in _mobile_otp_cache:
+        del _mobile_otp_cache[phone]
+    
+    # Issue tokens
+    access_token, _ = security.create_access_token({"sub": user.email, "role": user.role})
+    refresh_token, refresh_jti = security.create_refresh_token({"sub": user.email})
+    
+    db.add(RefreshToken(
+        jti=refresh_jti, user_id=user.id,
+        expires_at=datetime.datetime.utcnow() + datetime.timedelta(days=security.REFRESH_TOKEN_EXPIRE_DAYS),
+    ))
+    db.commit()
+    
+    # Store refresh token in HttpOnly cookie
+    response.set_cookie(
+        key="refresh_token", value=refresh_token,
+        httponly=True, secure=True, samesite="strict",
+        max_age=security.REFRESH_TOKEN_EXPIRE_DAYS * 86400, path="/api/citizen/auth",
+    )
+    
+    _audit(db, user.id, "MOBILE_OTP_LOGIN_SUCCESS", ip, f"phone={phone}")
+    
+    return schemas.MobileOtpVerifyResponse(
+        access_token=access_token,
+        token_type="bearer",
+        expires_in=security.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        user={
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "phone": user.phone,
+            "role": user.role
+        }
+    )

@@ -292,11 +292,12 @@
             
             <!-- Grid of 4 cards -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; max-width: 100%; margin: 0 auto;">
-                <div class="glass-panel hover-card" onclick="window.location.href='/frontend/src/citizen/fraud-complaint.html'">
+                <div class="glass-panel hover-card" onclick="startFinancialFraudFlow()">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
                         <i data-lucide="banknote" style="width: 48px; height: 48px; color: var(--neon-cyan);"></i>
                         <h3 style="color: var(--neon-cyan); margin-top: 10px;">Financial Frauds</h3>
                         <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Report UPI, SMS, Bank, or Credit Card frauds</p>
+                        <small style="color: #ef4444; font-size: 11px; margin-top: -5px;"><i data-lucide="smartphone" style="width: 10px; display: inline;"></i> Mobile OTP Required</small>
                     </div>
                 </div>
                 
@@ -341,10 +342,22 @@
                 <h2 style="margin-bottom: 15px; color: var(--neon-cyan); display: flex; align-items: center; gap: 10px; justify-content: center;">
                     <i data-lucide="shield-check"></i> Citizen Login
                 </h2>
-                <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 25px;">
-                    Secure login to report cyber complaints.
+                <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">
+                    Secure authentication for cyber crime reporting
                 </p>
-                
+
+                <!-- AUTH METHOD TABS -->
+                <div style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid var(--border-color);">
+                    <button type="button" id="tab-email" class="auth-tab-btn active" onclick="switchAuthTab('email')" style="flex: 1; padding: 12px; background: transparent; border: none; border-bottom: 2px solid var(--neon-cyan); color: var(--text-primary); font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i data-lucide="mail" style="width: 16px;"></i> Email & Password
+                    </button>
+                    <button type="button" id="tab-mobile" class="auth-tab-btn" onclick="switchAuthTab('mobile')" style="flex: 1; padding: 12px; background: transparent; border: none; color: var(--text-secondary); font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i data-lucide="smartphone" style="width: 16px;"></i> Mobile OTP
+                    </button>
+                </div>
+
+                <!-- EMAIL LOGIN PANEL -->
+                <div id="email-auth-panel">
                 <!-- LOGIN FORM -->
                 <form id="login-form" onsubmit="handleLogin(event)">
                     <div class="form-group">
@@ -369,12 +382,67 @@
                     <button type="submit" class="btn-primary" style="width: 100%; margin-top: 15px;">
                         Login <i data-lucide="arrow-right"></i>
                     </button>
-                    
+
                     <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 15px;">
-                        Don't have an account? 
+                        Don't have an account?
                         <a href="#" onclick="toggleAuthForm(); return false;" style="color: var(--neon-cyan); text-decoration: underline; cursor: pointer;">Register here</a>
                     </p>
                 </form>
+                </div><!-- End email-auth-panel -->
+
+                <!-- MOBILE OTP AUTH PANEL (For Financial Fraud) -->
+                <div id="mobile-auth-panel" style="display: none;">
+                    <!-- STEP 1: Mobile Number Input -->
+                    <div id="mobile-auth-step-1">
+                        <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                            <p style="font-size: 12px; color: #fca5a5; margin: 0;">
+                                <strong>Financial Fraud Portal:</strong> Mobile OTP authentication is required. Your account will be auto-created if not registered.
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Mobile Number <span style="color: #ef4444;">*</span></label>
+                            <input type="tel" id="auth-mobile" class="form-control" placeholder="Enter 10-digit mobile" pattern="[6-9]\d{9}" maxlength="10" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Security Captcha</label>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+                                <canvas id="mobile-captcha-canvas" width="150" height="45" style="border-radius: 6px; background: #121c26;"></canvas>
+                                <button type="button" class="btn-secondary" onclick="refreshMobileCaptcha()" style="padding: 8px;"><i data-lucide="refresh-cw" style="width: 16px;"></i></button>
+                            </div>
+                            <input type="text" id="mobile-captcha-input" class="form-control" placeholder="Enter Captcha" required>
+                        </div>
+
+                        <button type="button" id="send-mobile-otp-btn" class="btn-primary" onclick="sendMobileOtp()" style="width: 100%; margin-top: 10px;">
+                            Send OTP <i data-lucide="smartphone"></i>
+                        </button>
+                    </div>
+
+                    <!-- STEP 2: OTP Verification -->
+                    <div id="mobile-auth-step-2" style="display: none;">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 8px; color: var(--text-primary);">Enter OTP</h3>
+                            <p style="font-size: 13px; color: var(--text-secondary);">Code sent to <strong id="mobile-otp-display-phone" style="color: var(--neon-cyan);"></strong></p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>6-digit OTP</label>
+                            <input type="text" id="mobile-otp-input" class="form-control" placeholder="------" maxlength="6" pattern="\d{6}" style="text-align: center; letter-spacing: 10px; font-size: 22px;" required>
+                        </div>
+
+                        <div id="mobile-otp-timer" style="text-align: center; font-size: 13px; margin-bottom: 15px; color: var(--text-secondary);">Resend in 60s</div>
+
+                        <button type="button" id="verify-mobile-otp-btn" class="btn-primary" onclick="verifyMobileOtp()" style="width: 100%; margin-bottom: 10px;">
+                            Verify & Login <i data-lucide="check-circle"></i>
+                        </button>
+
+                        <button type="button" class="btn-secondary" onclick="backToMobileInput()" style="width: 100%;">
+                            Change Number
+                        </button>
+                    </div>
+                </div>
+                <!-- End Mobile OTP Panel -->
 
                 <!-- REGISTER FORM (Hidden by default) -->
                 <form id="register-form" onsubmit="handleRegister(event)" style="display: none;">
@@ -925,5 +993,7 @@
 
     <!-- Citizen Portal JavaScript -->
     <script src="/frontend/src/citizen/citizen.js"></script>
+    <!-- Mobile OTP Auth for Financial Fraud Portal -->
+    <script src="/frontend/src/citizen/mobile-otp-auth.js"></script>
 </body>
 </html>

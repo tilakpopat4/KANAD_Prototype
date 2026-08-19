@@ -34,7 +34,42 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class MobileOtpRequest(BaseModel):
+    phone: str = Field(min_length=10, max_length=10)
+
+    @field_validator("phone")
+    @classmethod
+    def valid_phone(cls, v: str) -> str:
+        if not re.fullmatch(r"[6-9]\d{9}", v):
+            raise ValueError("Enter a valid 10-digit Indian mobile number")
+        return v
+
+
+class MobileOtpVerify(BaseModel):
+    phone: str = Field(min_length=10, max_length=10)
+    otp: str = Field(min_length=6, max_length=6)
+
+    @field_validator("phone")
+    @classmethod
+    def valid_phone(cls, v: str) -> str:
+        if not re.fullmatch(r"[6-9]\d{9}", v):
+            raise ValueError("Enter a valid 10-digit Indian mobile number")
+        return v
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int
+
+
+class MobileOtpResponse(BaseModel):
+    message: str
+    expires_in: int = 300  # 5 minutes
+
+
+class MobileOtpVerifyResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    user: dict

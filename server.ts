@@ -2034,7 +2034,7 @@ function sendStaticSafe(res: Response, subpaths: string[], fallbackIndex = true)
     return res.sendFile(fullPath);
   }
   if (fallbackIndex) {
-    const indexPath = resolveFrontendPath("citizen", "index.html");
+    const indexPath = resolveFrontendPath("src", "citizen", "index.html");
     if (fs.existsSync(indexPath)) {
       return res.sendFile(indexPath);
     }
@@ -2054,7 +2054,7 @@ app.get(["/favicon.ico", "/favicon.png"], (req: Request, res: Response) => {
 
 // Static Routes matching user specifications
 app.get("/", (req: Request, res: Response) => {
-  sendStaticSafe(res, ["citizen", "index.html"]);
+  sendStaticSafe(res, ["src", "citizen", "index.html"]);
 });
 
 app.get("/contact", (req: Request, res: Response) => {
@@ -2066,19 +2066,19 @@ app.get("/privacy-policy", (req: Request, res: Response) => {
 });
 
 app.get("/sitemanager", (req: Request, res: Response) => {
-  sendStaticSafe(res, ["citizen", "sitemanager.html"]);
+  sendStaticSafe(res, ["src", "citizen", "sitemanager.html"]);
 });
 
 app.get(["/fir-complaint", "/fir-complaint.html"], (req: Request, res: Response) => {
-  sendStaticSafe(res, ["citizen", "fir-complaint.html"]);
+  sendStaticSafe(res, ["src", "citizen", "fir-complaint.html"]);
 });
 
 app.get(["/fraud-complaint", "/fraud-complaint.html"], (req: Request, res: Response) => {
-  sendStaticSafe(res, ["citizen", "fraud-complaint.html"]);
+  sendStaticSafe(res, ["src", "citizen", "fraud-complaint.html"]);
 });
 
 app.get(["/test-complaint", "/test-complaint.html"], (req: Request, res: Response) => {
-  sendStaticSafe(res, ["citizen", "test-complaint.html"]);
+  sendStaticSafe(res, ["src", "citizen", "test-complaint.html"]);
 });
 
 app.get("/employee", (req: Request, res: Response) => {
@@ -2091,7 +2091,7 @@ app.get("/admin", (req: Request, res: Response) => {
 
 // Fallback for SPA/static assets
 app.get("*", (req: Request, res: Response) => {
-  sendStaticSafe(res, ["citizen", "index.html"]);
+  sendStaticSafe(res, ["src", "citizen", "index.html"]);
 });
 
 // Error handling middleware

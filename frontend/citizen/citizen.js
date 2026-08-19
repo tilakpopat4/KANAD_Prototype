@@ -365,6 +365,26 @@ function backToStep1() {
     if (otpCountdownInterval) clearInterval(otpCountdownInterval);
 }
 
+/**
+ * Handle Financial Fraud option click - redirects to fraud page with mobile auth
+ * If not authenticated, pre-selects mobile OTP tab for streamlined Financial Fraud access
+ */
+function startFinancialFraudFlow() {
+    const savedToken = localStorage.getItem('token');
+    if (savedToken && currentUser && currentUser.role === 'citizen') {
+        // Already logged in - redirect directly
+        window.location.href = '/frontend/citizen/fraud-complaint.html';
+    } else {
+        // Not logged in - go to auth and pre-select mobile OTP
+        pendingCategory = 'financial_fraud';
+        switchTab('auth');
+        // Switch to mobile OTP tab (primary for Financial Fraud)
+        switchAuthTab('mobile');
+        // Generate mobile captcha
+        if (typeof generateMobileCaptcha === 'function') generateMobileCaptcha();
+    }
+}
+
 function showMockEmailNotification(email, otp) {
     const existing = document.getElementById('mock-email-notification');
     if (existing) existing.remove();

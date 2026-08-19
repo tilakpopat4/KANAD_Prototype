@@ -1149,7 +1149,7 @@ app.include_router(fir_router)
 @app.get("/")
 def serve_dashboard() -> FileResponse:
     """Serve the main dashboard."""
-    dashboard = FRONTEND_DIR / "src" / "citizen" / "index.html"
+    dashboard = FRONTEND_DIR / "citizen" / "index.html"
     if not dashboard.exists():
         raise FileNotFoundError("index.html not found")
     return FileResponse(dashboard, media_type="text/html")

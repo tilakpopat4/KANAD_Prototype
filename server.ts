@@ -2044,6 +2044,7 @@ function sendStaticSafe(res: Response, subpaths: string[], fallbackIndex = true)
 
 const frontendDir = resolveFrontendPath();
 app.use("/frontend", express.static(frontendDir));
+app.use("/assets", express.static(path.join(frontendDir, "assets")));
 app.use("/uploads", express.static(UPLOAD_DIR));
 
 // Favicon routes

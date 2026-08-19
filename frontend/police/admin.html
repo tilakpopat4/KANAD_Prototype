@@ -626,9 +626,18 @@
 // ────────────────────────────────────────────────
 // 0. FIREBASE INIT
 // ────────────────────────────────────────────────
-firebase.initializeApp(FIREBASE_CONFIG);
+try {
+  if (!firebase.apps.length) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+  }
+} catch(e) {
+  console.warn("Firebase app init warning:", e);
+}
 const auth = firebase.auth();
 const db   = firebase.firestore();
+try {
+  db.settings({ experimentalForceLongPolling: true, merge: true });
+} catch(e) {}
 
 // ────────────────────────────────────────────────
 // 1. STATE

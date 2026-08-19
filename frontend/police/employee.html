@@ -346,9 +346,18 @@
     <!-- Firebase Auth Integration for Employee Portal -->
     <script>
     (function() {
-      firebase.initializeApp(FIREBASE_CONFIG);
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(FIREBASE_CONFIG);
+        }
+      } catch(e) {
+        console.warn("Firebase app init warning:", e);
+      }
       const fbAuth = firebase.auth();
       const fbDb   = firebase.firestore();
+      try {
+        fbDb.settings({ experimentalForceLongPolling: true, merge: true });
+      } catch(e) {}
 
       let empProfile = null; // Firestore user profile
       let fbToken    = null; // Firebase ID token (for API calls)

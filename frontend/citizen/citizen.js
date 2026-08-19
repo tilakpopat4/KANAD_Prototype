@@ -123,21 +123,28 @@ async function initSlideshow() {
         // Load slides from Firestore, with fallback to local API
         let slides = [];
         try {
-            const fsApp = firebase.apps.length
-                ? firebase.app()
-                : firebase.initializeApp(FIREBASE_CONFIG);
-            const fsDb = firebase.firestore();
+            if (typeof firebase !== 'undefined' && typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.projectId) {
+                const fsApp = firebase.apps.length
+                    ? firebase.app()
+                    : firebase.initializeApp(FIREBASE_CONFIG);
+                const fsDb = firebase.firestore();
+                try {
+                    fsDb.settings({ experimentalForceLongPolling: true, merge: true });
+                } catch(e) {}
 
-            const snap = await fsDb.collection('slides')
-                .where('is_active', '==', true)
-                .get();
+                const queryPromise = fsDb.collection('slides')
+                    .where('is_active', '==', true)
+                    .get();
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore timeout")), 2500));
 
-            slides = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            slides.sort((a, b) => {
-                const timeA = a.created_at?.toMillis ? a.created_at.toMillis() : (new Date(a.created_at || 0).getTime());
-                const timeB = b.created_at?.toMillis ? b.created_at.toMillis() : (new Date(b.created_at || 0).getTime());
-                return timeB - timeA;
-            });
+                const snap = await Promise.race([queryPromise, timeoutPromise]);
+                slides = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                slides.sort((a, b) => {
+                    const timeA = a.created_at?.toMillis ? a.created_at.toMillis() : (new Date(a.created_at || 0).getTime());
+                    const timeB = b.created_at?.toMillis ? b.created_at.toMillis() : (new Date(b.created_at || 0).getTime());
+                    return timeB - timeA;
+                });
+            }
         } catch (fsErr) {
             console.warn("Firestore slides query fallback:", fsErr.message);
         }

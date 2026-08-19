@@ -118,6 +118,23 @@ interface Complaint {
   created_at: string;
 }
 
+export interface UnifiedReport {
+  id: string | number;
+  reference_id: string; // TXN-90210, WSR-2026-XXXX, CSR-2026-XXXX, FR-XXXX
+  report_type: "complaint" | "fraud" | "women_safety" | "child_safety";
+  reporter_name: string;
+  reporter_email?: string;
+  reporter_phone?: string;
+  category: string;
+  description: string;
+  status: "pending" | "converted" | "investigating" | "resolved";
+  priority_score: number; // 1 to 5
+  created_at: string; // ISO 8601
+  evidence_count: number;
+  raw_payload: any;
+  branch_id?: string;
+}
+
 // ── In-Memory Database Store ────────────────────────────────
 let userIdCounter = 1;
 let complaintIdCounter = 1;
@@ -127,6 +144,7 @@ let auditIdCounter = 1;
 let noteIdCounter = 1;
 let firIdCounter = 1;
 let slideIdCounter = 1;
+let unifiedReportIdCounter = 1;
 
 const users: User[] = [];
 const complaints: Complaint[] = [];
@@ -136,6 +154,7 @@ const auditLogs: AuditLog[] = [];
 const caseNotes: CaseNote[] = [];
 const firDrafts: FirDraft[] = [];
 const slides: Slide[] = [];
+const unifiedReports: UnifiedReport[] = [];
 
 // ── Password & Auth Utilities ───────────────────────────────
 function hashPassword(password: string): string {
@@ -468,6 +487,67 @@ function seedDatabase() {
       created_at: new Date().toISOString()
     }
   );
+
+  // Seed Unified Reports (for Complaints Queue)
+  unifiedReports.push(
+    {
+      id: "FR-2026-8812",
+      reference_id: "FR-2026-8812",
+      report_type: "fraud",
+      reporter_name: "Suresh Mehta",
+      reporter_email: "suresh.mehta@example.com",
+      reporter_phone: "+91 98250 11223",
+      category: "financial_fraud",
+      description: "Investment scheme fraud via Telegram channel promising 300% weekly returns. Debited 1,20,000 INR to fraudulent UPI ID: quickinvest@yesbank.",
+      status: "pending",
+      priority_score: 4,
+      created_at: new Date(Date.now() - 3 * 3600000).toISOString(),
+      evidence_count: 2,
+      raw_payload: {
+        filer: { name: "Suresh Mehta", email: "suresh.mehta@example.com", phone: "9825011223" },
+        financial_details: { amount: 120000, bank: "State Bank of India", upi_id: "quickinvest@yesbank", txn_id: "UPI/32948291039" },
+        incident: { platform: "Telegram", group_name: "Crypto VIP Guaranteed", date: "2026-08-17" }
+      }
+    },
+    {
+      id: "WSR-2026-3091",
+      reference_id: "WSR-2026-3091",
+      report_type: "women_safety",
+      reporter_name: "Anonymous",
+      category: "cyberstalking",
+      description: "Persistent cyberstalking, abusive direct messages, and threats to distribute morphed photographs across social media platforms.",
+      status: "pending",
+      priority_score: 5,
+      created_at: new Date(Date.now() - 5 * 3600000).toISOString(),
+      evidence_count: 3,
+      raw_payload: {
+        incident_type: "cyberstalking",
+        platform: "Instagram",
+        suspect_profile: "@stalker_unknown_99",
+        threat_level: "critical",
+        anonymous: true
+      }
+    },
+    {
+      id: "CSR-2026-5544",
+      reference_id: "CSR-2026-5544",
+      report_type: "child_safety",
+      reporter_name: "Pooja Sharma (Parent)",
+      reporter_email: "pooja.sharma@example.com",
+      category: "online_grooming",
+      description: "Suspect contacted minor victim through online Discord server, requesting explicit photographs and attempting blackmail.",
+      status: "pending",
+      priority_score: 5,
+      created_at: new Date(Date.now() - 1 * 3600000).toISOString(),
+      evidence_count: 1,
+      raw_payload: {
+        screening: { is_minor: true, victim_age: 14, relationship: "Parent" },
+        category_key: "online_grooming",
+        platform: "Discord",
+        suspect: { handle: "shadow_gamer#4412" }
+      }
+    }
+  );
 }
 
 seedDatabase();
@@ -617,6 +697,285 @@ app.post("/complaints", (req: Request, res: Response) => {
     priority_score: priority,
     assigned_desk: assignedDesk,
     is_severe: isSevere
+  });
+});
+
+// ── Unified Complaints Queue & Integration Endpoints ──────────
+
+// 6a. Unified Queue (GET /complaints/queue/unified)
+app.get(["/complaints/queue/unified", "/api/complaints/queue/unified"], (req: Request, res: Response) => {
+  const reportsList: UnifiedReport[] = [];
+
+  // Add specialized reports from unifiedReports store
+  for (const r of unifiedReports) {
+    const evCount = evidences.filter(e => String(e.complaint_id) === String(r.id) || e.filename.includes(r.reference_id)).length;
+    reportsList.push({
+      id: r.id,
+      reference_id: r.reference_id,
+      report_type: r.report_type,
+      reporter_name: r.reporter_name,
+      reporter_email: r.reporter_email,
+      reporter_phone: r.reporter_phone,
+      category: r.category,
+      description: r.description,
+      status: r.status,
+      priority_score: r.priority_score,
+      created_at: r.created_at,
+      evidence_count: r.evidence_count || evCount,
+      raw_payload: r.raw_payload || {}
+    });
+  }
+
+  // Include standard citizen complaints formatted to the unified contract
+  for (const c of complaints) {
+    const already = reportsList.some(r => r.reference_id === c.ticket_id || String(r.id) === String(c.id));
+    if (!already) {
+      const citizen = users.find(u => u.id === c.citizen_id);
+      const evCount = evidences.filter(e => e.complaint_id === c.id).length;
+      reportsList.push({
+        id: c.id,
+        reference_id: c.ticket_id,
+        report_type: "complaint",
+        reporter_name: citizen ? citizen.name : "Citizen User",
+        reporter_email: citizen?.email,
+        reporter_phone: undefined,
+        category: c.category,
+        description: c.description,
+        status: c.status === "investigating" ? "converted" : c.status as any,
+        priority_score: c.priority_score,
+        created_at: c.created_at,
+        evidence_count: evCount,
+        raw_payload: {
+          ticket_id: c.ticket_id,
+          category: c.category,
+          assigned_desk: c.assigned_desk,
+          is_severe: c.is_severe,
+          district: c.district,
+          branch_id: c.branch_id
+        }
+      });
+    }
+  }
+
+  // Sort: highest priority first, then newest first
+  reportsList.sort((a, b) => (b.priority_score - a.priority_score) || (new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+
+  return res.json({ reports: reportsList });
+});
+
+// 6b. Standard Queue (GET /complaints/queue)
+app.get(["/complaints/queue", "/api/complaints/queue"], (req: Request, res: Response) => {
+  const result = complaints.map(c => {
+    const citizen = users.find(u => u.id === c.citizen_id);
+    return {
+      id: c.id,
+      ticket_id: c.ticket_id,
+      reporter_name: citizen ? citizen.name : "Citizen User",
+      category: c.category,
+      description: c.description,
+      status: c.status,
+      priority_score: c.priority_score,
+      assigned_desk: c.assigned_desk,
+      created_at: c.created_at
+    };
+  });
+  return res.json({ complaints: result });
+});
+
+// 6c. Standard Convert (POST /complaints/:id/convert)
+app.post(["/complaints/:id/convert", "/api/complaints/:id/convert"], (req: Request, res: Response) => {
+  const idParam = req.params.id;
+  const complaint = complaints.find(c => String(c.id) === idParam || c.ticket_id.toUpperCase() === idParam.toUpperCase());
+  if (!complaint) {
+    const unified = unifiedReports.find(r => String(r.id) === idParam || r.reference_id.toUpperCase() === idParam.toUpperCase());
+    if (unified) {
+      unified.status = "converted";
+      return res.json({
+        message: "Complaint converted to formal case successfully",
+        case_id: unified.id,
+        status: "converted"
+      });
+    }
+    return res.status(404).json({ detail: "Complaint not found" });
+  }
+
+  complaint.status = "investigating";
+  const unified = unifiedReports.find(r => r.reference_id === complaint.ticket_id || String(r.id) === String(complaint.id));
+  if (unified) {
+    unified.status = "converted";
+  }
+
+  return res.json({
+    message: "Complaint converted to formal case successfully",
+    case_id: complaint.id,
+    ticket_id: complaint.ticket_id,
+    status: complaint.status
+  });
+});
+
+// 6d. Specialized Convert (POST /complaints/:report_type/:report_id/convert)
+app.post(["/complaints/:report_type/:report_id/convert", "/api/complaints/:report_type/:report_id/convert"], (req: Request, res: Response) => {
+  const { report_type, report_id } = req.params;
+
+  const report = unifiedReports.find(r =>
+    (String(r.id) === report_id || r.reference_id.toUpperCase() === report_id.toUpperCase()) &&
+    (!report_type || r.report_type.toLowerCase() === report_type.toLowerCase())
+  );
+
+  if (!report) {
+    const complaint = complaints.find(c => String(c.id) === report_id || c.ticket_id.toUpperCase() === report_id.toUpperCase());
+    if (complaint) {
+      complaint.status = "investigating";
+      return res.json({
+        message: "Report converted to formal case successfully",
+        case_id: complaint.id,
+        reference_id: complaint.ticket_id,
+        status: "converted",
+        complaint
+      });
+    }
+    return res.status(404).json({ detail: `Report of type '${report_type}' with id '${report_id}' not found` });
+  }
+
+  report.status = "converted";
+
+  let existingComplaint = complaints.find(c => c.ticket_id === report.reference_id);
+  if (!existingComplaint) {
+    const deskName = report.report_type === "women_safety" || report.report_type === "child_safety"
+      ? "Women & Child Cyber Cases"
+      : report.report_type === "fraud"
+      ? "Financial Fraud & Identity Theft"
+      : "General Investigation Desk";
+
+    let citizenUser = users.find(u => u.email === report.reporter_email);
+    if (!citizenUser && report.reporter_name) {
+      citizenUser = {
+        id: userIdCounter++,
+        name: report.reporter_name,
+        email: report.reporter_email || `citizen_${Date.now()}@forensync.gov`,
+        role: "citizen",
+        password_hash: "firebase_managed",
+        is_active: 1
+      };
+      users.push(citizenUser);
+    }
+
+    existingComplaint = {
+      id: complaintIdCounter++,
+      ticket_id: report.reference_id.startsWith("TXN-") ? report.reference_id : `TXN-${Math.floor(10000 + Math.random() * 90000)}`,
+      citizen_id: citizenUser ? citizenUser.id : 1,
+      category: report.category,
+      description: `[Converted from ${report.report_type.toUpperCase()} - Ref: ${report.reference_id}]\n\n${report.description}`,
+      language: "en",
+      status: "investigating",
+      priority_score: report.priority_score || 3,
+      assigned_desk: deskName,
+      is_severe: report.priority_score >= 4 ? 1 : 0,
+      branch_id: report.branch_id || "br_ahm_central",
+      district: "National Cyber Crime Reporting Portal",
+      created_at: new Date().toISOString()
+    };
+    complaints.push(existingComplaint);
+  } else {
+    existingComplaint.status = "investigating";
+  }
+
+  return res.json({
+    message: "Report converted to formal case successfully",
+    case_id: existingComplaint.id,
+    reference_id: report.reference_id,
+    report_type: report.report_type,
+    status: "converted",
+    complaint: existingComplaint
+  });
+});
+
+// 6e. Specialized Submission Endpoints
+app.post(["/complaints/fraud", "/api/reports/fraud"], (req: Request, res: Response) => {
+  const payload = req.body || {};
+  const filer = payload.filer || {};
+  const refId = `FR-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const report: UnifiedReport = {
+    id: refId,
+    reference_id: refId,
+    report_type: "fraud",
+    reporter_name: filer.name || payload.reporter_name || "Citizen Reporter",
+    reporter_email: filer.email || payload.reporter_email,
+    reporter_phone: filer.phone || payload.reporter_phone,
+    category: payload.category || "financial_fraud",
+    description: payload.description || payload.incident?.description || `Financial fraud report submitted via Citizen Portal. Amount involved: ${payload.financial_details?.amount || 'N/A'} INR.`,
+    status: "pending",
+    priority_score: 4,
+    created_at: new Date().toISOString(),
+    evidence_count: 0,
+    raw_payload: payload
+  };
+
+  unifiedReports.push(report);
+  return res.json({
+    success: true,
+    message: "Financial fraud report filed successfully",
+    reference_id: refId,
+    report
+  });
+});
+
+app.post(["/complaints/women_safety", "/api/reports/women_safety"], (req: Request, res: Response) => {
+  const payload = req.body || {};
+  const refId = `WSR-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const report: UnifiedReport = {
+    id: refId,
+    reference_id: refId,
+    report_type: "women_safety",
+    reporter_name: payload.anonymous ? "Anonymous" : (payload.reporter_name || "Anonymous"),
+    reporter_email: payload.reporter_email,
+    reporter_phone: payload.reporter_phone,
+    category: payload.incident_type || payload.category || "cyberstalking",
+    description: payload.description || "Women safety emergency cyber report.",
+    status: "pending",
+    priority_score: 5,
+    created_at: new Date().toISOString(),
+    evidence_count: 0,
+    raw_payload: payload
+  };
+
+  unifiedReports.push(report);
+  return res.json({
+    success: true,
+    message: "Women safety report filed with high priority",
+    reference_id: refId,
+    report
+  });
+});
+
+app.post(["/complaints/child_safety", "/api/reports/child_safety"], (req: Request, res: Response) => {
+  const payload = req.body || {};
+  const refId = `CSR-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const report: UnifiedReport = {
+    id: refId,
+    reference_id: refId,
+    report_type: "child_safety",
+    reporter_name: payload.reporter_name || payload.guardian_name || "Parent/Guardian",
+    reporter_email: payload.reporter_email,
+    reporter_phone: payload.reporter_phone,
+    category: payload.category_key || payload.category || "online_grooming",
+    description: payload.description || "Child safety incident report submitted.",
+    status: "pending",
+    priority_score: 5,
+    created_at: new Date().toISOString(),
+    evidence_count: 0,
+    raw_payload: payload
+  };
+
+  unifiedReports.push(report);
+  return res.json({
+    success: true,
+    message: "Child safety report filed with highest priority",
+    reference_id: refId,
+    report
   });
 });
 

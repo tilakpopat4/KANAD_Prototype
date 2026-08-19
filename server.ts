@@ -5,6 +5,10 @@ import fs from "fs";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import multer from "multer";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3000;
@@ -1984,69 +1988,84 @@ app.post(["/api/women-safety", "/api/women-safety/complaint"], (req: Request, re
 });
 
 // ── Static Frontend Files Serving ───────────────────────────
-const frontendDir = fs.existsSync(path.join(process.cwd(), "frontend"))
-  ? path.join(process.cwd(), "frontend")
-  : path.join(__dirname, "frontend");
-const citizenDir = path.join(frontendDir, "citizen");
-const policeDir = path.join(frontendDir, "police");
+function resolveFrontendPath(...subpaths: string[]): string {
+  const candidates = [
+    path.join(process.cwd(), "frontend", ...subpaths),
+    path.join(__dirname, "frontend", ...subpaths),
+    path.join(__dirname, "..", "frontend", ...subpaths),
+    path.join(process.cwd(), ...subpaths)
+  ];
+  for (const c of candidates) {
+    try {
+      if (fs.existsSync(c)) return c;
+    } catch {}
+  }
+  return path.join(process.cwd(), "frontend", ...subpaths);
+}
 
+function sendStaticSafe(res: Response, subpaths: string[], fallbackIndex = true) {
+  const fullPath = resolveFrontendPath(...subpaths);
+  if (fs.existsSync(fullPath)) {
+    return res.sendFile(fullPath);
+  }
+  if (fallbackIndex) {
+    const indexPath = resolveFrontendPath("citizen", "index.html");
+    if (fs.existsSync(indexPath)) {
+      return res.sendFile(indexPath);
+    }
+  }
+  return res.status(404).send("Page not found");
+}
+
+const frontendDir = resolveFrontendPath();
 app.use("/frontend", express.static(frontendDir));
 app.use("/uploads", express.static(UPLOAD_DIR));
 
 // Favicon routes
 app.get(["/favicon.ico", "/favicon.png"], (req: Request, res: Response) => {
-  res.sendFile(path.join(frontendDir, "assets", "logo.png"));
+  sendStaticSafe(res, ["assets", "logo.png"], false);
 });
 
 // Static Routes matching user specifications
 app.get("/", (req: Request, res: Response) => {
-  res.sendFile(path.join(citizenDir, "index.html"));
+  sendStaticSafe(res, ["citizen", "index.html"]);
 });
 
 app.get("/contact", (req: Request, res: Response) => {
-  res.sendFile(path.join(frontendDir, "contact.html"));
+  sendStaticSafe(res, ["contact.html"]);
 });
 
 app.get("/privacy-policy", (req: Request, res: Response) => {
-  res.sendFile(path.join(frontendDir, "privacy-policy.html"));
+  sendStaticSafe(res, ["privacy-policy.html"]);
 });
 
 app.get("/sitemanager", (req: Request, res: Response) => {
-  res.sendFile(path.join(citizenDir, "sitemanager.html"));
+  sendStaticSafe(res, ["citizen", "sitemanager.html"]);
 });
 
 app.get(["/fir-complaint", "/fir-complaint.html"], (req: Request, res: Response) => {
-  const firFile = fs.existsSync(path.join(citizenDir, "fir-complaint.html"))
-    ? path.join(citizenDir, "fir-complaint.html")
-    : path.join(frontendDir, "src", "citizen", "fir-complaint.html");
-  res.sendFile(firFile);
+  sendStaticSafe(res, ["citizen", "fir-complaint.html"]);
 });
 
 app.get(["/fraud-complaint", "/fraud-complaint.html"], (req: Request, res: Response) => {
-  const fraudFile = fs.existsSync(path.join(citizenDir, "fraud-complaint.html"))
-    ? path.join(citizenDir, "fraud-complaint.html")
-    : path.join(frontendDir, "src", "citizen", "fraud-complaint.html");
-  res.sendFile(fraudFile);
+  sendStaticSafe(res, ["citizen", "fraud-complaint.html"]);
 });
 
 app.get(["/test-complaint", "/test-complaint.html"], (req: Request, res: Response) => {
-  const testFile = fs.existsSync(path.join(citizenDir, "test-complaint.html"))
-    ? path.join(citizenDir, "test-complaint.html")
-    : path.join(frontendDir, "src", "citizen", "test-complaint.html");
-  res.sendFile(testFile);
+  sendStaticSafe(res, ["citizen", "test-complaint.html"]);
 });
 
 app.get("/employee", (req: Request, res: Response) => {
-  res.sendFile(path.join(policeDir, "employee.html"));
+  sendStaticSafe(res, ["police", "employee.html"]);
 });
 
 app.get("/admin", (req: Request, res: Response) => {
-  res.sendFile(path.join(policeDir, "admin.html"));
+  sendStaticSafe(res, ["police", "admin.html"]);
 });
 
 // Fallback for SPA/static assets
 app.get("*", (req: Request, res: Response) => {
-  res.sendFile(path.join(citizenDir, "index.html"));
+  sendStaticSafe(res, ["citizen", "index.html"]);
 });
 
 // Error handling middleware

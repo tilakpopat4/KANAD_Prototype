@@ -3,218 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ahmedabad Cyber Crime Portal — KANAD</title>
-    <meta name="description" content="File cyber complaints, track case status, and upload digital evidence with the Ahmedabad Cyber Crime Branch portal.">
+    <title>National Cyber Crime Reporting Portal — ForenSync</title>
+    <meta name="description" content="File cyber complaints, track case status, and upload digital evidence with the National Cyber Crime Reporting Portal.">
+    <!-- Favicon & Touch Icon -->
+    <link rel="icon" type="image/png" href="/frontend/assets/logo.png">
+    <link rel="shortcut icon" href="/frontend/assets/logo.png">
+    <link rel="apple-touch-icon" href="/frontend/assets/logo.png">
+    <!-- Fonts -->
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap">
     <!-- CSS Stylesheet -->
-    <link rel="stylesheet" href="/frontend/src/shared/style.css">
+    <link rel="stylesheet" href="/frontend/style.css">
+    <!-- Firebase (for permanent slideshow storage) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase config & routing mapping -->
+    <script src="/frontend/firebase-config.js"></script>
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .child-safety-shell {
-            background: linear-gradient(180deg, #fffdf9 0%, #f7f1e8 100%);
-            border: 1px solid rgba(24,84,142,0.12);
-            box-shadow: 0 12px 30px rgba(24,84,142,0.08);
-        }
-        .child-safety-hero {
-            display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 28px;
-            align-items: center;
-            padding: 10px 10px 18px;
-        }
-        .child-safety-badge {
-            display: inline-block;
-            padding: 7px 12px;
-            background: rgba(24,84,142,0.08);
-            border: 1px solid rgba(24,84,142,0.12);
-            border-radius: 999px;
-            color: var(--neon-cyan);
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 14px;
-        }
-        .child-safety-hero-copy h1 {
-            font-size: clamp(2.1rem, 5vw, 4rem);
-            line-height: 1.03;
-            margin-bottom: 16px;
-            color: #3d4d66;
-            font-weight: 700;
-        }
-        .child-safety-hero-copy h1 strong {
-            color: #d7861d;
-        }
-        .child-safety-hero-copy p {
-            color: var(--text-secondary);
-            font-size: 1.03rem;
-            max-width: 620px;
-        }
-        .child-safety-cta-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 20px;
-            align-items: center;
-        }
-        .child-safety-learn-more {
-            display: none;
-            margin-top: 18px;
-            background: rgba(24,84,142,0.04);
-            border: 1px solid rgba(24,84,142,0.12);
-            border-radius: 12px;
-            padding: 16px;
-            color: var(--text-primary);
-        }
-        .child-safety-learn-more.visible {
-            display: block;
-        }
-        .child-safety-learn-more ul {
-            margin-top: 10px;
-            padding-left: 18px;
-            color: var(--text-secondary);
-        }
-        .child-safety-hero-image {
-            min-height: 260px;
-            border-radius: 22px;
-            border: 1px solid rgba(24,84,142,0.12);
-            background:
-                linear-gradient(135deg, rgba(214, 161, 55, 0.18), rgba(24,84,142,0.08)),
-                url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
-            position: relative;
-            overflow: hidden;
-        }
-        .child-safety-hero-image::after {
-            content: "";
-            position: absolute;
-            inset: auto 16px 16px auto;
-            width: 120px;
-            height: 120px;
-            background: rgba(255,255,255,0.3);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 999px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        }
-        .child-safety-alert-row {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(260px, 1fr));
-            gap: 18px;
-            margin: 10px 0 24px;
-        }
-        .child-safety-alert-box {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 18px 20px;
-            border-radius: 14px;
-            border: 1px solid rgba(24,84,142,0.12);
-            background: rgba(255,255,255,0.42);
-        }
-        .child-safety-alert-box.danger {
-            background: rgba(239,68,68,0.08);
-            border-color: rgba(239,68,68,0.25);
-        }
-        .child-safety-alert-box.support {
-            background: rgba(16,185,129,0.08);
-            border-color: rgba(16,185,129,0.2);
-        }
-        .child-safety-alert-icon {
-            width: 42px;
-            height: 42px;
-            min-width: 42px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 20px;
-        }
-        .danger .child-safety-alert-icon { background: linear-gradient(135deg, #ef4444, #b91c1c); }
-        .support .child-safety-alert-icon { background: linear-gradient(135deg, #10b981, #0f766e); }
-        .child-safety-alert-box strong {
-            display: block;
-            margin-bottom: 3px;
-            color: var(--text-primary);
-        }
-        .child-safety-alert-box p {
-            color: var(--text-secondary);
-            font-size: 0.92rem;
-            line-height: 1.5;
-        }
-        .child-safety-callout {
-            display: grid;
-            grid-template-columns: 0.9fr 1.1fr;
-            gap: 20px;
-            align-items: center;
-            background: rgba(214, 161, 55, 0.12);
-            border: 1px solid rgba(214,161,55,0.2);
-            border-radius: 18px;
-            padding: 18px 20px;
-            margin: 18px 0 28px;
-        }
-        .child-safety-callout-image {
-            min-height: 170px;
-            border-radius: 16px;
-            background: url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=80') center/cover no-repeat;
-        }
-        .child-safety-callout h3 {
-            font-size: clamp(1.5rem, 2vw, 2.3rem);
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-        .child-safety-callout p {
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-        .child-safety-form-wrap {
-            display: grid;
-            grid-template-columns: minmax(0, 2fr) minmax(220px, 0.8fr);
-            gap: 24px;
-            margin-top: 10px;
-        }
-        .child-safety-sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-        .child-safety-side-card {
-            background: rgba(255,255,255,0.64);
-            border: 1px solid rgba(24,84,142,0.12);
-            border-radius: 16px;
-            padding: 18px;
-        }
-        .child-safety-side-card h4 {
-            margin-bottom: 10px;
-            color: var(--text-primary);
-            font-size: 1.2rem;
-        }
-        .child-safety-side-card p, .child-safety-side-card li {
-            color: var(--text-secondary);
-            font-size: 0.92rem;
-        }
-        .child-safety-side-card ul {
-            padding-left: 18px;
-            margin: 8px 0 12px;
-        }
-        .child-safety-side-card .btn-secondary {
-            width: 100%;
-            justify-content: center;
-        }
-        @media (max-width: 860px) {
-            .child-safety-hero,
-            .child-safety-form-wrap,
-            .child-safety-callout,
-            .child-safety-alert-row {
-                grid-template-columns: 1fr;
-            }
-            .child-safety-shell {
-                padding: 18px 14px;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -225,7 +33,7 @@
                 <div class="logo-icon" style="display:none; align-items:center; justify-content:center; width:40px; height:40px; background: linear-gradient(135deg, #18548e, #289ee7); border-radius:8px; font-size:20px;">🛡️</div>
                 <div>
                     <div class="logo-text">ForenSync</div>
-                    <div class="logo-sub">Cyber Shield Ahmedabad</div>
+                    <div class="logo-sub">National Cyber Crime Reporting Portal</div>
                 </div>
             </div>
             
@@ -259,9 +67,6 @@
             <button class="tab-btn" id="tab-citizen-track" onclick="switchTab('citizen-track')" style="display: none;">
                 <i data-lucide="search"></i> Track Status
             </button>
-            <button class="tab-btn" id="tab-child-safety" onclick="switchTab('child-safety')" style="display: none;">
-                <i data-lucide="heart"></i> Child Safety
-            </button>
             <button class="tab-btn" id="tab-landing" onclick="switchTab('landing')" style="display: none;">
                 <i data-lucide="home"></i> Landing
             </button>
@@ -270,10 +75,10 @@
         <!-- LANDING VIEW -->
         <div id="view-landing" class="app-view active">
             <h1 style="text-align: center; margin-top: 40px; margin-bottom: 10px; color: var(--neon-cyan); font-size: 32px; font-weight: 700;">
-                Ahmedabad Cyber Crime Portal
+                National Cyber Crime Reporting Portal
             </h1>
             <p style="text-align: center; color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px auto; font-size: 15px;">
-                Welcome to Ahmedabad Cyber Shield. Select an option below to report an incident or track status.
+                Welcome to the National Cyber Crime Reporting Portal. Select an option below to report an incident or track status.
             </p>
             
             <!-- Announcements Slideshow (Full Screen) -->
@@ -291,45 +96,36 @@
 
             
             <!-- Grid of 4 cards -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; max-width: 100%; margin: 0 auto;">
-                <div class="glass-panel hover-card" onclick="window.location.href='/frontend/src/citizen/fraud-complaint.html'">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
-                        <i data-lucide="banknote" style="width: 48px; height: 48px; color: var(--neon-cyan);"></i>
-                        <h3 style="color: var(--neon-cyan); margin-top: 10px;">Financial Frauds</h3>
-                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Report UPI, SMS, Bank, or Credit Card frauds</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 100%; margin: 0 auto;">
+                <div class="glass-panel hover-card" onclick="selectLandingOption('financial_fraud')">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 22px; text-align: center;">
+                        <i data-lucide="banknote" style="width: 52px; height: 52px; color: var(--neon-cyan);"></i>
+                        <h3 style="color: var(--neon-cyan); margin-top: 10px; font-size: 22px; font-weight: 600; letter-spacing: 0.5px;">Financial Frauds</h3>
+                        <p style="font-size: 16px; color: var(--text-secondary); line-height: 1.5; margin-top: 6px; font-weight: 400;">Report UPI, SMS, Bank, or Credit Card frauds</p>
                     </div>
                 </div>
                 
-                <div class="glass-panel hover-card" onclick="selectLandingOption('child_safety')">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
-                        <i data-lucide="shield-check" style="width: 48px; height: 48px; color: #ff6b6b;"></i>
-                        <h3 style="color: #ff6b6b; margin-top: 10px;">CyberTipline Child Safety</h3>
-                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Report exploitation, grooming, child sexual abuse material, or online abuse against minors</p>
-                    </div>
-                </div>
-
-                <div class="glass-panel hover-card" onclick="selectLandingOption('women_safety')">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
-                        <i data-lucide="heart" style="width: 48px; height: 48px; color: #ff8ca8;"></i>
-                        <h3 style="color: #ff8ca8; margin-top: 10px;">Women Safety &amp; Harassment</h3>
-                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Report stalking, abuse, online harassment, blackmail, or digital violence against women</p>
+                <div class="glass-panel hover-card" onclick="selectLandingOption('women_child')">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 22px; text-align: center;">
+                        <i data-lucide="heart" style="width: 52px; height: 52px; color: #ff6b6b;"></i>
+                        <h3 style="color: #ff6b6b; margin-top: 10px; font-size: 22px; font-weight: 600; letter-spacing: 0.5px;">Women/Child Cyber Cases</h3>
+                        <p style="font-size: 16px; color: var(--text-secondary); line-height: 1.5; margin-top: 6px; font-weight: 400;">Report cyber harassment, abuse, or stalking against women/children</p>
                     </div>
                 </div>
                 
-                <!-- Report Crime (FIR) - NEW -->
-                <div class="glass-panel hover-card" onclick="window.location.href='/frontend/src/citizen/fir-complaint.html'">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
-                        <i data-lucide="file-text" style="width: 48px; height: 48px; color: #ff3333;"></i>
-                        <h3 style="color: #ff3333; margin-top: 10px;">Report Crime</h3>
-                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">File FIR for theft, robbery, assault, missing persons, property crime</p>
+                <div class="glass-panel hover-card" onclick="selectLandingOption('other')">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 22px; text-align: center;">
+                        <i data-lucide="shield-alert" style="width: 52px; height: 52px; color: var(--neon-purple);"></i>
+                        <h3 style="color: var(--neon-purple); margin-top: 10px; font-size: 22px; font-weight: 600; letter-spacing: 0.5px;">Other Cyber Crime</h3>
+                        <p style="font-size: 16px; color: var(--text-secondary); line-height: 1.5; margin-top: 6px; font-weight: 400;">Report hacking, ransomware, or other digital crimes</p>
                     </div>
                 </div>
                 
                 <div class="glass-panel hover-card" onclick="selectLandingOption('track')">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 25px 20px; text-align: center;">
-                        <i data-lucide="search" style="width: 48px; height: 48px; color: var(--success);"></i>
-                        <h3 style="color: var(--success); margin-top: 10px;">Track Your Complaint</h3>
-                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 5px;">Check case status, details, or upload evidence</p>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 22px; text-align: center;">
+                        <i data-lucide="search" style="width: 52px; height: 52px; color: var(--success);"></i>
+                        <h3 style="color: var(--success); margin-top: 10px; font-size: 22px; font-weight: 600; letter-spacing: 0.5px;">Track Your Complaint</h3>
+                        <p style="font-size: 16px; color: var(--text-secondary); line-height: 1.5; margin-top: 6px; font-weight: 400;">Check case status, details, or upload evidence</p>
                     </div>
                 </div>
             </div>
@@ -339,436 +135,52 @@
         <div id="view-auth" class="app-view" style="max-width: 480px; margin: 40px auto 0 auto;">
             <div class="glass-panel">
                 <h2 style="margin-bottom: 15px; color: var(--neon-cyan); display: flex; align-items: center; gap: 10px; justify-content: center;">
-                    <i data-lucide="shield-check"></i> Citizen Login
+                    <i data-lucide="shield-check"></i> Citizen Verification
                 </h2>
                 <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 25px;">
-                    Secure login to report cyber complaints.
+                    Secure verification required to report cyber complaints.
                 </p>
                 
-                <!-- LOGIN FORM -->
-                <form id="login-form" onsubmit="handleLogin(event)">
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" id="auth-email" class="form-control" placeholder="Enter Email Address" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="auth-password" class="form-control" placeholder="Enter Password" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Security Captcha</label>
-                        <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 8px;">
-                            <canvas id="captcha-canvas" width="150" height="45" style="border-radius: 6px; background: #121c26; border: 1px solid var(--border-color);"></canvas>
-                            <button type="button" class="btn-secondary" onclick="generateCaptcha()" style="padding: 10px;"><i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i></button>
+                <form id="auth-otp-form" onsubmit="handleOtpSubmit(event)">
+                    <!-- Step 1: Email & Captcha -->
+                    <div id="auth-step-1">
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="auth-email" class="form-control" placeholder="Enter Email Address" required>
                         </div>
-                        <input type="text" id="auth-captcha-input" class="form-control" placeholder="Enter Captcha Code" required>
-                    </div>
-                    
-                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 15px;">
-                        Login <i data-lucide="arrow-right"></i>
-                    </button>
-                    
-                    <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 15px;">
-                        Don't have an account? 
-                        <a href="#" onclick="toggleAuthForm(); return false;" style="color: var(--neon-cyan); text-decoration: underline; cursor: pointer;">Register here</a>
-                    </p>
-                </form>
-
-                <!-- REGISTER FORM (Hidden by default) -->
-                <form id="register-form" onsubmit="handleRegister(event)" style="display: none;">
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="register-fullname" class="form-control" placeholder="Enter Full Name" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" id="register-email" class="form-control" placeholder="Enter Email Address" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Phone Number (10-digit)</label>
-                        <input type="tel" id="register-phone" class="form-control" placeholder="Enter 10-digit Phone" pattern="[6-9]\d{9}" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Password (Min 12 chars, uppercase, lowercase, digit, special char)</label>
-                        <input type="password" id="register-password" class="form-control" placeholder="Enter Password" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Confirm Password</label>
-                        <input type="password" id="register-confirm-password" class="form-control" placeholder="Confirm Password" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Security Captcha (Government Compliance 🇮🇳)</label>
-                        <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 8px;">
-                            <canvas id="register-captcha-canvas" width="150" height="45" style="border-radius: 6px; background: #121c26; border: 1px solid var(--border-color);"></canvas>
-                            <button type="button" class="btn-secondary" onclick="generateRegisterCaptcha()" style="padding: 10px;"><i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i></button>
+                        
+                        <div class="form-group">
+                            <label>Security Captcha</label>
+                            <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 8px;">
+                                <canvas id="captcha-canvas" width="150" height="45" style="border-radius: 6px; background: #121c26; border: 1px solid var(--border-color);"></canvas>
+                                <button type="button" class="btn-secondary" onclick="generateCaptcha()" style="padding: 10px;"><i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i></button>
+                            </div>
+                            <input type="text" id="auth-captcha-input" class="form-control" placeholder="Enter Captcha Code" required>
                         </div>
-                        <input type="text" id="register-captcha-input" class="form-control" placeholder="Enter Captcha Code" required>
+                        
+                        <button type="button" onclick="sendEmailOtp()" class="btn-primary" style="width: 100%; margin-top: 15px;">
+                            Send Email OTP <i data-lucide="mail"></i>
+                        </button>
                     </div>
                     
-                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 15px;">
-                        Register <i data-lucide="user-plus"></i>
-                    </button>
-
-                    <div id="register-otp-panel" class="form-group" style="display:none; margin-top: 18px; padding: 16px; border-radius: 12px; background: rgba(40,158,231,0.06); border: 1px solid rgba(40,158,231,0.22);">
-                        <label style="display:block; margin-bottom: 8px; color: var(--neon-cyan); font-weight: 600;">OTP Verification</label>
-                        <p style="margin: 0 0 10px; font-size: 12px; color: var(--text-secondary);">
-                            OTP sent to <strong id="register-otp-email" style="color: var(--text-primary);">your email</strong>
-                        </p>
-                        <input type="text" id="register-otp-input" class="form-control" maxlength="6" placeholder="Enter 6-digit OTP" style="margin-bottom: 12px;">
-                        <div style="display:flex; gap:10px;">
-                            <button type="button" class="btn-secondary" onclick="sendRegisterOtp()" style="flex:1;">Resend OTP</button>
-                            <button type="button" class="btn-primary" onclick="verifyRegisterOtp()" style="flex:1;">Verify OTP</button>
+                    <!-- Step 2: OTP Entry -->
+                    <div id="auth-step-2" style="display: none;">
+                        <div class="form-group">
+                            <label>Enter 6-Digit Email OTP</label>
+                            <input type="text" id="auth-otp-input" class="form-control" placeholder="••••••" maxlength="6" pattern="[0-9]{6}">
+                            <div id="otp-timer" style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; text-align: right;"></div>
                         </div>
+                        
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 15px;">
+                            Verify &amp; Proceed <i data-lucide="arrow-right"></i>
+                        </button>
+                        
+                        <button type="button" onclick="backToStep1()" class="btn-secondary" style="width: 100%; margin-top: 10px;">
+                            Back / Edit Email
+                        </button>
                     </div>
-                     
-                    <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 15px;">
-                        Already have an account? 
-                        <a href="#" onclick="toggleAuthForm(); return false;" style="color: var(--neon-cyan); text-decoration: underline; cursor: pointer;">Login here</a>
-                    </p>
                 </form>
             </div>
-        </div>
-
-        <div id="view-child-safety" class="app-view" style="max-width: 1100px; margin: 20px auto 0 auto;">
-            <div class="glass-panel child-safety-shell">
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:18px;">
-                    <div></div>
-                    <button type="button" class="btn-secondary" onclick="window.location.href='https://www.google.com'" style="background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); color: #ff8a8a;">
-                        Quick Exit
-                    </button>
-                </div>
-
-                <div class="child-safety-hero">
-                    <div class="child-safety-hero-copy">
-                        <div class="child-safety-badge">Child Safety Reporting</div>
-                        <h1>The <strong>CyberTipline</strong> is the place to report child sexual exploitation.</h1>
-                        <p>If you believe you or someone you know is a victim of exploitation, we are here to help.</p>
-                        <div class="child-safety-cta-row">
-                            <button type="button" class="btn-primary" onclick="document.getElementById('child-safety-form').scrollIntoView({behavior:'smooth', block:'start'});">Report Incident</button>
-                            <button type="button" class="btn-secondary" onclick="toggleChildSafetyLearnMore()">Want to learn more before you make a report?</button>
-                        </div>
-                        <div id="child-safety-learn-more" class="child-safety-learn-more">
-                            <strong>Before you report</strong>
-                            <ul>
-                                <li>You can report anonymously if you prefer.</li>
-                                <li>We do not require you to re-upload distressing material or relive the incident unnecessarily.</li>
-                                <li>Urgent danger reports can be routed immediately to 112 and local child protection services.</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="child-safety-hero-image" aria-label="Child safety support illustration"></div>
-                </div>
-
-                <div class="child-safety-alert-row" id="child-safety-alerts">
-                    <div class="child-safety-alert-box danger">
-                        <div class="child-safety-alert-icon">!</div>
-                        <div>
-                            <strong>Immediate danger</strong>
-                            <p>If you or someone you know is in immediate danger, please call 112 or your nearest police station immediately.</p>
-                        </div>
-                    </div>
-                    <div class="child-safety-alert-box support">
-                        <div class="child-safety-alert-icon">☎</div>
-                        <div>
-                            <strong>CHILDLINE 1098</strong>
-                            <p>National 24×7 emergency helpline for children in distress. Free and available in all languages.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="child-safety-callout">
-                    <div class="child-safety-callout-image" aria-label="Support callout illustration"></div>
-                    <div>
-                        <h3>If you prefer to speak to someone directly, you can contact CHILDLINE 1098 or the POCSO e-Box.</h3>
-                        <p>Call <strong>1098</strong> for immediate support from India's national child help line, or visit <a href="https://pocsoebox.gov.in" target="_blank" rel="noreferrer">pocsoebox.gov.in</a> to submit a complaint directly.</p>
-                        <p>Support is available 24 hours a day, 7 days a week.</p>
-                    </div>
-                </div>
-
-                <div class="child-safety-form-wrap">
-                    <form id="child-safety-form">
-                        <div class="form-group">
-                            <label>Who is being reported?</label>
-                            <select id="child-reporting-for" class="form-control" required>
-                                <option value="">Select</option>
-                                <option value="myself">Myself</option>
-                                <option value="someone_i_know">Someone I know</option>
-                                <option value="url_unknown_victim">A URL where explicit content was posted regarding someone I do not know</option>
-                                <option value="other_activity">Other activity I saw or heard</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>When did the most recent incident happen?</label>
-                            <select id="child-recency" class="form-control" required>
-                                <option value="">Select</option>
-                                <option value="not_yet">It hasn't occurred yet</option>
-                                <option value="today">Yesterday / today / now</option>
-                                <option value="lt_1_month">Less than 1 month ago</option>
-                                <option value="1_6_months">Between 1 month and 6 months ago</option>
-                                <option value="6_12_months">Between 6 months and 1 year ago</option>
-                                <option value="over_year">Over a year ago</option>
-                                <option value="unknown">I don't know</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Approximate date and time of the most recent incident</label>
-                            <input type="datetime-local" id="child-incident-datetime" class="form-control" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Was this incident one-time or ongoing?</label>
-                            <select id="child-frequency" class="form-control" required>
-                                <option value="">Select</option>
-                                <option value="one_time">One-time</option>
-                                <option value="ongoing">Ongoing</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Where did the incident happen?</label>
-                            <select id="child-location-type" class="form-control" required>
-                                <option value="">Select</option>
-                                <option value="online">Online</option>
-                                <option value="offline">Offline</option>
-                                <option value="both">Both</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Category of incident</label>
-                            <select id="child-category" class="form-control" required>
-                                <option value="">Select</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Do you or the child victim currently feel in physical danger?</label>
-                            <select id="child-feels-danger" class="form-control" required>
-                                <option value="">Select</option>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                                <option value="unknown">I don't know</option>
-                            </select>
-                        </div>
-
-                        <div id="child-danger-banner" class="suggest-banner" style="display:none; margin-bottom:18px;">
-                            <span>If anyone is in immediate danger, please stop and call 112 or your nearest police station right now.</span>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Optional victim details</label>
-                            <input type="text" id="child-victim-name" class="form-control" placeholder="Victim name (optional)">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Victim age</label>
-                            <input type="number" id="child-victim-age" class="form-control" min="0" max="17" placeholder="Age if known">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Platform or website involved</label>
-                            <input type="text" id="child-platform" class="form-control" placeholder="Example: Instagram, Telegram, WhatsApp">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Links, usernames, handles or email addresses</label>
-                            <textarea id="child-urls-handles" class="form-control" rows="3" placeholder="Add URLs, handles or other identifying details"></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Narrative</label>
-                            <textarea id="child-narrative" class="form-control" rows="5" placeholder="Describe what happened as clearly as possible"></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Reporter contact (optional)</label>
-                            <input type="text" id="child-reporter-name" class="form-control" placeholder="Your name (optional)">
-                            <input type="email" id="child-reporter-email" class="form-control" style="margin-top:10px;" placeholder="Your email (optional)">
-                            <input type="tel" id="child-reporter-phone" class="form-control" style="margin-top:10px;" placeholder="Your phone (optional)">
-                        </div>
-
-                        <div class="form-group" style="display:flex; align-items:center; gap:10px;">
-                            <input type="checkbox" id="child-anonymous" checked>
-                            <label for="child-anonymous" style="margin:0;">Report anonymously</label>
-                        </div>
-
-                        <button type="submit" class="btn-primary" style="width:100%; margin-top:16px;">Submit Child Safety Report</button>
-                    </form>
-
-                    <aside class="child-safety-sidebar">
-                        <div class="child-safety-side-card">
-                            <h4>Get explicit images taken down</h4>
-                            <p>If there are nude or sexually explicit images or videos of a child online, there is help to get them removed.</p>
-                            <ul>
-                                <li>StopNCII.org</li>
-                                <li>Take It Down</li>
-                            </ul>
-                            <button type="button" class="btn-secondary" onclick="window.open('https://stopncii.org', '_blank')">Visit here to learn more →</button>
-                        </div>
-                        <div class="child-safety-side-card">
-                            <h4>Report directly to law enforcement</h4>
-                            <p>National Cyber Crime Reporting Portal: <a href="https://cybercrime.gov.in" target="_blank" rel="noreferrer">cybercrime.gov.in</a></p>
-                            <p>Cyber Crime Helpline: 1930</p>
-                            <p>CHILDLINE: 1098</p>
-                        </div>
-                    </aside>
-                </div>
-
-                <div id="child-safety-success" style="display:none; margin-top:20px; background: rgba(16, 185, 129, 0.12); border:1px solid rgba(16,185,129,0.3); color:#d1fae5; border-radius:12px; padding:18px;">
-                    <h3 style="margin-top:0; color:#6ee7b7;">Report submitted</h3>
-                    <p id="child-safety-reference" style="margin: 8px 0 0;"></p>
-                    <p id="child-safety-message" style="margin: 8px 0 0;"></p>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-women-safety" class="app-view" style="max-width: 1100px; margin: 20px auto 0 auto;">
-           <div class="glass-panel child-safety-shell">
-               <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:18px;">
-                   <div></div>
-                   <button type="button" class="btn-secondary" onclick="window.location.href='https://www.google.com'" style="background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); color: #ff8a8a;">
-                       Quick Exit
-                   </button>
-               </div>
-
-               <div class="child-safety-hero">
-                   <div class="child-safety-hero-copy">
-                       <div class="child-safety-badge">Women Safety Reporting</div>
-                       <h1>Report <strong>online harassment</strong>, stalking, blackmail, or abuse against women.</h1>
-                       <p>If you are a woman facing unsafe online content, impersonation, digital abuse, or threatening messages, you can file a complaint here.</p>
-                       <div class="child-safety-cta-row">
-                           <button type="button" class="btn-primary" onclick="document.getElementById('women-safety-form').scrollIntoView({behavior:'smooth', block:'start'});">Report Women Safety Case</button>
-                           <button type="button" class="btn-secondary" onclick="document.getElementById('women-safety-resources').scrollIntoView({behavior:'smooth', block:'start'});">Need support resources?</button>
-                       </div>
-                   </div>
-                   <div class="child-safety-hero-image" style="background: linear-gradient(135deg, rgba(255, 140, 168, 0.18), rgba(24,84,142,0.08)), url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;" aria-label="Women safety support illustration"></div>
-               </div>
-
-               <div class="child-safety-alert-row" id="women-safety-resources">
-                   <div id="women-safety-resources-list" style="display: none;"></div>
-                   <div class="child-safety-alert-box danger">
-                       <div class="child-safety-alert-icon">!</div>
-                       <div>
-                           <strong>Immediate danger</strong>
-                           <p>If you are in immediate danger, call 112 or your nearest police station right away.</p>
-                       </div>
-                   </div>
-                   <div class="child-safety-alert-box support">
-                       <div class="child-safety-alert-icon">☎</div>
-                       <div>
-                           <strong>Women Helpline</strong>
-                           <p>Call 181 for immediate women support and emergency guidance from the national helpline service.</p>
-                       </div>
-                   </div>
-               </div>
-
-               <div class="child-safety-form-wrap">
-                   <form id="women-safety-form">
-                       <div class="form-group">
-                           <label>Type of women safety issue</label>
-                           <select id="women-incident-type" class="form-control" required>
-                               <option value="">Select</option>
-                               <option value="online_harassment">Online harassment or abuse</option>
-                               <option value="stalking">Stalking or repeated threatening contact</option>
-                               <option value="blackmail">Blackmail / sextortion / extortion</option>
-                               <option value="impersonation">Fake profile / impersonation</option>
-                               <option value="image_abuse">Explicit image or deepfake abuse</option>
-                               <option value="other">Other threat or violence</option>
-                           </select>
-                       </div>
-
-                       <div class="form-group">
-                           <label>When did this happen?</label>
-                           <input type="datetime-local" id="women-incident-datetime" class="form-control" required>
-                       </div>
-
-                       <div class="form-group">
-                           <label>Where did it happen?</label>
-                           <select id="women-incident-location" class="form-control" required>
-                               <option value="">Select</option>
-                               <option value="online">Online only</option>
-                               <option value="offline">Offline only</option>
-                               <option value="both">Both online and offline</option>
-                           </select>
-                       </div>
-
-                       <div class="form-group">
-                           <label>Who is involved?</label>
-                           <input type="text" id="women-victim-name" class="form-control" placeholder="Victim or complainant name (optional)">
-                           <input type="text" id="women-report-relation" class="form-control" style="margin-top:10px;" placeholder="Relationship to accused / suspect (optional)">
-                       </div>
-
-                       <div class="form-group">
-                           <label>Platform, app, handle, phone number, or email used</label>
-                           <input type="text" id="women-platform" class="form-control" placeholder="Instagram, WhatsApp, mobile number, email, or other platform">
-                       </div>
-
-                       <div class="form-group">
-                           <label>Suspect or offender details (optional)</label>
-                           <input type="text" id="women-suspect-name" class="form-control" placeholder="Name of accused person or organisation (optional)">
-                           <input type="text" id="women-suspect-handle" class="form-control" style="margin-top:10px;" placeholder="Username, handle, profile, or contact details (optional)">
-                           <input type="text" id="women-suspect-relationship" class="form-control" style="margin-top:10px;" placeholder="Relationship or context, if known (optional)">
-                       </div>
-
-                       <div class="form-group">
-                           <label>Describe the incident in your own words</label>
-                           <textarea id="women-description" class="form-control" rows="5" placeholder="Describe the harassment, intimidation, stalking, threats, or abuse in as much detail as possible. Include dates, patterns, pressure, threats, or digital contact." required></textarea>
-                       </div>
-
-                       <div class="form-group">
-                           <label>Evidence / digital trail</label>
-                           <textarea id="women-evidence-links" class="form-control" rows="3" placeholder="Paste screenshot links, URLs, profile links, message screenshots, call logs, phone numbers, usernames, or note what evidence you have"></textarea>
-                       </div>
-
-                       <div class="form-group">
-                           <label>Evidence notes and supporting context</label>
-                           <textarea id="women-evidence-notes" class="form-control" rows="3" placeholder="Describe the evidence clearly: what happened, when it happened, how the contact began, any red flags, harassment pattern, blackmail, impersonation, or threats"></textarea>
-                       </div>
-
-                       <div class="form-group">
-                           <label>Reporter details (optional)</label>
-                           <input type="text" id="women-reporter-name" class="form-control" placeholder="Your name (optional)">
-                           <input type="email" id="women-reporter-email" class="form-control" style="margin-top:10px;" placeholder="Your email (optional)">
-                           <input type="tel" id="women-reporter-phone" class="form-control" style="margin-top:10px;" placeholder="Your phone (optional)">
-                       </div>
-
-                       <div class="form-group" style="display:flex; align-items:center; gap:10px;">
-                           <input type="checkbox" id="women-anonymous" checked>
-                           <label for="women-anonymous" style="margin:0;">Report anonymously</label>
-                       </div>
-
-                       <button type="submit" class="btn-primary" style="width:100%; margin-top:16px;">Submit Women Safety Report</button>
-                   </form>
-
-                   <aside class="child-safety-sidebar">
-                       <div class="child-safety-side-card">
-                           <h4>Quick support</h4>
-                           <p>National Women Helpline: <strong>181</strong></p>
-                           <p>Emergency: <strong>112</strong></p>
-                           <p>Cyber Crime Helpline: <strong>1930</strong></p>
-                           <button type="button" class="btn-secondary" onclick="window.open('https://cybercrime.gov.in', '_blank')">Report via NCRP →</button>
-                       </div>
-                       <div class="child-safety-side-card">
-                           <h4>What to include</h4>
-                           <ul>
-                               <li>Platform, app, username, profile or number used</li>
-                               <li>Timeline and dates when contact happened</li>
-                               <li>Threats, abuse, blackmail, impersonation, or stalking details</li>
-                               <li>Any links, screenshots, or supporting evidence available</li>
-                           </ul>
-                       </div>
-                   </aside>
-               </div>
-           </div>
         </div>
 
         <!-- 2. CITIZEN COMPLAINT REGISTRATION VIEW -->
@@ -791,6 +203,19 @@
                         </div>
                     </div>
 
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Select Your District</label>
+                            <select id="complaint-district" class="form-control" required>
+                                <option value="">Select District</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Enter City / Town</label>
+                            <input type="text" id="complaint-city" class="form-control" placeholder="e.g. New Delhi, Mumbai, Bengaluru" required>
+                        </div>
+                    </div>
+
                     <!-- Category Follow-Up Questions (Conditional details) -->
                     <div id="conditional-questions" class="form-group" style="display: none; padding: 15px; border-radius: 8px; background: rgba(120, 196, 224, 0.05); border: 1px solid var(--border-color); margin-bottom: 20px;">
                         <h4 id="conditional-title" style="margin-bottom: 10px; font-size: 14px; color: var(--neon-cyan);">Specific Investigation Queries</h4>
@@ -802,8 +227,7 @@
                         <select id="complaint-cat" class="form-control" onchange="handleCategoryQuestions()">
                             <option value="" data-i18n="citizen_cat_auto">Auto-Route (Recommended)</option>
                             <option value="financial_fraud" data-i18n="citizen_cat_financial">Financial Fraud</option>
-                            <option value="women_child" data-i18n="citizen_cat_women_child">CyberTipline Child Safety</option>
-                            <option value="women_safety" data-i18n="citizen_cat_women_safety">Women Safety / Harassment</option>
+                            <option value="women_child" data-i18n="citizen_cat_women_child">Women/Child Cyber Cases</option>
                             <option value="impersonation" data-i18n="citizen_cat_impersonation">Social Media Impersonation</option>
                             <option value="hacking" data-i18n="citizen_cat_hacking">Hacking / Ransomware</option>
                             <option value="other" data-i18n="citizen_cat_other">Other Crimes</option>
@@ -833,7 +257,7 @@
                         <i data-lucide="info"></i> Public Awareness Advisory
                     </h4>
                     <p style="font-size: 12px; color: var(--text-secondary);">
-                        The Ahmedabad Cyber Crime Branch will never call asking for money, passwords, or OTPs. File reports safely here. Maintain evidence integrity for legal compliance.
+                        The National Cyber Crime Reporting Portal will never call asking for money, passwords, or OTPs. File reports safely here. Maintain evidence integrity for legal compliance.
                     </p>
                 </div>
             </div>
@@ -909,21 +333,13 @@
         
         <!-- FOOTER -->
         <footer class="app-footer">
-            <a href="/contact" data-i18n="footer_contact">Contact Us</a>
-            <a href="#" data-i18n="footer_privacy">Privacy Policies</a>
-            <span data-i18n="footer_rights">&copy; All rights reserved</span>
-            <div class="footer-lang-selector">
-                <i data-lucide="languages" style="width: 14px; height: 14px;"></i>
-                <select id="footer-lang-select" onchange="setLanguage(this.value)">
-                    <option value="en" selected>English</option>
-                    <option value="hi">हिन्दी (Hindi)</option>
-                    <option value="gu">ગુજરાતી (Gujarati)</option>
-                </select>
-            </div>
+            <a href="/contact">Contact Us</a>
+            <a href="/privacy-policy">Privacy Policy</a>
+            <span>&copy; National Cyber Crime Reporting Portal. All rights reserved.</span>
         </footer>
     </div>
 
     <!-- Citizen Portal JavaScript -->
-    <script src="/frontend/src/citizen/citizen.js"></script>
+    <script src="/frontend/citizen/citizen.js"></script>
 </body>
 </html>

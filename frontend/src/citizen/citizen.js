@@ -980,7 +980,10 @@ function showMockEmailNotification(email, otp) {
         </div>
         <div style="font-size: 13px; line-height: 1.4; color: #d4d4d8;">
             <strong style="color: #fff; display: block; font-size: 13px; margin-bottom: 2px;">To: ${email}</strong>
-            Your OTP for citizen verification on ForenSync Cyber Portal is <strong style="color: var(--neon-cyan); font-size: 14px;">${otp}</strong>. Valid for 5 mins. Please do not share it.
+            Your OTP for citizen verification on ForenSync Cyber Portal is <strong style="color: #38bdf8; font-size: 15px; letter-spacing: 2px;">${otp}</strong>.
+            <div style="margin-top: 10px; display: flex; gap: 8px;">
+                <button onclick="if(document.getElementById('register-otp-input')){document.getElementById('register-otp-input').value='${otp}';} if(document.getElementById('auth-otp-input')){document.getElementById('auth-otp-input').value='${otp}';} this.parentElement.parentElement.parentElement.remove();" style="background: #0284c7; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">Auto-Fill OTP</button>
+            </div>
         </div>
     `;
 

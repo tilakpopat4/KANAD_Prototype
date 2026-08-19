@@ -663,21 +663,20 @@ app.post("/api/sitemanager-login", (req: Request, res: Response) => {
 });
 
 // 4. Send Email OTP
-app.post("/send-otp", (req: Request, res: Response) => {
-  const { email, otp } = req.body;
-  if (!email || !otp) {
-    return res.status(400).json({ detail: "Email and OTP required" });
-  }
-  console.log(`[OTP Engine] Generated email OTP for ${email}: ${otp}`);
-  return res.json({ message: "OTP sent successfully" });
-});
-
-// 5. Send Mobile OTP (SMS)
-app.post("/api/send-otp", (req: Request, res: Response) => {
-  const mobile = req.body.mobile;
-  const otp = req.body.otp;
-  console.log(`[OTP Engine] Generated SMS OTP for ${mobile}: ${otp}`);
-  return res.json({ success: true, message: "OTP sent successfully" });
+app.post(["/send-otp", "/api/send-otp"], (req: Request, res: Response) => {
+  const email = req.body.email || req.body.recipient || "citizen@forensync.gov.in";
+  const mobile = req.body.mobile || req.body.phone;
+  const otp = req.body.otp || Math.floor(100000 + Math.random() * 900000).toString();
+  
+  console.log(`[OTP Engine] Generated verification OTP for ${email || mobile}: ${otp}`);
+  return res.json({ 
+    success: true, 
+    message: "OTP sent successfully", 
+    otp: otp,
+    email: email,
+    mobile: mobile,
+    preview: `Verification Code: ${otp}`
+  });
 });
 
 // 6. Submit Citizen Complaint

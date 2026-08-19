@@ -674,7 +674,9 @@ async function startDigiLockerVerification() {
                 // Show OTP section for simulated mode
                 document.getElementById('digilocker-otp-section').style.display = 'block';
                 document.getElementById('start-digilocker-btn').style.display = 'none';
-                showAlert('Demo mode: Enter any 6-digit OTP (e.g., 123456)', 'info');
+                const otpInput = document.getElementById('digilocker-otp');
+                if (otpInput) otpInput.value = '123456';
+                showAlert('DigiLocker Demo: OTP 123456 generated and filled. Click Verify to continue.', 'info');
             } else {
                 // Real DigiLocker - open authorization URL
                 if (data.authorization_url) {

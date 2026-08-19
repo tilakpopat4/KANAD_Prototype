@@ -279,7 +279,12 @@ function validateStep(n) {
     return true;
 }
 
-function sendOtp() { alert('OTP sent'); }
+function sendOtp() {
+    const generated = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpInput = document.getElementById('otp');
+    if (otpInput) otpInput.value = generated;
+    alert(`Verification OTP Generated: ${generated}\n(Auto-filled for instant verification)`);
+}
 
 function saveDraft() {
     const data = {};
